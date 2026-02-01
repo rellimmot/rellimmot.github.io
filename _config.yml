@@ -147,7 +147,7 @@ timezone: # "America/Chicago" # https://en.wikipedia.org/wiki/List_of_tz_databas
 # Plugins (previously gems:)
 plugins:
   - jekyll-paginate
-  - jekyll-sitemap
+  # - jekyll-sitemap  # Disabled - site should not be indexed by search engines
   - jekyll-gist
   - jekyll-feed
   - jemoji
@@ -156,7 +156,7 @@ plugins:
 # mimic GitHub Pages with --safe
 allowlist:
   - jekyll-paginate
-  - jekyll-sitemap
+  # - jekyll-sitemap  # Disabled - site should not be indexed by search engines
   - jekyll-gist
   - jekyll-feed
   - jemoji
