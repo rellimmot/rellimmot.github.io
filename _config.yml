@@ -238,3 +238,7 @@ defaults:
 
       # added to clear GitHub API error per https://github.com/DIYbiosphere/sphere/issues/140
       github: [metadata]
+
+# Load jQuery before main.min.js
+footer_scripts:
+  - https://code.jquery.com/jquery-3.7.1.min.js
