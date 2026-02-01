@@ -1,27 +1,21 @@
 source "https://rubygems.org"
 
-# Hello! This is where you manage which Jekyll version is used to run.
-# When you want to use a different version, change it below, save the
-# file and run `bundle install`. Run Jekyll with `bundle exec`, like so:
-#
-#     bundle exec jekyll serve
-#
-# This will help ensure the proper Jekyll version is running.
-# Happy Jekylling!
-
-# gem "github-pages", group: :jekyll_plugins
-
-# To upgrade, run `bundle update`.
-
+# GitHub Pages gem - provides Jekyll and plugins compatible with GitHub Pages
+# See: https://pages.github.com/versions/ for current versions
 gem "github-pages", group: :jekyll_plugins
-gem "minimal-mistakes-jekyll", :github => "mmistakes/minimal-mistakes"
 
-# If you have any plugins, put them here!
+# Minimal Mistakes theme - using latest from GitHub
+gem "minimal-mistakes-jekyll", github: "mmistakes/minimal-mistakes"
+
+# Additional plugins
 group :jekyll_plugins do
   gem "jekyll-paginate"
   gem "jekyll-sitemap"
   gem "jekyll-gist"
   gem "jekyll-feed"
   gem "jemoji"
-
+  gem "jekyll-include-cache"
 end
+
+# Performance and compatibility
+gem "webrick", "~> 1.8" # Required for Ruby 3.0+

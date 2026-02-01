@@ -6,6 +6,4 @@
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
-@import "lightgallery/lightgallery";
-@import "lightgallery/lg-transitions";
-@import "cssgram/cssgram";
+// lightgallery and cssgram removed - using bundled CSS files instead

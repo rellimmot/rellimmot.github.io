@@ -19,34 +19,21 @@ repository               : "rellimmot/rellimmot.github.io" # GitHub username/rep
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
+# Comments - Configured for giscus (GitHub Discussions-based)
+# Setup required:
+# 1. Enable Discussions: https://github.com/rellimmot/rellimmot.github.io/settings (scroll to Features > Discussions)
+# 2. Install giscus app: https://github.com/apps/giscus
+# 3. Visit https://giscus.app to get your repo_id and category_id
+# 4. Update the values below
 comments:
-  provider               : "facebook" # false (default), "disqus", "discourse", "facebook", "google-plus", "staticman", "custom"
-  disqus:
-    shortname            : # https://help.disqus.com/customer/portal/articles/466208-what-s-a-shortname-
-  discourse:
-    server               : # https://meta.discourse.org/t/embedding-discourse-comments-via-javascript/31963 , e.g.: meta.discourse.org
-  facebook:
-    # https://developers.facebook.com/docs/plugins/comments#configurator
-    # https://developers.facebook.com/docs/plugins/comments
-    appid                : 494255804247179
-    num_posts            : 5 # 5 (default)
-    colorscheme          : # "light" (default), "dark"
-staticman:
-  allowedFields          : ['name', 'email', 'url', 'message']
-  branch                 : "master"
-  commitMessage          : "New comment."
-  filename               : comment-{@timestamp}
-  format                 : "yml"
-  moderation             : true
-  path                   : "docs/_data/comments/{options.slug}" # "/_data/comments/{options.slug}" (default)
-  requiredFields         : ['name', 'email', 'message']
-  transforms:
-    email                : "md5"
-  generatedFields:
-    date:
-      type               : "date"
-      options:
-        format           : "iso8601" # "iso8601" (default), "timestamp-seconds", "timestamp-milliseconds"
+  provider               : "giscus"
+  giscus:
+    repo_id              : # "R_xxx" - Get from https://giscus.app
+    category_name        : "Comments"
+    category_id          : # "DIC_xxx" - Get from https://giscus.app
+    discussion_term      : "pathname"
+    reactions_enabled    : '1'
+    theme                : "preferred_color_scheme"
 atom_feed:
   path                   : # blank (default) uses feed.xml
 
@@ -71,51 +58,26 @@ social:
   name                   : # If the user or organization name differs from the site's name
   links: # An array of links to social media profiles
 
-# Analytics
-analytics:
-  provider               : "google" # false (default), "google", "google-universal", "custom"
-  google:
-    tracking_id          : "UA-107095408-1"
+# Analytics - Disabled (not needed for this site)
 
 
 # Site Author
 author:
   name             : "Thomas Miller"
-  avatar           : "/assets/images/bio-photo.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/assets/images/bio-photo.jpg"
   bio              : ""
   location         : "New Orleans, LA"
   email            : "rellimmot@rellimmot.com"
   uri              : "https://www.rellimmot.com"
-  bitbucket        :
-  codepen          :
-  dribbble         :
-  flickr           :
   facebook         : "rellimmot"
-  foursquare       :
   github           : "rellimmot"
-  gitlab           :
-  google_plus      :
-  keybase          :
-  instagram        :
-  lastfm           :
-  linkedin         :
-  pinterest        :
-  soundcloud       :
-  stackoverflow    : # "123456/username" (the last part of your profile url, e.g. https://stackoverflow.com/users/123456/username)
-  steam            :
-  tumblr           :
-  twitter          :
-  vine             :
-  weibo            :
-  xing             :
-  youtube          : # "https://youtube.com/c/MichaelRoseDesign"
+  # Add more social profiles as needed (twitter, linkedin, etc.)
 
 
 # Reading Files
 include:
   - .htaccess
   - /_pages
-  - /assets/js/vendor/jquery/jquery-3.2.1.min.js
 exclude:
   - "*.sublime-project"
   - "*.sublime-workspace"
@@ -183,20 +145,22 @@ timezone: # "America/Chicago" # https://en.wikipedia.org/wiki/List_of_tz_databas
 
 
 # Plugins (previously gems:)
-plugins_dir:
+plugins:
   - jekyll-paginate
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
   - jemoji
+  - jekyll-include-cache
 
 # mimic GitHub Pages with --safe
-whitelist:
+allowlist:
   - jekyll-paginate
   - jekyll-sitemap
   - jekyll-gist
   - jekyll-feed
   - jemoji
+  - jekyll-include-cache
 
 
 # Archives
