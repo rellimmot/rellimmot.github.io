@@ -11,10 +11,10 @@ minimal_mistakes_skin    : "default" # "air", "contrast", "dark", "dirt", "mint"
 locale                   : "en-US"
 title                    : "relliMmoT Project Log"
 title_separator          : "|"
-name                     : &name "Thomas George Miller"
+name                     : "Thomas George Miller"
 description              : "A project log."
 url                      : "https://www.rellimmot.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
-baseurl                  :  # the subpath of your site, e.g. "/blog"
+baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "rellimmot/rellimmot.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
@@ -47,8 +47,8 @@ yandex_site_verification :
 twitter:
   username               :
 facebook:
-  username               : rellimmot
-  app_id                 : 494255804247179
+  username               :
+  app_id                 :
   publisher              :
 og_image                 : # Open Graph/Twitter default site image
 # For specifying social profiles
@@ -65,13 +65,12 @@ social:
 author:
   name             : "Thomas Miller"
   avatar           : "/assets/images/bio-photo.jpg"
-  bio              : ""
+  bio              : "Electrical engineer. Hardware, embedded systems, instrumentation."
   location         : "New Orleans, LA"
   email            : "rellimmot@rellimmot.com"
   uri              : "https://www.rellimmot.com"
-  facebook         : "rellimmot"
   github           : "rellimmot"
-  # Add more social profiles as needed (twitter, linkedin, etc.)
+  # Add more social profiles as needed (linkedin, etc.)
 
 
 # Reading Files

@@ -1,37 +1,29 @@
-	---
-	layout: splash
-	permalink: /
-	header:
-	  overlay_color: "#5e616c"
-	  caption:
-	excerpt: 'Project log and portfolio for Thomas Miller'
-	feature_row:
-	  - image_path: /assets/images/mm-customizable-feature.png
-	    alt: "customizable"
-	    title: "Placeholder1"
-	    excerpt: "So much placeholder1!"
-	    url: "/"
-	    btn_label: "Don't bother"
-	  - image_path: /assets/images/mm-responsive-feature.png
-	    alt: "fully responsive"
-	    title: "Placeholder2"
-	    excerpt: "What a placeholder!"
-	    url: "/"
-	    btn_label: "Don't click"
-	  - image_path: /assets/images/mm-free-feature.png
-	    alt: "100% free"
-	    title: "100% Free"
-	    excerpt: "So free!"
-	    url: "/"
-	    btn_label: "Same thing"
-	github:
-	  - excerpt: '{::nomarkdown}<iframe style="display: inline-block;" src="https://ghbtns.com/github-btn.html?user=rellimmot&repo=rellimmot.github.io&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe> <iframe style="display: inline-block;" src="https://ghbtns.com/github-btn.html?user=rellimmot&repo=rellimmot.github.io&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="158px" height="30px"></iframe>{:/nomarkdown}'
-	intro:
-	  - excerpt: 'Get notified when I add new stuff &nbsp; [<i class="fa fa-twitter"></i> @rellimmot](https://twitter.com/rellimmot){: .btn .btn--twitter} [<i class="fa fa-paypal"></i> Tip Me](https://www.paypal.me/rellimmot){: .btn}'
-	---
+---
+layout: splash
+permalink: /
+header:
+  overlay_color: "#5e616c"
+  caption:
+excerpt: 'Engineering projects, technical writeups, and occasional making'
+feature_row:
+  - image_path: /assets/images/mm-customizable-feature.png
+    alt: "portfolio"
+    title: "Portfolio"
+    excerpt: "Hardware projects, instrumentation systems, and fabrication work"
+    url: "/portfolio/"
+    btn_label: "View Projects"
+  - image_path: /assets/images/mm-responsive-feature.png
+    alt: "blog"
+    title: "Technical Notes"
+    excerpt: "Writeups on reverse engineering, repair, and technical problem-solving"
+    url: "/year-archive/"
+    btn_label: "Read Posts"
+  - image_path: /assets/images/mm-free-feature.png
+    alt: "about"
+    title: "About"
+    excerpt: "Electrical engineer working on instrumentation, automation, and hardware"
+    url: "/contact/"
+    btn_label: "Get in Touch"
+---
 
-	{% include feature_row id="intro" type="center" %}
-
-	{% include feature_row %}
-
-(lorem ipsum)
+{% include feature_row %}
