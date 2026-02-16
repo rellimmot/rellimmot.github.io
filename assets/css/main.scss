@@ -26,8 +26,14 @@ html {
 }
 
 // Fix: Giscus comment widget overflow
-.page__comments .giscus-frame {
-  max-width: 100%;
+.page__comments {
+  overflow: hidden;
+
+  .giscus,
+  .giscus-frame {
+    max-width: 100%;
+    width: 100%;
+  }
 }
 
 // Custom: Cap hero banner image height
