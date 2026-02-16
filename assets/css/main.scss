@@ -27,12 +27,16 @@ html {
 
 // Fix: Giscus comment widget overflow
 .page__comments {
+  overflow-x: hidden;
+}
+
+#giscus-comments {
   overflow: hidden;
 
-  .giscus,
-  .giscus-frame {
-    max-width: 100%;
-    width: 100%;
+  > .giscus,
+  iframe.giscus-frame {
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
 
