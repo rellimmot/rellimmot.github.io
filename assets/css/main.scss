@@ -25,11 +25,6 @@ html {
   bottom: auto;
 }
 
-// Fix: Giscus comment widget extends into page padding-right
-.page__comments {
-  padding-right: inherit;
-  box-sizing: border-box;
-}
 
 // Custom: Cap hero banner image height
 .page__hero-image {
