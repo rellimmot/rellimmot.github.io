@@ -19,12 +19,6 @@ html {
   max-width: 100% !important;
 }
 
-// Fix: Footer was using position:absolute which overlaps content
-.page__footer {
-  position: relative;
-  bottom: auto;
-}
-
 // Custom: Cap hero banner image height
 .page__hero-image {
   max-height: 400px;
