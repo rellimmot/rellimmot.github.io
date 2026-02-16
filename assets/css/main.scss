@@ -25,6 +25,11 @@ html {
   bottom: auto;
 }
 
+// Fix: Giscus comment widget overflow
+.page__comments .giscus-frame {
+  max-width: 100%;
+}
+
 // Custom: Cap hero banner image height
 .page__hero-image {
   max-height: 400px;
