@@ -7,3 +7,14 @@
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
 // lightgallery and cssgram removed - using bundled CSS files instead
+
+// Custom: Reduce base font size
+html {
+  font-size: 14px; // Reduced from default 16px
+}
+
+// Custom: Remove right padding on wide pages
+.wide .page {
+  padding-right: 0 !important;
+  max-width: 100% !important;
+}

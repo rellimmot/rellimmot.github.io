@@ -2,7 +2,7 @@
 title: "Hello World"
 excerpt_separator: "<!--more-->"
 categories:
-  - Meta
+  - Blog
 tags:
   - First Post
 ---

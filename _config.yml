@@ -9,10 +9,10 @@ minimal_mistakes_skin    : "default" # "air", "contrast", "dark", "dirt", "mint"
 
 # Site Settings
 locale                   : "en-US"
-title                    : "relliMmoT Project Log"
+title                    : "Thomas Miller"
 title_separator          : "|"
 name                     : "Thomas George Miller"
-description              : "A project log."
+description              : "Projects and technical notes"
 url                      : "https://www.rellimmot.com" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "rellimmot/rellimmot.github.io" # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
@@ -65,7 +65,7 @@ social:
 author:
   name             : "Thomas Miller"
   avatar           : "/assets/images/bio-photo.jpg"
-  bio              : "Electrical engineer. Hardware, embedded systems, instrumentation."
+  bio              : "Electrical engineer specializing in manufacturing test systems, embedded controls, and instrumentation. Background spanning defense avionics, oceanographic research, and industrial automation. Full-stack approach to hardware and software integration."
   location         : "New Orleans, LA"
   email            : "rellimmot@rellimmot.com"
   uri              : "https://www.rellimmot.com"

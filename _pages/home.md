@@ -4,24 +4,24 @@ permalink: /
 header:
   overlay_color: "#5e616c"
   caption:
-excerpt: 'Engineering projects, technical writeups, and occasional making'
+excerpt: 'Hardware, software, and systems engineering projects'
 feature_row:
   - image_path: /assets/images/mm-customizable-feature.png
     alt: "portfolio"
     title: "Portfolio"
-    excerpt: "Hardware projects, instrumentation systems, and fabrication work"
+    excerpt: "Test systems, instrumentation, and embedded hardware spanning defense, research, and manufacturing"
     url: "/portfolio/"
     btn_label: "View Projects"
   - image_path: /assets/images/mm-responsive-feature.png
     alt: "blog"
     title: "Technical Notes"
-    excerpt: "Writeups on reverse engineering, repair, and technical problem-solving"
+    excerpt: "Documentation of troubleshooting, reverse engineering, and technical problem-solving"
     url: "/year-archive/"
     btn_label: "Read Posts"
   - image_path: /assets/images/mm-free-feature.png
     alt: "about"
     title: "About"
-    excerpt: "Electrical engineer working on instrumentation, automation, and hardware"
+    excerpt: "Manufacturing test engineer with background in naval research and defense avionics"
     url: "/contact/"
     btn_label: "Get in Touch"
 ---
