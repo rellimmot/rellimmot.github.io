@@ -19,18 +19,12 @@ repository               : "rellimmot/rellimmot.github.io" # GitHub username/rep
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
-# Comments - Configured for giscus (GitHub Discussions-based)
-# Setup required:
-# 1. Enable Discussions: https://github.com/rellimmot/rellimmot.github.io/settings (scroll to Features > Discussions)
-# 2. Install giscus app: https://github.com/apps/giscus
-# 3. Visit https://giscus.app to get your repo_id and category_id
-# 4. Update the values below
 comments:
   provider               : "giscus"
   giscus:
-    repo_id              : # "R_xxx" - Get from https://giscus.app
-    category_name        : "Comments"
-    category_id          : # "DIC_xxx" - Get from https://giscus.app
+    repo_id              : "MDEwOlJlcG9zaXRvcnk5NzQxNDc3Nw=="
+    category_name        : "Announcements"
+    category_id          : "DIC_kwDOBc5uec4C2koH"
     discussion_term      : "pathname"
     reactions_enabled    : '1'
     theme                : "preferred_color_scheme"
@@ -217,7 +211,7 @@ defaults:
       layout: single
       author_profile: true
       read_time: true
-      comments: # true
+      comments: true
       share: true
       related: true
 
