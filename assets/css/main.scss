@@ -26,11 +26,6 @@ html {
 }
 
 
-// Fix: Default iframe border causes giscus to overflow by a few pixels
-.giscus-frame {
-  border: none;
-}
-
 // Custom: Cap hero banner image height
 .page__hero-image {
   max-height: 400px;
