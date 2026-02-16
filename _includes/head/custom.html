@@ -20,4 +20,31 @@
 <link rel="stylesheet" href="{{ site.url }}{{ site.baseurl }}/{{ "assets/css/gallery.css" }}" />
 {% endif %}
 
+{% if page.support contains 'photoswipe' %}
+<!-- PhotoSwipe v5.4.4 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css" />
+<script type="module">
+  import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
+  import PhotoSwipe from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js';
+  window.PhotoSwipeLightbox = PhotoSwipeLightbox;
+  window.PhotoSwipe = PhotoSwipe;
+</script>
+
+<!-- PhotoSwipe Dynamic Caption Plugin v1.2.9 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe-dynamic-caption-plugin@1.2.9/photoswipe-dynamic-caption-plugin.css" />
+<script type="module">
+  import PhotoSwipeDynamicCaption from 'https://cdn.jsdelivr.net/npm/photoswipe-dynamic-caption-plugin@1.2.9/photoswipe-dynamic-caption-plugin.esm.js';
+  window.PhotoSwipeDynamicCaption = PhotoSwipeDynamicCaption;
+</script>
+
+<!-- PhotoSwipe Deep Zoom Plugin v1.0.0 -->
+<script type="module">
+  import PhotoSwipeDeepZoom from 'https://cdn.jsdelivr.net/npm/photoswipe-deep-zoom-plugin@1.0.0/photoswipe-deep-zoom-plugin.esm.js';
+  window.PhotoSwipeDeepZoom = PhotoSwipeDeepZoom;
+</script>
+
+<!-- PhotoSwipe custom styles -->
+<link rel="stylesheet" href="{{ site.url }}{{ site.baseurl }}/assets/css/photoswipe-custom.css" />
+{% endif %}
+
 <!-- end custom head snippets -->

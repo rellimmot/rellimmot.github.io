@@ -1,0 +1,76 @@
+<!-- Gallery grid for thumbnail display -->
+<div id="photoswipe-gallery" class="image-gallery">
+  <div class="gallery-sizer"></div>
+  {% for picture in include.gallery.pictures %}
+  <div class="image-wrapper">
+    <a href="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/{{ include.collection_name }}/{{ picture.original }}"
+       data-pswp-width="{{ picture.width }}"
+       data-pswp-height="{{ picture.height }}"
+       {% if picture.caption %}data-pswp-caption="{{ picture.caption | escape }}"{% endif %}
+       {% if picture.tiles %}data-pswp-tiles="{{ picture.tiles | jsonify | escape }}"{% endif %}
+       target="_blank"
+       class="photoswipe-image">
+      <img src="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/{{ include.collection_name }}/{{ picture.thumbnail }}"
+           alt="{{ picture.caption | default: picture.filename }}" />
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+// Initialize PhotoSwipe Lightbox
+const lightbox = new PhotoSwipeLightbox({
+  gallery: '#photoswipe-gallery',
+  children: 'a.photoswipe-image',
+  pswpModule: PhotoSwipe,
+
+  // Enable plugins
+  paddingFn: (viewportSize) => {
+    return {
+      top: 30, bottom: 30, left: 70, right: 70
+    }
+  }
+});
+
+// Dynamic Caption plugin
+const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
+  type: 'auto',
+  captionContent: (slide) => {
+    return slide.data.element.dataset.pswpCaption || '';
+  }
+});
+
+// Deep Zoom plugin
+lightbox.on('uiRegister', function() {
+  lightbox.pswp.ui.registerElement({
+    name: 'deep-zoom-indicator',
+    appendTo: 'wrapper',
+    onInit: (el, pswp) => {
+      pswp.on('change', () => {
+        const currSlide = pswp.currSlide;
+        if (currSlide && currSlide.data.element.dataset.pswpTiles) {
+          // Deep zoom available
+          new PhotoSwipeDeepZoom(lightbox, {
+            tile: JSON.parse(currSlide.data.element.dataset.pswpTiles)
+          });
+        }
+      });
+    }
+  });
+});
+
+lightbox.init();
+
+// Isotope masonry layout (reuse existing library)
+var $grid = $('#photoswipe-gallery').isotope({
+  percentPosition: true,
+  columnWidth: '.gallery-sizer',
+  itemSelector: '.image-wrapper',
+  layoutMode: "masonry"
+});
+
+// Layout after images load
+$grid.imagesLoaded().progress(function() {
+  $grid.isotope('layout');
+});
+</script>

@@ -1,0 +1,75 @@
+---
+---
+
+// Image gallery grid (masonry)
+.image-gallery {
+  .image-wrapper, .gallery-sizer {
+    width: 33.333%;
+
+    @media screen and (min-width: 768px) {
+      width: 20%;
+    }
+  }
+
+  .image-wrapper {
+    float: left;
+    padding: 3px;
+
+    a {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+
+  &:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+}
+
+// PhotoSwipe dynamic caption styling
+.pswp__dynamic-caption {
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 1em;
+  font-size: 14px;
+  line-height: 1.5;
+
+  @media (min-width: 768px) {
+    max-width: 400px;
+  }
+}
+
+// PhotoSwipe zoom cursor
+.pswp--zoom-allowed .pswp__img {
+  cursor: zoom-in;
+}
+
+.pswp--zoomed-in .pswp__img {
+  cursor: grab;
+}
+
+.pswp--zoomed-in .pswp__img:active {
+  cursor: grabbing;
+}
+
+// Photography collection page styling
+.photography-collection {
+  .photography-title {
+    margin-bottom: 1em;
+    font-size: 2em;
+  }
+}

@@ -1,5 +1,5 @@
 ---
-title: "Cotton Gin NIR Robot"
+title: "Cotton Gin NIR Robot (2017)"
 excerpt: "A robot for field-deployed lab instruments in rugged environments."
 header:
  image: https://rellimmot.s3.amazonaws.com/assets/images/portfolio-assets/lenny-robot/lenny17.jpg

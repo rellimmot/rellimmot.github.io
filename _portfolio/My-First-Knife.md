@@ -1,5 +1,5 @@
 ---
-title: "Basic Homemade Knife"
+title: "Basic Homemade Knife (2016)"
 excerpt: "Photographic step-by-step DIY showing how I made my first knife."
 header:
   image: https://i.imgur.com/CyDPDEA.jpg

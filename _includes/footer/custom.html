@@ -1,3 +1,62 @@
 <!-- start custom footer snippets -->
 
+<script>
+// Complete greedy-nav implementation
+(function checkJQuery() {
+  if (typeof jQuery !== 'undefined') {
+    jQuery(document).ready(function($) {
+      var $btn = $("button.greedy-nav__toggle");
+      var $vlinks = $("nav.greedy-nav .visible-links");
+      var $hlinks = $("nav.greedy-nav .hidden-links");
+      var breaks = [];
+
+      function updateNav() {
+        var availableSpace = $vlinks.width() - 10;
+        var numOfVisibleItems = $vlinks.children().length;
+        var requiredSpace = breaks[numOfVisibleItems - 1];
+
+        // Move items to hidden if they don't fit
+        if (requiredSpace > availableSpace) {
+          $vlinks.children().last().prependTo($hlinks);
+          numOfVisibleItems -= 1;
+          updateNav();
+        }
+        // Move items back to visible if space available
+        else if (availableSpace > breaks[numOfVisibleItems]) {
+          $hlinks.children().first().appendTo($vlinks);
+          numOfVisibleItems += 1;
+          updateNav();
+        }
+
+        // Show/hide button based on hidden items
+        if (numOfVisibleItems === breaks.length) {
+          $btn.addClass("hidden");
+        } else {
+          $btn.removeClass("hidden");
+        }
+      }
+
+      // Calculate break points
+      $vlinks.children().outerWidth(function(i, w) {
+        breaks.push(w + (breaks[i-1] || 0));
+      });
+
+      // Click handler
+      $btn.on("click", function() {
+        $hlinks.toggleClass("hidden");
+        $(this).toggleClass("close");
+      });
+
+      // Update on resize
+      $(window).resize(updateNav);
+
+      // Initial update
+      updateNav();
+    });
+  } else {
+    setTimeout(checkJQuery, 50);
+  }
+})();
+</script>
+
 <!-- end custom footer snippets -->
