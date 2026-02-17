@@ -1,6 +1,6 @@
 ---
 layout: gallery
-title: Project Portfolio Gallery
+title: "Project Portfolio Gallery (2010-2018)"
 no_menu_item: true # required only for this example website because of menu construction
 support: [jquery, gallery]
 ---

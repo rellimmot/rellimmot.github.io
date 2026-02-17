@@ -1,6 +1,6 @@
 ---
 layout: gallery
-title: "Project Portfolio Gallery"
+title: "Project Portfolio Gallery (2010-2018)"
 support: [jquery, gallery]
 excerpt: "A collection of hardware projects, builds, and fabrication work spanning the last decade."
 header:
