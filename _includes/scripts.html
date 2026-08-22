@@ -11,5 +11,14 @@
   <script src="{{ '/assets/js/main.min.js' | absolute_url }}"></script>
 {% endif %}
 
+{% if page.support contains 'gallery' %}
+<!-- A jQuery plugin that adds cross-browser mouse wheel support. (Optional) -->
+<script src="{{ 'assets/js/plugins/jquery.mousewheel.js' | absolute_url }}"></script>
+<script src="{{ 'assets/js/plugins/lightgallery.min.js' | absolute_url }}"></script>
+<script src="{{ 'assets/js/plugins/lg-thumbnail.min.js' | absolute_url }}"></script>
+<script src="{{ 'assets/js/plugins/isotope.pkgd.min.js' | absolute_url }}"></script>
+<script src="{{ 'assets/js/plugins/imagesloaded.pkgd.js' | absolute_url }}"></script>
+{% endif %}
+
 {% include analytics.html %}
 {% include /comments-providers/scripts.html %}

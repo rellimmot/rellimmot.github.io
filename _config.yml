@@ -79,9 +79,7 @@ exclude:
   - .bundle
   - .jekyll-assets-cache
   - .sass-cache
-  - assets/js/plugins
   - assets/js/_main.js
-  - assets/js/vendor
   - Capfile
   - CHANGELOG
   - config
@@ -247,3 +245,4 @@ defaults:
 # Load jQuery before main.min.js
 footer_scripts:
   - https://code.jquery.com/jquery-3.7.1.min.js
+  - /assets/js/main.min.js
