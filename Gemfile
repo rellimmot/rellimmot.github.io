@@ -4,8 +4,8 @@ source "https://rubygems.org"
 # See: https://pages.github.com/versions/ for current versions
 gem "github-pages", group: :jekyll_plugins
 
-# Minimal Mistakes theme - using latest from GitHub
-gem "minimal-mistakes-jekyll", github: "mmistakes/minimal-mistakes"
+# Minimal Mistakes theme is vendored directly in _layouts/_includes/_sass,
+# not loaded as a gem - no theme gem needed here.
 
 # Additional plugins
 group :jekyll_plugins do
