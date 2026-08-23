@@ -1,76 +1,84 @@
-<!-- Gallery grid for thumbnail display -->
-<div id="photoswipe-gallery" class="image-gallery">
-  <div class="gallery-sizer"></div>
-  {% for picture in include.gallery.pictures %}
-  <div class="image-wrapper">
-    <a href="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/{{ include.collection_name }}/{{ picture.original }}"
-       data-pswp-width="{{ picture.width }}"
-       data-pswp-height="{{ picture.height }}"
+{% comment %}
+Photo grid + PhotoSwipe lightbox for one photography set.
+
+Usage from a _photography/*.md file:
+    {% include photoswipe-gallery.html gallery=site.data.galleries.photography.my-set %}
+
+The data file supplies a list of pictures plus one of:
+    s3_prefix    images live on S3, use this for real sets
+    local_path   images live in this repo under assets/images/photography/
+
+Image dimensions are read from the filenames (NAME-WIDTHxHEIGHT.jpg), so they are
+never written down twice. Full contract is documented at the top of any file in
+_data/galleries/photography/.
+
+Layout is CSS columns, see .photo-grid in assets/css/photoswipe-custom.scss.
+No jQuery, no isotope, no imagesLoaded on this page.
+{% endcomment %}
+
+{% assign g = include.gallery %}
+{% if g.s3_prefix %}
+  {% assign set_id = g.s3_prefix %}
+  {% assign base = "https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/" | append: g.s3_prefix | append: "/" %}
+{% else %}
+  {% assign set_id = g.local_path %}
+  {% capture base %}{{ "/assets/images/photography/" | append: g.local_path | append: "/" | absolute_url }}{% endcapture %}
+{% endif %}
+{% assign grid_id = "photo-grid-" | append: set_id %}
+
+<div id="{{ grid_id }}" class="photo-grid">
+  {% for picture in g.pictures %}
+    {% assign full_dims = picture.full | split: "-" | last | split: "." | first | split: "x" %}
+    {% assign thumb_dims = picture.thumb | split: "-" | last | split: "." | first | split: "x" %}
+    {% assign label = picture.alt | default: picture.caption | default: picture.full %}
+    <a href="{{ base }}{{ picture.full }}"
+       data-pswp-width="{{ full_dims[0] }}"
+       data-pswp-height="{{ full_dims[1] }}"
        {% if picture.caption %}data-pswp-caption="{{ picture.caption | escape }}"{% endif %}
-       {% if picture.tiles %}data-pswp-tiles="{{ picture.tiles | jsonify | escape }}"{% endif %}
        target="_blank"
+       rel="noopener"
        class="photoswipe-image">
-      <img src="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/{{ include.collection_name }}/{{ picture.thumbnail }}"
-           alt="{{ picture.caption | default: picture.filename }}" />
+      <img src="{{ base }}{{ picture.thumb }}"
+           width="{{ thumb_dims[0] }}"
+           height="{{ thumb_dims[1] }}"
+           loading="lazy"
+           decoding="async"
+           alt="{{ label | escape }}" />
     </a>
-  </div>
   {% endfor %}
 </div>
 
 <script>
-// Initialize PhotoSwipe Lightbox
-const lightbox = new PhotoSwipeLightbox({
-  gallery: '#photoswipe-gallery',
-  children: 'a.photoswipe-image',
-  pswpModule: PhotoSwipe,
+// PhotoSwipe loads as an ES module from the page head. Module scripts are deferred,
+// so the globals it sets do not exist yet while this inline script is being parsed.
+// Wait for DOMContentLoaded, which fires after deferred modules have run.
+document.addEventListener('DOMContentLoaded', function() {
+  var gallery = document.getElementById('{{ grid_id }}');
+  if (!gallery || typeof PhotoSwipeLightbox === 'undefined') { return; }
 
-  // Enable plugins
-  paddingFn: (viewportSize) => {
-    return {
-      top: 30, bottom: 30, left: 70, right: 70
-    }
-  }
-});
-
-// Dynamic Caption plugin
-const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
-  type: 'auto',
-  captionContent: (slide) => {
-    return slide.data.element.dataset.pswpCaption || '';
-  }
-});
-
-// Deep Zoom plugin
-lightbox.on('uiRegister', function() {
-  lightbox.pswp.ui.registerElement({
-    name: 'deep-zoom-indicator',
-    appendTo: 'wrapper',
-    onInit: (el, pswp) => {
-      pswp.on('change', () => {
-        const currSlide = pswp.currSlide;
-        if (currSlide && currSlide.data.element.dataset.pswpTiles) {
-          // Deep zoom available
-          new PhotoSwipeDeepZoom(lightbox, {
-            tile: JSON.parse(currSlide.data.element.dataset.pswpTiles)
-          });
-        }
-      });
+  var lightbox = new PhotoSwipeLightbox({
+    gallery: '#{{ grid_id }}',
+    children: 'a.photoswipe-image',
+    pswpModule: PhotoSwipe,
+    bgOpacity: 0.95,
+    paddingFn: function() {
+      return window.innerWidth < 768
+        ? { top: 0, bottom: 0, left: 0, right: 0 }
+        : { top: 30, bottom: 30, left: 70, right: 70 };
     }
   });
-});
 
-lightbox.init();
+  // Captions come from data-pswp-caption on each anchor. Registered before
+  // init() because plugins cannot attach to a lightbox that is already running.
+  if (typeof PhotoSwipeDynamicCaption !== 'undefined') {
+    new PhotoSwipeDynamicCaption(lightbox, {
+      type: 'auto',
+      captionContent: function(slide) {
+        return slide.data.element.dataset.pswpCaption || '';
+      }
+    });
+  }
 
-// Isotope masonry layout (reuse existing library)
-var $grid = $('#photoswipe-gallery').isotope({
-  percentPosition: true,
-  columnWidth: '.gallery-sizer',
-  itemSelector: '.image-wrapper',
-  layoutMode: "masonry"
-});
-
-// Layout after images load
-$grid.imagesLoaded().progress(function() {
-  $grid.isotope('layout');
+  lightbox.init();
 });
 </script>

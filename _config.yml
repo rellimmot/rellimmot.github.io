@@ -238,6 +238,9 @@ defaults:
       layout: photography
       author_profile: false
       share: true
+      # head/custom.html and scripts.html gate on page.support, and Jekyll does
+      # not copy front matter down from a layout, so it has to be set here.
+      support: [photoswipe]
 
       # added to clear GitHub API error per https://github.com/DIYbiosphere/sphere/issues/140
       github: [metadata]
