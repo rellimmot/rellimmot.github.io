@@ -12,30 +12,21 @@
 {% endif %}
 
 {% if page.support contains 'photoswipe' %}
-<!-- PhotoSwipe v5.4.4 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css" />
+<!-- PhotoSwipe v5.4.4, served from this repo rather than a CDN -->
+<link rel="stylesheet" href="{{ '/assets/css/photoswipe.css' | absolute_url }}" />
+<link rel="stylesheet" href="{{ '/assets/css/photoswipe-dynamic-caption-plugin.css' | absolute_url }}" />
+<link rel="stylesheet" href="{{ '/assets/css/photoswipe-custom.css' | absolute_url }}" />
 <script type="module">
-  import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
-  import PhotoSwipe from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js';
+  import PhotoSwipeLightbox from '{{ "/assets/js/plugins/photoswipe-lightbox.esm.js" | absolute_url }}';
+  import PhotoSwipe from '{{ "/assets/js/plugins/photoswipe.esm.js" | absolute_url }}';
+  import PhotoSwipeDynamicCaption from '{{ "/assets/js/plugins/photoswipe-dynamic-caption-plugin.esm.js" | absolute_url }}';
   window.PhotoSwipeLightbox = PhotoSwipeLightbox;
   window.PhotoSwipe = PhotoSwipe;
-</script>
-
-<!-- PhotoSwipe Dynamic Caption Plugin v1.2.9 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe-dynamic-caption-plugin@1.2.9/photoswipe-dynamic-caption-plugin.css" />
-<script type="module">
-  import PhotoSwipeDynamicCaption from 'https://cdn.jsdelivr.net/npm/photoswipe-dynamic-caption-plugin@1.2.9/photoswipe-dynamic-caption-plugin.esm.js';
   window.PhotoSwipeDynamicCaption = PhotoSwipeDynamicCaption;
+  // Module scripts are deferred, so anything using these globals has to wait
+  // for DOMContentLoaded. See _includes/photoswipe-gallery.html.
+  window.dispatchEvent(new Event('photoswipe:ready'));
 </script>
-
-<!-- PhotoSwipe Deep Zoom Plugin v1.0.0 -->
-<script type="module">
-  import PhotoSwipeDeepZoom from 'https://cdn.jsdelivr.net/npm/photoswipe-deep-zoom-plugin@1.0.0/photoswipe-deep-zoom-plugin.esm.js';
-  window.PhotoSwipeDeepZoom = PhotoSwipeDeepZoom;
-</script>
-
-<!-- PhotoSwipe custom styles -->
-<link rel="stylesheet" href="{{ site.url }}{{ site.baseurl }}/assets/css/photoswipe-custom.css" />
 {% endif %}
 
 <!-- end custom head snippets -->
