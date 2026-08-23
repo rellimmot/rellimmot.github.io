@@ -7,14 +7,12 @@
 </div>
 <br> -->
 <div id="image-gallery{% if include.id_number %}-{{ include.id_number }}{% endif %}" class="image-gallery">
-  <div id="gallery-sizer" class="gallery-sizer"></div>
+  <div id="gallery-sizer{% if include.id_number %}-{{ include.id_number }}{% endif %}" class="gallery-sizer"></div>
     {% for picture in include.gallery.pictures %}
       <div class="image-wrapper {{ picture.filter }} {{ picture.priority }}">
         <a href="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ picture.original }}"
-        data-responsive="
-          {% for size in picture.sizes %}
-              https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery//{{ size }} {{ size | split: '-' | last | split: '.' | first | split: 'x' | first | strip }}{% unless forloop.last %},{% endunless %}
-          {% endfor %}"
+        data-srcset="{% for size in picture.sizes %}https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ size }} {{ size | split: '-' | last | split: '.' | first | split: 'x' | first | strip }}w, {% endfor %}https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ picture.original }} {{ picture.original | split: '-' | last | split: '.' | first | split: 'x' | first | strip }}w"
+        data-sizes="100vw"
         class="image"
           {% if picture.title %}
               data-sub-html="<div class='lg-toolbar caption'><h4>{{ picture.title | escape }}</h4>
@@ -29,53 +27,47 @@
 </div>
 
 <script>
-
-$(document).ready(function() {
-  // Initialize lightGallery v2
+// jQuery, isotope, imagesLoaded and lightGallery all load from the page footer,
+// which comes after this block. Wait for DOMContentLoaded so they exist.
+document.addEventListener('DOMContentLoaded', function() {
   var galleryElement = document.getElementById('image-gallery{% if include.id_number %}-{{ include.id_number }}{% endif %}');
-  if (galleryElement) {
-    lightGallery(galleryElement, {
-      plugins: [lgThumbnail],
-      selector: '.image',
-      licenseKey: '0000-0000-000-0000' // Free license key for open source
+  if (!galleryElement) { return; }
+
+  // lightGallery v2
+  lightGallery(galleryElement, {
+    plugins: [lgThumbnail],
+    selector: '.image',
+    licenseKey: '0000-0000-000-0000' // placeholder key for GPL use
+  });
+
+  // isotope masonry
+  var $grid = $(galleryElement).isotope({
+    percentPosition: true,
+    columnWidth: '#gallery-sizer{% if include.id_number %}-{{ include.id_number }}{% endif %}',
+    itemSelector: '.image-wrapper',
+    layoutMode: 'masonry',
+    getSortData: {
+      priority: '.priority'
+    }
+  });
+
+  // filter buttons (markup is commented out above, kept for when it comes back)
+  $('#filters').on('click', 'button', function() {
+    var filterValue = $(this).attr('data-filter');
+    $grid.isotope({ filter: filterValue });
+  });
+
+  $('.button-group').each(function(i, buttonGroup) {
+    var $buttonGroup = $(buttonGroup);
+    $buttonGroup.on('click', 'button', function() {
+      $buttonGroup.find('.is-checked').removeClass('is-checked');
+      $(this).addClass('is-checked');
     });
-  }
-});
+  });
 
-
-// init isotope
-var $grid{% if include.id_number %}{{ include.id_number }}{% endif %} = $('#image-gallery{% if include.id_number %}-{{ include.id_number }}{% endif %}').isotope({
-  percentPosition: true,
-  columnWidth: '#gallery-sizer{% if include.id_number %}-{{ include.id_number }}{% endif %}',
-  itemSelector: '.image-wrapper',
-  layoutMode: "masonry",
-  getSortData:{
-    priority: '.priority'
-  }
-});
-
-
-// bind filter button click
-$('#filters').on( 'click', 'button', function() {
-  var filterValue = $( this ).attr('data-filter');
-  // use filterFn if matches value
-  // filterValue = filterFns[ filterValue ] || filterValue;
-  $grid.isotope({ filter: filterValue });
-  console.info( 'FILTER: ', filterValue );
-});
-
-// change is-checked class on buttons
-$('.button-group').each( function( i, buttonGroup ) {
-  var $buttonGroup = $( buttonGroup );
-  $buttonGroup.on( 'click', 'button', function() {
-    $buttonGroup.find('.is-checked').removeClass('is-checked');
-    $( this ).addClass('is-checked');
+  // re-layout as each image finishes loading
+  $grid.imagesLoaded().progress(function() {
+    $grid.isotope('layout');
   });
 });
-
-// layout Isotope after each image loads
-$grid{% if include.id_number %}{{ include.id_number }}{% endif %}.imagesLoaded().progress( function() {
-  $grid{% if include.id_number %}{{ include.id_number }}{% endif %}.masonry();
-});
-
 </script>
