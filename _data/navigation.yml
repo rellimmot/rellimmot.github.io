@@ -18,5 +18,9 @@ main:
     url: /year-archive/
   - title: "Portfolio"
     url: /portfolio/
+# Photography is built and live but deliberately unlinked for now.
+# Reachable at /photography/ by typing the URL. Uncomment to publish it.
+#  - title: "Photography"
+#    url: /photography/
 #  - title: "Contact"
 #    url: /contact/

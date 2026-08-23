@@ -1,0 +1,73 @@
+# Photography set data.
+#
+# Point at ONE image source:
+#   s3_prefix: <folder>    real sets. Images at
+#                          https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/<folder>/
+#                          Objects must be publicly readable, see the note below.
+#   local_path: <folder>   images committed to this repo under
+#                          assets/images/photography/<folder>/
+#                          Fine for small or placeholder sets.
+#
+# Two files per picture, both in the same folder:
+#   full   long edge 2048px, JPEG quality ~85, shown in the lightbox
+#   thumb  long edge  800px, JPEG quality ~80, shown in the grid
+#
+# Dimensions are read from the filename (NAME-WIDTHxHEIGHT.jpg) by
+# _includes/photoswipe-gallery.html, so never write them out separately.
+# Strip GPS from EXIF before uploading.
+#
+# caption is optional and shows in the lightbox. alt is optional and falls
+# back to caption.
+#
+# S3 note: uploading is not enough. The bucket has no policy granting public
+# read, so a new object is private and returns 403 to visitors. Grant read on
+# assets/images/* before pointing a set at s3_prefix.
+#
+# The images in this set are generated placeholders, not real photographs.
+
+
+s3_prefix: leica-q
+
+pictures:
+  - full:  LEIQ-0001-2048x1365.jpg
+    thumb: LEIQ-0001-800x533.jpg
+    caption: "Quarter light"
+  - full:  LEIQ-0002-1365x2048.jpg
+    thumb: LEIQ-0002-533x800.jpg
+    caption: "Streetcar stop, Canal"
+  - full:  LEIQ-0003-2048x2048.jpg
+    thumb: LEIQ-0003-800x800.jpg
+    caption: "Shotgun house, shutters closed"
+  - full:  LEIQ-0004-1638x2048.jpg
+    thumb: LEIQ-0004-640x800.jpg
+    caption: "Bar back, mid afternoon"
+  - full:  LEIQ-0005-2048x1152.jpg
+    thumb: LEIQ-0005-800x450.jpg
+    caption: "Rain starting"
+  - full:  LEIQ-0006-2048x1365.jpg
+    thumb: LEIQ-0006-800x533.jpg
+    caption: "Iron work detail"
+  - full:  LEIQ-0007-1365x2048.jpg
+    thumb: LEIQ-0007-533x800.jpg
+    caption: "Dog on a porch"
+  - full:  LEIQ-0008-2048x1638.jpg
+    thumb: LEIQ-0008-800x640.jpg
+    caption: "Second line, far off"
+  - full:  LEIQ-0009-2048x1365.jpg
+    thumb: LEIQ-0009-800x533.jpg
+    caption: "Bricks and paint"
+  - full:  LEIQ-0010-1152x2048.jpg
+    thumb: LEIQ-0010-450x800.jpg
+    caption: "Window unit and wires"
+  - full:  LEIQ-0011-1365x2048.jpg
+    thumb: LEIQ-0011-533x800.jpg
+    caption: "Bridge underside"
+  - full:  LEIQ-0012-2048x1365.jpg
+    thumb: LEIQ-0012-800x533.jpg
+    caption: "Levee path"
+  - full:  LEIQ-0013-2048x2048.jpg
+    thumb: LEIQ-0013-800x800.jpg
+    caption: "Neon in daylight"
+  - full:  LEIQ-0014-2048x1152.jpg
+    thumb: LEIQ-0014-800x450.jpg
+    caption: "Late walk home"

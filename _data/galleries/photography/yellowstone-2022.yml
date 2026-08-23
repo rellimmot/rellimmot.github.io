@@ -1,0 +1,73 @@
+# Photography set data.
+#
+# Point at ONE image source:
+#   s3_prefix: <folder>    real sets. Images at
+#                          https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/<folder>/
+#                          Objects must be publicly readable, see the note below.
+#   local_path: <folder>   images committed to this repo under
+#                          assets/images/photography/<folder>/
+#                          Fine for small or placeholder sets.
+#
+# Two files per picture, both in the same folder:
+#   full   long edge 2048px, JPEG quality ~85, shown in the lightbox
+#   thumb  long edge  800px, JPEG quality ~80, shown in the grid
+#
+# Dimensions are read from the filename (NAME-WIDTHxHEIGHT.jpg) by
+# _includes/photoswipe-gallery.html, so never write them out separately.
+# Strip GPS from EXIF before uploading.
+#
+# caption is optional and shows in the lightbox. alt is optional and falls
+# back to caption.
+#
+# S3 note: uploading is not enough. The bucket has no policy granting public
+# read, so a new object is private and returns 403 to visitors. Grant read on
+# assets/images/* before pointing a set at s3_prefix.
+#
+# The images in this set are generated placeholders, not real photographs.
+
+
+s3_prefix: yellowstone-2022
+
+pictures:
+  - full:  YELL-0001-2048x1365.jpg
+    thumb: YELL-0001-800x533.jpg
+    caption: "Lower Falls from the north rim"
+  - full:  YELL-0002-1365x2048.jpg
+    thumb: YELL-0002-533x800.jpg
+    caption: "Morning steam off the basin"
+  - full:  YELL-0003-2048x2048.jpg
+    thumb: YELL-0003-800x800.jpg
+    caption: "Lodgepole stand, early light"
+  - full:  YELL-0004-1638x2048.jpg
+    thumb: YELL-0004-640x800.jpg
+    caption: "Bison crossing the road at dusk"
+  - full:  YELL-0005-2048x1152.jpg
+    thumb: YELL-0005-800x450.jpg
+    caption: "Grand Prismatic runoff"
+  - full:  YELL-0006-2048x1365.jpg
+    thumb: YELL-0006-800x533.jpg
+    caption: "Storm building over Hayden Valley"
+  - full:  YELL-0007-1365x2048.jpg
+    thumb: YELL-0007-533x800.jpg
+    caption: "Old snow above the treeline"
+  - full:  YELL-0008-2048x1638.jpg
+    thumb: YELL-0008-800x640.jpg
+    caption: "Mammoth terraces, late afternoon"
+  - full:  YELL-0009-2048x1365.jpg
+    thumb: YELL-0009-800x533.jpg
+    caption: "Elk in the meadow"
+  - full:  YELL-0010-1152x2048.jpg
+    thumb: YELL-0010-450x800.jpg
+    caption: "Firehole River bend"
+  - full:  YELL-0011-1365x2048.jpg
+    thumb: YELL-0011-533x800.jpg
+    caption: "Obsidian cliff detail"
+  - full:  YELL-0012-2048x1365.jpg
+    thumb: YELL-0012-800x533.jpg
+    caption: "Back road out of Pinedale"
+  - full:  YELL-0013-2048x2048.jpg
+    thumb: YELL-0013-800x800.jpg
+    caption: "Campsite, last night"
+  - full:  YELL-0014-2048x1152.jpg
+    thumb: YELL-0014-800x450.jpg
+    caption: "Long drive home"

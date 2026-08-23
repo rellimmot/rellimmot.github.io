@@ -1,0 +1,73 @@
+# Photography set data.
+#
+# Point at ONE image source:
+#   s3_prefix: <folder>    real sets. Images at
+#                          https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/<folder>/
+#                          Objects must be publicly readable, see the note below.
+#   local_path: <folder>   images committed to this repo under
+#                          assets/images/photography/<folder>/
+#                          Fine for small or placeholder sets.
+#
+# Two files per picture, both in the same folder:
+#   full   long edge 2048px, JPEG quality ~85, shown in the lightbox
+#   thumb  long edge  800px, JPEG quality ~80, shown in the grid
+#
+# Dimensions are read from the filename (NAME-WIDTHxHEIGHT.jpg) by
+# _includes/photoswipe-gallery.html, so never write them out separately.
+# Strip GPS from EXIF before uploading.
+#
+# caption is optional and shows in the lightbox. alt is optional and falls
+# back to caption.
+#
+# S3 note: uploading is not enough. The bucket has no policy granting public
+# read, so a new object is private and returns 403 to visitors. Grant read on
+# assets/images/* before pointing a set at s3_prefix.
+#
+# The images in this set are generated placeholders, not real photographs.
+
+
+s3_prefix: norway-pinedale-2022
+
+pictures:
+  - full:  NORW-0001-2048x1365.jpg
+    thumb: NORW-0001-800x533.jpg
+    caption: "Fjord wall in flat light"
+  - full:  NORW-0002-1365x2048.jpg
+    thumb: NORW-0002-533x800.jpg
+    caption: "Harbor at slack tide"
+  - full:  NORW-0003-2048x2048.jpg
+    thumb: NORW-0003-800x800.jpg
+    caption: "Snow line above the village"
+  - full:  NORW-0004-1638x2048.jpg
+    thumb: NORW-0004-640x800.jpg
+    caption: "Ferry crossing, north"
+  - full:  NORW-0005-2048x1152.jpg
+    thumb: NORW-0005-800x450.jpg
+    caption: "Rain on the window"
+  - full:  NORW-0006-2048x1365.jpg
+    thumb: NORW-0006-800x533.jpg
+    caption: "Church roof, hand cut shingles"
+  - full:  NORW-0007-1365x2048.jpg
+    thumb: NORW-0007-533x800.jpg
+    caption: "Switchback road"
+  - full:  NORW-0008-2048x1638.jpg
+    thumb: NORW-0008-800x640.jpg
+    caption: "Cloud sitting in the valley"
+  - full:  NORW-0009-2048x1365.jpg
+    thumb: NORW-0009-800x533.jpg
+    caption: "Stone fence, unknown age"
+  - full:  NORW-0010-1152x2048.jpg
+    thumb: NORW-0010-450x800.jpg
+    caption: "Low sun on water"
+  - full:  NORW-0011-1365x2048.jpg
+    thumb: NORW-0011-533x800.jpg
+    caption: "Wool drying outside"
+  - full:  NORW-0012-2048x1365.jpg
+    thumb: NORW-0012-800x533.jpg
+    caption: "Wyoming, coming back"
+  - full:  NORW-0013-2048x2048.jpg
+    thumb: NORW-0013-800x800.jpg
+    caption: "Fence post and wire"
+  - full:  NORW-0014-2048x1152.jpg
+    thumb: NORW-0014-800x450.jpg
+    caption: "Dry grass, high wind"
