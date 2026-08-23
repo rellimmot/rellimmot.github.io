@@ -59,7 +59,7 @@ social:
 author:
   name             : "Thomas Miller"
   avatar           : "/assets/images/bio-photo.jpg"
-  bio              : "Electrical engineer specializing in manufacturing test systems, embedded controls, and instrumentation. Background spanning defense avionics, oceanographic research, and industrial automation. Full-stack approach to hardware and software integration."
+  bio              : "Electrical engineer specializing in manufacturing test systems, embedded controls, and instrumentation. Background spanning avionics, oceanographic research, and industrial automation. Full-stack approach to hardware and software integration."
   location         : "New Orleans, LA"
   email            : "rellimmot@rellimmot.com"
   uri              : "https://www.rellimmot.com"
@@ -207,7 +207,9 @@ defaults:
       type: posts
     values:
       layout: single
-      author_profile: true
+      # The author profile only belongs on About Me. Turning it on anywhere else
+      # repeats the name already sitting in the masthead.
+      author_profile: false
       read_time: true
       comments: true
       share: true
@@ -219,7 +221,7 @@ defaults:
       type: pages
     values:
       layout: single
-      author_profile: true
+      author_profile: false
 
   # _portfolio
   - scope:
