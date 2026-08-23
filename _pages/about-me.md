@@ -3,7 +3,8 @@ permalink: /about-me/
 title: "About Me"
 layout: single
 author_profile: true
-classes: wide
+author_profile_full: true
+classes: [wide, about-page]
 excerpt: "Professional background and technical experience"
 last_modified_at: 2026-02-15
 redirect_from:

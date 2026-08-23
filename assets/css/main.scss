@@ -29,6 +29,24 @@ html {
   display: block;
 }
 
+// Custom: the masthead name already links home, but it was styled exactly like
+// plain text so nobody could tell. Give it a hover and keyboard affordance.
+.greedy-nav .site-title {
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+// Custom: on narrow screens the sidebar stacks above the content, which pushes
+// the actual page down behind an avatar and a row of links. Only About Me, where
+// the profile is the point, keeps it. $large is 1024px in the theme.
+@media screen and (max-width: 1023px) {
+  body:not(.about-page) .sidebar {
+    display: none;
+  }
+}
+
 // Custom: photography index page. The class comes from `classes:` in the front
 // matter of _pages/photography-archive.html, so it lands on <body> and can reach
 // the sidebar as well as the grid. Lives here rather than in

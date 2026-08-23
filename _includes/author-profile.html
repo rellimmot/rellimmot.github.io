@@ -16,14 +16,21 @@
     </div>
   {% endif %}
 
-  <div class="author__content">
-    <h3 class="author__name" itemprop="name">{{ author.name }}</h3>
-    {% if author.bio %}
-      <p class="author__bio" itemprop="description">
-        {{ author.bio }}
-      </p>
-    {% endif %}
-  </div>
+  {% comment %}
+    Pass compact=true for the avatar and links without the name and bio. The
+    name repeats the masthead on every page, so only About Me asks for the full
+    version. Call it as: {% include author-profile.html compact=true %}
+  {% endcomment %}
+  {% unless include.compact %}
+    <div class="author__content">
+      <h3 class="author__name" itemprop="name">{{ author.name }}</h3>
+      {% if author.bio %}
+        <p class="author__bio" itemprop="description">
+          {{ author.bio }}
+        </p>
+      {% endif %}
+    </div>
+  {% endunless %}
 
   <div class="author__urls-wrapper">
     <button class="btn btn--inverse">{{ site.data.ui-text[site.locale].follow_label | remove: ":" | default: "Follow" }}</button>
