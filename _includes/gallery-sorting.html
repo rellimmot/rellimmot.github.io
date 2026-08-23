@@ -8,10 +8,17 @@
 <br> -->
 <div id="image-gallery{% if include.id_number %}-{{ include.id_number }}{% endif %}" class="image-gallery">
   <div id="gallery-sizer{% if include.id_number %}-{{ include.id_number }}{% endif %}" class="gallery-sizer"></div>
+    {% assign s3 = "https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/" %}
     {% for picture in include.gallery.pictures %}
+      {% comment %} filenames carry their pixel size, e.g. PORTGAL243-1999x1499.jpg {% endcomment %}
+      {% assign thumb_dims = picture.thumbnail | split: '-' | last | split: '.' | first | split: 'x' %}
       <div class="image-wrapper {{ picture.filter }} {{ picture.priority }}">
-        <a href="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ picture.original }}"
-        data-srcset="{% for size in picture.sizes %}https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ size }} {{ size | split: '-' | last | split: '.' | first | split: 'x' | first | strip }}w, {% endfor %}https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ picture.original }} {{ picture.original | split: '-' | last | split: '.' | first | split: 'x' | first | strip }}w"
+        {% if picture.original contains '://' %}
+        <a href="{{ picture.original }}" class="video-link" target="_blank" rel="noopener" title="Watch on YouTube">
+          <span class="video-badge"><i class="fa fa-play-circle" aria-hidden="true"></i></span>
+        {% else %}
+        <a href="{{ s3 }}{{ picture.original }}"
+        data-srcset="{% for size in picture.sizes %}{{ s3 }}{{ size }} {{ size | split: '-' | last | split: '.' | first | split: 'x' | first }}w, {% endfor %}{{ s3 }}{{ picture.original }} {{ picture.original | split: '-' | last | split: '.' | first | split: 'x' | first }}w"
         data-sizes="100vw"
         class="image"
           {% if picture.title %}
@@ -20,15 +27,16 @@
                     <p>{{ picture.caption | escape }}</p>
                   {% endif %}</div>"
           {% endif %}>
-        <img alt="{{ picture.title }}" src="https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/portfolio-gallery/{{ picture.thumbnail }}" />
+        {% endif %}
+        <img alt="{{ picture.title }}" src="{{ s3 }}{{ picture.thumbnail }}" width="{{ thumb_dims[0] }}" height="{{ thumb_dims[1] }}" loading="lazy" decoding="async" />
         </a>
       </div>
     {% endfor %}
 </div>
 
 <script>
-// jQuery, isotope, imagesLoaded and lightGallery all load from the page footer,
-// which comes after this block. Wait for DOMContentLoaded so they exist.
+// jQuery, isotope and lightGallery all load from the page footer, which
+// comes after this block. Wait for DOMContentLoaded so they exist.
 document.addEventListener('DOMContentLoaded', function() {
   var galleryElement = document.getElementById('image-gallery{% if include.id_number %}-{{ include.id_number }}{% endif %}');
   if (!galleryElement) { return; }
@@ -36,6 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // lightGallery v2
   lightGallery(galleryElement, {
     plugins: [lgThumbnail],
+    // The strip would load every gallery image at full thumbnail size
+    // (~800 KB each, 232 of them) the moment the lightbox opens. Flip this
+    // back on once real small thumbnails exist on S3 and point
+    // data-exthumbimage at them.
+    thumbnail: false,
     selector: '.image',
     licenseKey: '0000-0000-000-0000' // placeholder key for GPL use
   });
@@ -65,9 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // re-layout as each image finishes loading
-  $grid.imagesLoaded().progress(function() {
-    $grid.isotope('layout');
-  });
+  // No imagesLoaded relayout here on purpose. The img tags carry their
+  // pixel size so the layout is right before anything loads, and
+  // imagesLoaded would fetch every thumbnail up front, which defeats
+  // loading="lazy".
 });
 </script>

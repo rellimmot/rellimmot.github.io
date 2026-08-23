@@ -47,6 +47,33 @@ html {
     display: block;
     clear: both;
   }
+
+  // the img tags carry width/height attributes, so with height:auto the
+  // browser reserves the right box before the image arrives and masonry
+  // can lay out immediately instead of reflowing as each thumbnail loads
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  // video tiles link out to YouTube instead of opening in the lightbox
+  .video-link {
+    display: block;
+    position: relative;
+  }
+
+  .video-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 3em;
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+  }
 }
 
 .caption {
