@@ -29,25 +29,30 @@ html {
   display: block;
 }
 
-// Custom: photography index cards.
-// The theme caps grid teasers at 120px tall with overflow hidden, which slices
-// the top off a photo instead of fitting it. Give these cards a consistent 3:2
-// crop instead. Lives here because /photography/ uses the archive layout, which
-// does not load photoswipe-custom.css.
+// Custom: photography index page. The class comes from `classes:` in the front
+// matter of _pages/photography-archive.html, so it lands on <body> and can reach
+// the sidebar as well as the grid. Lives here rather than in
+// photoswipe-custom.scss because /photography/ uses the archive layout, which
+// does not load that stylesheet.
 .photography-index {
-  .archive__item-teaser {
-    max-height: none;
-
-    img {
-      width: 100%;
-      aspect-ratio: 3 / 2;
-      object-fit: cover;
-      display: block;
-    }
+  // Keep the name and avatar, drop the engineering bio. It reads as a personal
+  // introduction that does not belong above a set of photographs.
+  .author__bio {
+    display: none;
   }
 
+  // The theme caps grid teasers at 120px tall with overflow hidden, which slices
+  // the top off a photo instead of fitting it. Use a consistent 3:2 crop.
+  .archive__item-teaser,
   .grid__item .archive__item-teaser {
     max-height: none;
+  }
+
+  .archive__item-teaser img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    display: block;
   }
 
   .archive__item-title {
