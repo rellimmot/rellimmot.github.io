@@ -28,3 +28,29 @@ html {
   margin: 0 auto;
   display: block;
 }
+
+// Custom: photography index cards.
+// The theme caps grid teasers at 120px tall with overflow hidden, which slices
+// the top off a photo instead of fitting it. Give these cards a consistent 3:2
+// crop instead. Lives here because /photography/ uses the archive layout, which
+// does not load photoswipe-custom.css.
+.photography-index {
+  .archive__item-teaser {
+    max-height: none;
+
+    img {
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .grid__item .archive__item-teaser {
+    max-height: none;
+  }
+
+  .archive__item-title {
+    margin-top: 0.5em;
+  }
+}
