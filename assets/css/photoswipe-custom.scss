@@ -67,6 +67,175 @@
   cursor: grabbing;
 }
 
+// Albums menu at the top of every album page. A details element, so the open and
+// close needs no script. Sticky so it stays reachable partway down a long grid.
+.album-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0 0 0.6em;
+  padding: 0.5em 0;
+  background: #fff;
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.45em 0.9em;
+    border: 1px solid #e6e8ea;
+    border-radius: 4px;
+    background: #fff;
+    color: #494e52;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+
+    &::-webkit-details-marker { display: none; }
+    &::marker { content: ""; }
+
+    &:hover,
+    &:focus-visible {
+      border-color: #7a8288;
+      color: #7a8288;
+    }
+  }
+
+  &__caret {
+    transition: transform 0.15s ease;
+  }
+
+  &[open] &__toggle {
+    border-color: #7a8288;
+  }
+
+  &[open] &__caret {
+    transform: rotate(180deg);
+  }
+
+  &__panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 280px;
+    max-width: min(90vw, 420px);
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-top: 0.25em;
+    background: #fff;
+    border: 1px solid #e6e8ea;
+    border-radius: 4px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  &__home {
+    display: block;
+    padding: 0.65em 1em;
+    border-bottom: 1px solid #e6e8ea;
+    color: #494e52;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      background: #f2f3f3;
+    }
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0.3em 0;
+    list-style: none;
+
+    li { margin: 0; }
+
+    a {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1em;
+      padding: 0.55em 1em;
+      color: #494e52;
+      text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        background: #f2f3f3;
+      }
+
+      &.is-current {
+        background: #f8f9f9;
+        color: #7a8288;
+        font-weight: bold;
+        // a small bar down the left so the current album reads at a glance
+        box-shadow: inset 3px 0 0 #7a8288;
+      }
+    }
+  }
+
+  &__date {
+    flex-shrink: 0;
+    color: #8a9095;
+    font-size: 0.85em;
+  }
+}
+
+// Previous / next album links at the foot of an album page.
+.album-pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1em;
+  margin: 2em 0 1em;
+  padding-top: 1em;
+  border-top: 1px solid #e6e8ea;
+  font-size: 0.9em;
+
+  a {
+    color: #494e52;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: #7a8288;
+      text-decoration: underline;
+    }
+  }
+
+  &__prev a,
+  &__next a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  &__next { text-align: right; }
+
+  &__label {
+    color: #8a9095;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__title { font-weight: bold; }
+
+  &__index {
+    padding: 0.4em 0.9em;
+    border: 1px solid #e6e8ea;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 599px) {
+    grid-template-columns: 1fr;
+
+    &__next { text-align: left; }
+    &__index { justify-self: start; }
+  }
+}
+
 // Photography collection page styling
 .photography-collection {
   .photography-title {

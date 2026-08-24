@@ -1,0 +1,33 @@
+{% comment %}
+Albums menu, shown at the top of every album page by _layouts/photography.html.
+
+Lists every album oldest first (sorted on the date in each album's front matter),
+marks the one you are on, and offers a way back to the photography index. Plain
+details/summary, so it opens and closes with no JavaScript at all.
+
+It carries a visible "Albums" label on purpose. The masthead already has a bare
+hamburger for the site nav, and two unlabelled burgers on one page would be confusing.
+{% endcomment %}
+{% assign albums = site.photography | sort: "date" %}
+<details class="album-nav">
+  <summary class="album-nav__toggle">
+    <i class="fa fa-th-large" aria-hidden="true"></i>
+    <span>Albums</span>
+    <i class="fa fa-caret-down album-nav__caret" aria-hidden="true"></i>
+  </summary>
+  <div class="album-nav__panel">
+    <a class="album-nav__home" href="{{ '/photography/' | relative_url }}">
+      <i class="fa fa-fw fa-arrow-left" aria-hidden="true"></i> All albums
+    </a>
+    <ol class="album-nav__list">
+      {% for album in albums %}
+        <li>
+          <a href="{{ album.url | relative_url }}"{% if album.url == page.url %} class="is-current" aria-current="page"{% endif %}>
+            <span class="album-nav__title">{{ album.title }}</span>
+            <span class="album-nav__date">{{ album.date | date: "%b %Y" }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+</details>

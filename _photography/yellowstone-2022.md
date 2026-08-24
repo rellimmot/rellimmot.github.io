@@ -1,5 +1,7 @@
 ---
 title: "Yellowstone, 2022"
+# date orders the Albums menu, oldest first. Placeholder until real photos land.
+date: 2022-06-15
 excerpt: "Two weeks on 35mm through Yellowstone and back down through Pinedale."
 header:
   teaser: https://s3.us-east-2.amazonaws.com/rellimmot/assets/images/photography/yellowstone-2022/YELL-0001-800x533.jpg

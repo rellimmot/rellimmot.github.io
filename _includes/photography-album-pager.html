@@ -1,0 +1,41 @@
+{% comment %}
+Previous / next album links for the foot of an album page. Same date order as the
+Albums menu, so "next" always means the next album chronologically.
+{% endcomment %}
+{% assign albums = site.photography | sort: "date" %}
+{% for album in albums %}
+  {% if album.url == page.url %}
+    {% assign album_idx = forloop.index0 %}
+  {% endif %}
+{% endfor %}
+{% if album_idx %}
+  {% if album_idx > 0 %}
+    {% assign prev_idx = album_idx | minus: 1 %}
+    {% assign prev_album = albums[prev_idx] %}
+  {% endif %}
+  {% assign next_idx = album_idx | plus: 1 %}
+  {% if next_idx < albums.size %}
+    {% assign next_album = albums[next_idx] %}
+  {% endif %}
+{% endif %}
+<nav class="album-pager" aria-label="Other albums">
+  <div class="album-pager__prev">
+    {% if prev_album %}
+      <a href="{{ prev_album.url | relative_url }}" rel="prev">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        <span class="album-pager__label">Previous</span>
+        <span class="album-pager__title">{{ prev_album.title }}</span>
+      </a>
+    {% endif %}
+  </div>
+  <a class="album-pager__index" href="{{ '/photography/' | relative_url }}">All albums</a>
+  <div class="album-pager__next">
+    {% if next_album %}
+      <a href="{{ next_album.url | relative_url }}" rel="next">
+        <span class="album-pager__label">Next</span>
+        <span class="album-pager__title">{{ next_album.title }}</span>
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+    {% endif %}
+  </div>
+</nav>
