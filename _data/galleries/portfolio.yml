@@ -8,1737 +8,1984 @@ preview:
   filter: cars
   title: OMG
   sizes:
+  - PORTGAL243-640x480.jpg
   - PORTGAL243-1154x866.jpg
   - PORTGAL243-1999x1499.jpg
-  thumbnail: PORTGAL243-1999x1499.jpg
+  thumbnail: PORTGAL243-640x480.jpg
 
 pictures:
 
 - filename: PORTGAL243
   original: PORTGAL243-3651x2738.jpg
   sizes:
+  - PORTGAL243-640x480.jpg
   - PORTGAL243-1154x866.jpg
   - PORTGAL243-1999x1499.jpg
-  thumbnail: PORTGAL243-1999x1499.jpg
+  thumbnail: PORTGAL243-640x480.jpg
 
 - filename: PORTGAL148
   original: PORTGAL148-3659x2733.jpg
   sizes:
+  - PORTGAL148-640x478.jpg
   - PORTGAL148-1157x864.jpg
   - PORTGAL148-2004x1497.jpg
-  thumbnail: PORTGAL148-2004x1497.jpg
+  thumbnail: PORTGAL148-640x478.jpg
 
 - filename: PORTGAL149
   original: PORTGAL149-2372x4216.jpg
   sizes:
+  - PORTGAL149-360x640.jpg
   - PORTGAL149-750x1333.jpg
   - PORTGAL149-1299x2309.jpg
-  thumbnail: PORTGAL149-1299x2309.jpg
+  thumbnail: PORTGAL149-360x640.jpg
 
 - filename: PORTGAL146
   original: PORTGAL146-4216x2372.jpg
   sizes:
+  - PORTGAL146-640x360.jpg
   - PORTGAL146-1333x750.jpg
   - PORTGAL146-2309x1299.jpg
-  thumbnail: PORTGAL146-2309x1299.jpg
+  thumbnail: PORTGAL146-640x360.jpg
 
 - filename: PORTGAL147
   original: https://www.youtube.com/watch?v=qduboZDe5OA
   sizes:
+  - PORTGAL147-640x360.jpg
   - PORTGAL147-1333x750.jpg
   - PORTGAL147-2309x1299.jpg
-  thumbnail: PORTGAL147-2309x1299.jpg
+  thumbnail: PORTGAL147-640x360.jpg
 
 - filename: PORTGAL144
   original: PORTGAL144-4412x2266.jpg
   sizes:
+  - PORTGAL144-640x328.jpg
   - PORTGAL144-1395x716.jpg
   - PORTGAL144-2417x1241.jpg
-  thumbnail: PORTGAL144-2417x1241.jpg
+  thumbnail: PORTGAL144-640x328.jpg
 
 - filename: PORTGAL145
   original: PORTGAL145-4216x2372.jpg
   sizes:
+  - PORTGAL145-640x360.jpg
   - PORTGAL145-1333x750.jpg
   - PORTGAL145-2309x1299.jpg
-  thumbnail: PORTGAL145-2309x1299.jpg
+  thumbnail: PORTGAL145-640x360.jpg
 
 - filename: PORTGAL142
   original: https://www.youtube.com/watch?v=qduboZDe5OA
   sizes:
+  - PORTGAL142-640x360.jpg
   - PORTGAL142-1333x750.jpg
   - PORTGAL142-2309x1299.jpg
-  thumbnail: PORTGAL142-2309x1299.jpg
+  thumbnail: PORTGAL142-640x360.jpg
 
 - filename: PORTGAL143
   original: PORTGAL143-4216x2372.jpg
   sizes:
+  - PORTGAL143-640x360.jpg
   - PORTGAL143-1333x750.jpg
   - PORTGAL143-2309x1299.jpg
-  thumbnail: PORTGAL143-2309x1299.jpg
+  thumbnail: PORTGAL143-640x360.jpg
 
 - filename: PORTGAL140
   original: PORTGAL140-2372x4216.jpg
   sizes:
+  - PORTGAL140-360x640.jpg
   - PORTGAL140-750x1333.jpg
   - PORTGAL140-1299x2309.jpg
-  thumbnail: PORTGAL140-1299x2309.jpg
+  thumbnail: PORTGAL140-360x640.jpg
 
 - filename: PORTGAL141
   original: PORTGAL141-4123x2425.jpg
   sizes:
+  - PORTGAL141-640x376.jpg
   - PORTGAL141-1304x767.jpg
   - PORTGAL141-2258x1328.jpg
-  thumbnail: PORTGAL141-2258x1328.jpg
+  thumbnail: PORTGAL141-640x376.jpg
 
 - filename: PORTGAL021
   original: PORTGAL021-3651x2738.jpg
   sizes:
+  - PORTGAL021-640x480.jpg
   - PORTGAL021-1154x866.jpg
   - PORTGAL021-1999x1499.jpg
-  thumbnail: PORTGAL021-1999x1499.jpg
+  thumbnail: PORTGAL021-640x480.jpg
 
 - filename: PORTGAL020
   original: PORTGAL020-2738x3651.jpg
   sizes:
+  - PORTGAL020-480x640.jpg
   - PORTGAL020-866x1154.jpg
   - PORTGAL020-1499x1999.jpg
-  thumbnail: PORTGAL020-1499x1999.jpg
+  thumbnail: PORTGAL020-480x640.jpg
 
 - filename: PORTGAL023
   original: PORTGAL023-3162x3162.jpg
   sizes:
+  - PORTGAL023-640x640.jpg
   - PORTGAL023-1000x1000.jpg
   - PORTGAL023-1732x1732.jpg
-  thumbnail: PORTGAL023-1732x1732.jpg
+  thumbnail: PORTGAL023-640x640.jpg
 
 - filename: PORTGAL022
   original: PORTGAL022-3651x2738.jpg
   sizes:
+  - PORTGAL022-640x480.jpg
   - PORTGAL022-1154x866.jpg
   - PORTGAL022-1999x1499.jpg
-  thumbnail: PORTGAL022-1999x1499.jpg
+  thumbnail: PORTGAL022-640x480.jpg
 
 - filename: PORTGAL025
   original: PORTGAL025-2738x3651.jpg
   sizes:
+  - PORTGAL025-480x640.jpg
   - PORTGAL025-866x1154.jpg
   - PORTGAL025-1499x1999.jpg
-  thumbnail: PORTGAL025-1499x1999.jpg
+  thumbnail: PORTGAL025-480x640.jpg
 
 - filename: PORTGAL024
   original: PORTGAL024-2738x3651.jpg
   sizes:
+  - PORTGAL024-480x640.jpg
   - PORTGAL024-866x1154.jpg
   - PORTGAL024-1499x1999.jpg
-  thumbnail: PORTGAL024-1499x1999.jpg
+  thumbnail: PORTGAL024-480x640.jpg
 
 - filename: PORTGAL027
   original: PORTGAL027-4216x2372.jpg
   sizes:
+  - PORTGAL027-640x360.jpg
   - PORTGAL027-1333x750.jpg
   - PORTGAL027-2309x1299.jpg
-  thumbnail: PORTGAL027-2309x1299.jpg
+  thumbnail: PORTGAL027-640x360.jpg
 
 - filename: PORTGAL026
   original: PORTGAL026-3651x2738.jpg
   sizes:
+  - PORTGAL026-640x480.jpg
   - PORTGAL026-1154x866.jpg
   - PORTGAL026-1999x1499.jpg
-  thumbnail: PORTGAL026-1999x1499.jpg
+  thumbnail: PORTGAL026-640x480.jpg
 
 - filename: PORTGAL029
   original: PORTGAL029-2372x4216.jpg
   sizes:
+  - PORTGAL029-360x640.jpg
   - PORTGAL029-750x1333.jpg
   - PORTGAL029-1299x2309.jpg
-  thumbnail: PORTGAL029-1299x2309.jpg
+  thumbnail: PORTGAL029-360x640.jpg
 
 - filename: PORTGAL028
   original: PORTGAL028-2372x4216.jpg
   sizes:
+  - PORTGAL028-360x640.jpg
   - PORTGAL028-750x1333.jpg
   - PORTGAL028-1299x2309.jpg
-  thumbnail: PORTGAL028-1299x2309.jpg
+  thumbnail: PORTGAL028-360x640.jpg
 
 - filename: PORTGAL218
   original: PORTGAL218-3863x2587.jpg
   sizes:
+  - PORTGAL218-640x429.jpg
   - PORTGAL218-1221x818.jpg
   - PORTGAL218-2116x1417.jpg
-  thumbnail: PORTGAL218-2116x1417.jpg
+  thumbnail: PORTGAL218-640x429.jpg
 
 - filename: PORTGAL159
   original: PORTGAL159-2372x4216.jpg
   sizes:
+  - PORTGAL159-360x640.jpg
   - PORTGAL159-750x1333.jpg
   - PORTGAL159-1299x2309.jpg
-  thumbnail: PORTGAL159-1299x2309.jpg
+  thumbnail: PORTGAL159-360x640.jpg
 
 - filename: PORTGAL158
   original: PORTGAL158-2372x4216.jpg
   sizes:
+  - PORTGAL158-360x640.jpg
   - PORTGAL158-750x1333.jpg
   - PORTGAL158-1299x2309.jpg
-  thumbnail: PORTGAL158-1299x2309.jpg
+  thumbnail: PORTGAL158-360x640.jpg
 
 - filename: PORTGAL155
   original: PORTGAL155-2372x4216.jpg
   sizes:
+  - PORTGAL155-360x640.jpg
   - PORTGAL155-750x1333.jpg
   - PORTGAL155-1299x2309.jpg
-  thumbnail: PORTGAL155-1299x2309.jpg
+  thumbnail: PORTGAL155-360x640.jpg
 
 - filename: PORTGAL154
   original: PORTGAL154-4216x2372.jpg
   sizes:
+  - PORTGAL154-640x360.jpg
   - PORTGAL154-1333x750.jpg
   - PORTGAL154-2309x1299.jpg
-  thumbnail: PORTGAL154-2309x1299.jpg
+  thumbnail: PORTGAL154-640x360.jpg
 
 - filename: PORTGAL157
   original: PORTGAL157-4216x2372.jpg
   sizes:
+  - PORTGAL157-640x360.jpg
   - PORTGAL157-1333x750.jpg
   - PORTGAL157-2309x1299.jpg
-  thumbnail: PORTGAL157-2309x1299.jpg
+  thumbnail: PORTGAL157-640x360.jpg
 
 - filename: PORTGAL156
   original: PORTGAL156-4216x2372.jpg
   sizes:
+  - PORTGAL156-640x360.jpg
   - PORTGAL156-1333x750.jpg
   - PORTGAL156-2309x1299.jpg
-  thumbnail: PORTGAL156-2309x1299.jpg
+  thumbnail: PORTGAL156-640x360.jpg
 
 - filename: PORTGAL151
   original: PORTGAL151-4216x2372.jpg
   sizes:
+  - PORTGAL151-640x360.jpg
   - PORTGAL151-1333x750.jpg
   - PORTGAL151-2309x1299.jpg
-  thumbnail: PORTGAL151-2309x1299.jpg
+  thumbnail: PORTGAL151-640x360.jpg
 
 - filename: PORTGAL150
   original: PORTGAL150-4216x2372.jpg
   sizes:
+  - PORTGAL150-640x360.jpg
   - PORTGAL150-1333x750.jpg
   - PORTGAL150-2309x1299.jpg
-  thumbnail: PORTGAL150-2309x1299.jpg
+  thumbnail: PORTGAL150-640x360.jpg
 
 - filename: PORTGAL153
   original: PORTGAL153-2372x4216.jpg
   sizes:
+  - PORTGAL153-360x640.jpg
   - PORTGAL153-750x1333.jpg
   - PORTGAL153-1299x2309.jpg
-  thumbnail: PORTGAL153-1299x2309.jpg
+  thumbnail: PORTGAL153-360x640.jpg
 
 - filename: PORTGAL152
   original: PORTGAL152-2372x4216.jpg
   sizes:
+  - PORTGAL152-360x640.jpg
   - PORTGAL152-750x1333.jpg
   - PORTGAL152-1299x2309.jpg
-  thumbnail: PORTGAL152-1299x2309.jpg
+  thumbnail: PORTGAL152-360x640.jpg
 
 - filename: PORTGAL014
   original: PORTGAL014-3659x2733.jpg
   sizes:
+  - PORTGAL014-640x478.jpg
   - PORTGAL014-1157x864.jpg
   - PORTGAL014-2004x1497.jpg
-  thumbnail: PORTGAL014-2004x1497.jpg
+  thumbnail: PORTGAL014-640x478.jpg
 
 - filename: PORTGAL015
   original: PORTGAL015-3659x2733.jpg
   sizes:
+  - PORTGAL015-640x478.jpg
   - PORTGAL015-1157x864.jpg
   - PORTGAL015-2004x1497.jpg
-  thumbnail: PORTGAL015-2004x1497.jpg
+  thumbnail: PORTGAL015-640x478.jpg
 
 - filename: PORTGAL016
   original: PORTGAL016-3659x2733.jpg
   sizes:
+  - PORTGAL016-640x478.jpg
   - PORTGAL016-1157x864.jpg
   - PORTGAL016-2004x1497.jpg
-  thumbnail: PORTGAL016-2004x1497.jpg
+  thumbnail: PORTGAL016-640x478.jpg
 
 - filename: PORTGAL017
   original: https://www.youtube.com/watch?v=McgSLGSpb_0
   sizes:
+  - PORTGAL017-640x480.jpg
   - PORTGAL017-1154x866.jpg
   - PORTGAL017-1999x1499.jpg
-  thumbnail: PORTGAL017-1999x1499.jpg
+  thumbnail: PORTGAL017-640x480.jpg
 
 - filename: PORTGAL010
   original: PORTGAL010-3659x2733.jpg
   sizes:
+  - PORTGAL010-640x478.jpg
   - PORTGAL010-1157x864.jpg
   - PORTGAL010-2004x1497.jpg
-  thumbnail: PORTGAL010-1157x864.jpg
+  thumbnail: PORTGAL010-640x478.jpg
 
 - filename: PORTGAL011
   original: PORTGAL011-2733x3659.jpg
   sizes:
+  - PORTGAL011-478x640.jpg
   - PORTGAL011-864x1157.jpg
   - PORTGAL011-1497x2004.jpg
-  thumbnail: PORTGAL011-1497x2004.jpg
+  thumbnail: PORTGAL011-478x640.jpg
 
 - filename: PORTGAL012
   original: PORTGAL012-3659x2733.jpg
   sizes:
+  - PORTGAL012-640x478.jpg
   - PORTGAL012-1157x864.jpg
   - PORTGAL012-2004x1497.jpg
-  thumbnail: PORTGAL012-2004x1497.jpg
+  thumbnail: PORTGAL012-640x478.jpg
 
 - filename: PORTGAL013
   original: https://www.youtube.com/watch?v=ClyCKS9WaZ4
   sizes:
+  - PORTGAL013-640x480.jpg
   - PORTGAL013-1154x866.jpg
   - PORTGAL013-1999x1499.jpg
-  thumbnail: PORTGAL013-1999x1499.jpg
+  thumbnail: PORTGAL013-640x480.jpg
 
 - filename: PORTGAL018
   original: PORTGAL018-3651x2738.jpg
   sizes:
+  - PORTGAL018-640x480.jpg
   - PORTGAL018-1154x866.jpg
   - PORTGAL018-1999x1499.jpg
-  thumbnail: PORTGAL018-1999x1499.jpg
+  thumbnail: PORTGAL018-640x480.jpg
 
 - filename: PORTGAL019
   original: PORTGAL019-2738x3651.jpg
   sizes:
+  - PORTGAL019-480x640.jpg
   - PORTGAL019-866x1154.jpg
   - PORTGAL019-1499x1999.jpg
-  thumbnail: PORTGAL019-1499x1999.jpg
+  thumbnail: PORTGAL019-480x640.jpg
 
 - filename: PORTGAL098
   original: PORTGAL098-2372x4216.jpg
   sizes:
+  - PORTGAL098-360x640.jpg
   - PORTGAL098-750x1333.jpg
   - PORTGAL098-1299x2309.jpg
-  thumbnail: PORTGAL098-1299x2309.jpg
+  thumbnail: PORTGAL098-360x640.jpg
 
 - filename: PORTGAL099
   original: PORTGAL099-4216x2372.jpg
   sizes:
+  - PORTGAL099-640x360.jpg
   - PORTGAL099-1333x750.jpg
   - PORTGAL099-2309x1299.jpg
-  thumbnail: PORTGAL099-2309x1299.jpg
+  thumbnail: PORTGAL099-640x360.jpg
 
 - filename: PORTGAL244
   original: PORTGAL244-3659x2732.jpg
   sizes:
+  - PORTGAL244-640x478.jpg
   - PORTGAL244-1157x864.jpg
   - PORTGAL244-2004x1496.jpg
-  thumbnail: PORTGAL244-2004x1496.jpg
+  thumbnail: PORTGAL244-640x478.jpg
 
 - filename: PORTGAL094
   original: PORTGAL094-3658x2733.jpg
   sizes:
+  - PORTGAL094-640x478.jpg
   - PORTGAL094-1156x864.jpg
   - PORTGAL094-2003x1496.jpg
-  thumbnail: PORTGAL094-2003x1496.jpg
+  thumbnail: PORTGAL094-640x478.jpg
 
 - filename: PORTGAL095
   original: https://www.youtube.com/watch?v=kXTcMYSihz8
   sizes:
+  - PORTGAL095-640x426.jpg
   - PORTGAL095-1225x816.jpg
   - PORTGAL095-2121x1413.jpg
-  thumbnail: PORTGAL095-2121x1413.jpg
+  thumbnail: PORTGAL095-640x426.jpg
 
 - filename: PORTGAL096
   original: PORTGAL096-4216x2372.jpg
   sizes:
+  - PORTGAL096-640x360.jpg
   - PORTGAL096-1333x750.jpg
   - PORTGAL096-2309x1299.jpg
-  thumbnail: PORTGAL096-2309x1299.jpg
+  thumbnail: PORTGAL096-640x360.jpg
 
 - filename: PORTGAL097
   original: PORTGAL097-4216x2372.jpg
   sizes:
+  - PORTGAL097-640x360.jpg
   - PORTGAL097-1333x750.jpg
   - PORTGAL097-2309x1299.jpg
-  thumbnail: PORTGAL097-2309x1299.jpg
+  thumbnail: PORTGAL097-640x360.jpg
 
 - filename: PORTGAL090
   original: PORTGAL090-4216x2372.jpg
   sizes:
+  - PORTGAL090-640x360.jpg
   - PORTGAL090-1333x750.jpg
   - PORTGAL090-2309x1299.jpg
-  thumbnail: PORTGAL090-2309x1299.jpg
+  thumbnail: PORTGAL090-640x360.jpg
 
 - filename: PORTGAL091
   original: PORTGAL091-4216x2372.jpg
   sizes:
+  - PORTGAL091-640x360.jpg
   - PORTGAL091-1333x750.jpg
   - PORTGAL091-2309x1299.jpg
-  thumbnail: PORTGAL091-2309x1299.jpg
+  thumbnail: PORTGAL091-640x360.jpg
 
 - filename: PORTGAL092
   original: PORTGAL092-3901x2563.jpg
   sizes:
+  - PORTGAL092-640x420.jpg
   - PORTGAL092-1233x810.jpg
   - PORTGAL092-2136x1403.jpg
-  thumbnail: PORTGAL092-2136x1403.jpg
+  thumbnail: PORTGAL092-640x420.jpg
 
 - filename: PORTGAL093
   original: https://www.youtube.com/watch?v=7lVdLTlFBig
   sizes:
+  - PORTGAL093-640x457.jpg
   - PORTGAL093-1183x844.jpg
   - PORTGAL093-2050x1463.jpg
-  thumbnail: PORTGAL093-2050x1463.jpg
+  thumbnail: PORTGAL093-640x457.jpg
 
 - filename: PORTGAL219
   original: https://www.youtube.com/watch?v=ctcYrWMd69E
   sizes:
+  - PORTGAL219-640x480.jpg
   - PORTGAL219-1154x866.jpg
   - PORTGAL219-1999x1499.jpg
-  thumbnail: PORTGAL219-1999x1499.jpg
+  thumbnail: PORTGAL219-640x480.jpg
 
 - filename: PORTGAL228
   original: PORTGAL228-3658x2733.jpg
   sizes:
+  - PORTGAL228-640x478.jpg
   - PORTGAL228-1156x864.jpg
   - PORTGAL228-2003x1496.jpg
-  thumbnail: PORTGAL228-2003x1496.jpg
+  thumbnail: PORTGAL228-640x478.jpg
 
 - filename: PORTGAL160
   original: PORTGAL160-4216x2372.jpg
   sizes:
+  - PORTGAL160-640x360.jpg
   - PORTGAL160-1333x750.jpg
   - PORTGAL160-2309x1299.jpg
-  thumbnail: PORTGAL160-2309x1299.jpg
+  thumbnail: PORTGAL160-640x360.jpg
 
 - filename: PORTGAL161
   original: PORTGAL161-2372x4216.jpg
   sizes:
+  - PORTGAL161-360x640.jpg
   - PORTGAL161-750x1333.jpg
   - PORTGAL161-1299x2309.jpg
-  thumbnail: PORTGAL161-1299x2309.jpg
+  thumbnail: PORTGAL161-360x640.jpg
 
 - filename: PORTGAL009
   original: PORTGAL009-2733x3659.jpg
   sizes:
+  - PORTGAL009-478x640.jpg
   - PORTGAL009-864x1157.jpg
   - PORTGAL009-1497x2004.jpg
-  thumbnail: PORTGAL009-1497x2004.jpg
+  thumbnail: PORTGAL009-478x640.jpg
 
 - filename: PORTGAL008
   original: PORTGAL008-3659x2733.jpg
   sizes:
+  - PORTGAL008-640x478.jpg
   - PORTGAL008-1157x864.jpg
   - PORTGAL008-2004x1497.jpg
-  thumbnail: PORTGAL008-2004x1497.jpg
+  thumbnail: PORTGAL008-640x478.jpg
 
 - filename: PORTGAL164
   original: PORTGAL164-2372x4216.jpg
   sizes:
+  - PORTGAL164-360x640.jpg
   - PORTGAL164-750x1333.jpg
   - PORTGAL164-1299x2309.jpg
-  thumbnail: PORTGAL164-1299x2309.jpg
+  thumbnail: PORTGAL164-360x640.jpg
 
 - filename: PORTGAL165
   original: PORTGAL165-4216x2372.jpg
   sizes:
+  - PORTGAL165-640x360.jpg
   - PORTGAL165-1333x750.jpg
   - PORTGAL165-2309x1299.jpg
-  thumbnail: PORTGAL165-2309x1299.jpg
+  thumbnail: PORTGAL165-640x360.jpg
 
 - filename: PORTGAL166
   original: PORTGAL166-4216x2372.jpg
   sizes:
+  - PORTGAL166-640x360.jpg
   - PORTGAL166-1333x750.jpg
   - PORTGAL166-2309x1299.jpg
-  thumbnail: PORTGAL166-2309x1299.jpg
+  thumbnail: PORTGAL166-640x360.jpg
 
 - filename: PORTGAL167
   original: PORTGAL167-4216x2372.jpg
   sizes:
+  - PORTGAL167-640x360.jpg
   - PORTGAL167-1333x750.jpg
   - PORTGAL167-2309x1299.jpg
-  thumbnail: PORTGAL167-2309x1299.jpg
+  thumbnail: PORTGAL167-640x360.jpg
 
 - filename: PORTGAL003
   original: PORTGAL003-3659x2733.jpg
   sizes:
+  - PORTGAL003-640x478.jpg
   - PORTGAL003-1157x864.jpg
   - PORTGAL003-2004x1497.jpg
-  thumbnail: PORTGAL003-2004x1497.jpg
+  thumbnail: PORTGAL003-640x478.jpg
 
 - filename: PORTGAL002
   original: PORTGAL002-3651x2738.jpg
   sizes:
+  - PORTGAL002-640x480.jpg
   - PORTGAL002-1154x866.jpg
   - PORTGAL002-1999x1499.jpg
-  thumbnail: PORTGAL002-1999x1499.jpg
+  thumbnail: PORTGAL002-640x480.jpg
 
 - filename: PORTGAL001
   original: PORTGAL001-3651x2738.jpg
   sizes:
-  - PORTGAL001-1154x866.jpg
+  - PORTGAL001-640x480.jpg
   - PORTGAL001-1999x1499.jpg
-  thumbnail: PORTGAL001-1999x1499.jpg
+  thumbnail: PORTGAL001-640x480.jpg
 
 - filename: PORTGAL007
   original: PORTGAL007-3659x2733.jpg
   sizes:
+  - PORTGAL007-640x478.jpg
   - PORTGAL007-1157x864.jpg
   - PORTGAL007-2004x1497.jpg
-  thumbnail: PORTGAL007-2004x1497.jpg
+  thumbnail: PORTGAL007-640x478.jpg
 
 - filename: PORTGAL006
   original: https://www.youtube.com/watch?v=4F7zYdU1Rtw
   sizes:
+  - PORTGAL006-478x640.jpg
   - PORTGAL006-864x1157.jpg
   - PORTGAL006-1497x2004.jpg
-  thumbnail: PORTGAL006-1497x2004.jpg
+  thumbnail: PORTGAL006-478x640.jpg
 
 - filename: PORTGAL005
   original: PORTGAL005-3659x2733.jpg
   sizes:
+  - PORTGAL005-640x478.jpg
   - PORTGAL005-1157x864.jpg
   - PORTGAL005-2004x1497.jpg
-  thumbnail: PORTGAL005-2004x1497.jpg
+  thumbnail: PORTGAL005-640x478.jpg
 
 - filename: PORTGAL004
   original: PORTGAL004-3659x2733.jpg
   sizes:
+  - PORTGAL004-640x478.jpg
   - PORTGAL004-1157x864.jpg
   - PORTGAL004-2004x1497.jpg
-  thumbnail: PORTGAL004-2004x1497.jpg
+  thumbnail: PORTGAL004-640x478.jpg
 
 - filename: PORTGAL171
   original: PORTGAL171-4216x2372.jpg
   sizes:
+  - PORTGAL171-640x360.jpg
   - PORTGAL171-1333x750.jpg
   - PORTGAL171-2309x1299.jpg
-  thumbnail: PORTGAL171-2309x1299.jpg
+  thumbnail: PORTGAL171-640x360.jpg
 
 - filename: PORTGAL210
   original: PORTGAL210-4216x2372.jpg
   sizes:
+  - PORTGAL210-640x360.jpg
   - PORTGAL210-1333x750.jpg
   - PORTGAL210-2309x1299.jpg
-  thumbnail: PORTGAL210-2309x1299.jpg
+  thumbnail: PORTGAL210-640x360.jpg
 
 - filename: PORTGAL083
   original: PORTGAL083-2372x4216.jpg
   sizes:
+  - PORTGAL083-360x640.jpg
   - PORTGAL083-750x1333.jpg
   - PORTGAL083-1299x2309.jpg
-  thumbnail: PORTGAL083-1299x2309.jpg
+  thumbnail: PORTGAL083-360x640.jpg
 
 - filename: PORTGAL082
   original: PORTGAL082-4216x2372.jpg
   sizes:
+  - PORTGAL082-640x360.jpg
   - PORTGAL082-1333x750.jpg
   - PORTGAL082-2309x1299.jpg
-  thumbnail: PORTGAL082-2309x1299.jpg
+  thumbnail: PORTGAL082-640x360.jpg
 
 - filename: PORTGAL081
   original: PORTGAL081-2372x4216.jpg
   sizes:
+  - PORTGAL081-360x640.jpg
   - PORTGAL081-750x1333.jpg
   - PORTGAL081-1299x2309.jpg
-  thumbnail: PORTGAL081-1299x2309.jpg
+  thumbnail: PORTGAL081-360x640.jpg
 
 - filename: PORTGAL080
   original: PORTGAL080-2730x3661.jpg
   sizes:
+  - PORTGAL080-477x640.jpg
   - PORTGAL080-863x1157.jpg
   - PORTGAL080-1495x2005.jpg
-  thumbnail: PORTGAL080-1495x2005.jpg
+  thumbnail: PORTGAL080-477x640.jpg
 
 - filename: PORTGAL087
   original: https://www.youtube.com/watch?v=yhvoxO3SA4w
   sizes:
+  - PORTGAL087-360x640.jpg
   - PORTGAL087-750x1333.jpg
   - PORTGAL087-1299x2309.jpg
-  thumbnail: PORTGAL087-1299x2309.jpg
+  thumbnail: PORTGAL087-360x640.jpg
 
 - filename: PORTGAL086
   original: https://www.youtube.com/watch?v=yhvoxO3SA4w
   sizes:
+  - PORTGAL086-640x360.jpg
   - PORTGAL086-1333x750.jpg
   - PORTGAL086-2309x1299.jpg
-  thumbnail: PORTGAL086-2309x1299.jpg
+  thumbnail: PORTGAL086-640x360.jpg
 
 - filename: PORTGAL085
   original: PORTGAL085-2372x4216.jpg
   sizes:
+  - PORTGAL085-360x640.jpg
   - PORTGAL085-750x1333.jpg
   - PORTGAL085-1299x2309.jpg
-  thumbnail: PORTGAL085-1299x2309.jpg
+  thumbnail: PORTGAL085-360x640.jpg
 
 - filename: PORTGAL084
   original: PORTGAL084-4216x2372.jpg
   sizes:
+  - PORTGAL084-640x360.jpg
   - PORTGAL084-1333x750.jpg
   - PORTGAL084-2309x1299.jpg
-  thumbnail: PORTGAL084-2309x1299.jpg
+  thumbnail: PORTGAL084-640x360.jpg
 
 - filename: PORTGAL089
   original: PORTGAL089-4216x2372.jpg
   sizes:
+  - PORTGAL089-640x360.jpg
   - PORTGAL089-1333x750.jpg
   - PORTGAL089-2309x1299.jpg
-  thumbnail: PORTGAL089-2309x1299.jpg
+  thumbnail: PORTGAL089-640x360.jpg
 
 - filename: PORTGAL088
   original: PORTGAL088-4216x2372.jpg
   sizes:
+  - PORTGAL088-640x360.jpg
   - PORTGAL088-1333x750.jpg
   - PORTGAL088-2309x1299.jpg
-  thumbnail: PORTGAL088-2309x1299.jpg
+  thumbnail: PORTGAL088-640x360.jpg
 
 - filename: PORTGAL177
   original: PORTGAL177-4216x2372.jpg
   sizes:
+  - PORTGAL177-640x360.jpg
   - PORTGAL177-1333x750.jpg
   - PORTGAL177-2309x1299.jpg
-  thumbnail: PORTGAL177-2309x1299.jpg
+  thumbnail: PORTGAL177-640x360.jpg
 
 - filename: PORTGAL176
   original: PORTGAL176-4216x2372.jpg
   sizes:
+  - PORTGAL176-640x360.jpg
   - PORTGAL176-1333x750.jpg
   - PORTGAL176-2309x1299.jpg
-  thumbnail: PORTGAL176-2309x1299.jpg
+  thumbnail: PORTGAL176-640x360.jpg
 
 - filename: PORTGAL175
   original: PORTGAL175-4216x2372.jpg
   sizes:
+  - PORTGAL175-640x360.jpg
   - PORTGAL175-1333x750.jpg
   - PORTGAL175-2309x1299.jpg
-  thumbnail: PORTGAL175-2309x1299.jpg
+  thumbnail: PORTGAL175-640x360.jpg
 
 - filename: PORTGAL174
   original: PORTGAL174-4216x2372.jpg
   sizes:
+  - PORTGAL174-640x360.jpg
   - PORTGAL174-1333x750.jpg
   - PORTGAL174-2309x1299.jpg
-  thumbnail: PORTGAL174-2309x1299.jpg
+  thumbnail: PORTGAL174-640x360.jpg
 
 - filename: PORTGAL173
   original: PORTGAL173-4216x2372.jpg
   sizes:
+  - PORTGAL173-640x360.jpg
   - PORTGAL173-1333x750.jpg
   - PORTGAL173-2309x1299.jpg
-  thumbnail: PORTGAL173-2309x1299.jpg
+  thumbnail: PORTGAL173-640x360.jpg
 
 - filename: PORTGAL172
   original: PORTGAL172-4216x2372.jpg
   sizes:
+  - PORTGAL172-640x360.jpg
   - PORTGAL172-1333x750.jpg
   - PORTGAL172-2309x1299.jpg
-  thumbnail: PORTGAL172-2309x1299.jpg
+  thumbnail: PORTGAL172-640x360.jpg
 
 - filename: PORTGAL078
   original: PORTGAL078-2730x3661.jpg
   sizes:
+  - PORTGAL078-477x640.jpg
   - PORTGAL078-863x1157.jpg
   - PORTGAL078-1495x2005.jpg
-  thumbnail: PORTGAL078-1495x2005.jpg
+  thumbnail: PORTGAL078-477x640.jpg
 
 - filename: PORTGAL079
   original: PORTGAL079-3661x2730.jpg
   sizes:
+  - PORTGAL079-640x477.jpg
   - PORTGAL079-1157x863.jpg
   - PORTGAL079-2005x1495.jpg
-  thumbnail: PORTGAL079-2005x1495.jpg
+  thumbnail: PORTGAL079-640x477.jpg
 
 - filename: PORTGAL076
   original: PORTGAL076-3651x2738.jpg
   sizes:
+  - PORTGAL076-640x480.jpg
   - PORTGAL076-1154x866.jpg
   - PORTGAL076-1999x1499.jpg
-  thumbnail: PORTGAL076-1999x1499.jpg
+  thumbnail: PORTGAL076-640x480.jpg
 
 - filename: PORTGAL077
   original: PORTGAL077-3651x2738.jpg
   sizes:
+  - PORTGAL077-640x480.jpg
   - PORTGAL077-1154x866.jpg
   - PORTGAL077-1999x1499.jpg
-  thumbnail: PORTGAL077-1999x1499.jpg
+  thumbnail: PORTGAL077-640x480.jpg
 
 - filename: PORTGAL074
   original: PORTGAL074-3889x2571.jpg
   sizes:
+  - PORTGAL074-640x423.jpg
   - PORTGAL074-1229x813.jpg
   - PORTGAL074-2130x1408.jpg
-  thumbnail: PORTGAL074-2130x1408.jpg
+  thumbnail: PORTGAL074-640x423.jpg
 
 - filename: PORTGAL075
   original: PORTGAL075-3864x2587.jpg
   sizes:
+  - PORTGAL075-640x428.jpg
   - PORTGAL075-1222x818.jpg
   - PORTGAL075-2116x1417.jpg
-  thumbnail: PORTGAL075-2116x1417.jpg
+  thumbnail: PORTGAL075-640x428.jpg
 
 - filename: PORTGAL072
   original: PORTGAL072-3526x2836.jpg
   sizes:
+  - PORTGAL072-640x515.jpg
   - PORTGAL072-1115x897.jpg
   - PORTGAL072-1931x1553.jpg
-  thumbnail: PORTGAL072-1931x1553.jpg
+  thumbnail: PORTGAL072-640x515.jpg
 
 - filename: PORTGAL073
   original: PORTGAL073-4216x2372.jpg
   sizes:
+  - PORTGAL073-640x360.jpg
   - PORTGAL073-1333x750.jpg
   - PORTGAL073-2309x1299.jpg
-  thumbnail: PORTGAL073-2309x1299.jpg
+  thumbnail: PORTGAL073-640x360.jpg
 
 - filename: PORTGAL070
   original: https://www.youtube.com/watch?v=o-sHTLl4hwA
   sizes:
+  - PORTGAL070-640x446.jpg
   - PORTGAL070-1197x834.jpg
   - PORTGAL070-2074x1446.jpg
-  thumbnail: PORTGAL070-2074x1446.jpg
+  thumbnail: PORTGAL070-640x446.jpg
 
 - filename: PORTGAL071
   original: PORTGAL071-4216x2372.jpg
   sizes:
+  - PORTGAL071-640x360.jpg
   - PORTGAL071-1333x750.jpg
   - PORTGAL071-2309x1299.jpg
-  thumbnail: PORTGAL071-2309x1299.jpg
+  thumbnail: PORTGAL071-640x360.jpg
 
 - filename: PORTGAL179
   original: PORTGAL179-2372x4216.jpg
   sizes:
+  - PORTGAL179-360x640.jpg
   - PORTGAL179-750x1333.jpg
   - PORTGAL179-1299x2309.jpg
-  thumbnail: PORTGAL179-1299x2309.jpg
+  thumbnail: PORTGAL179-360x640.jpg
 
 - filename: PORTGAL178
   original: PORTGAL178-4216x2372.jpg
   sizes:
+  - PORTGAL178-640x360.jpg
   - PORTGAL178-1333x750.jpg
   - PORTGAL178-2309x1299.jpg
-  thumbnail: PORTGAL178-2309x1299.jpg
+  thumbnail: PORTGAL178-640x360.jpg
 
 - filename: PORTGAL245
   original: PORTGAL245-3651x2738.jpg
   sizes:
+  - PORTGAL245-640x480.jpg
   - PORTGAL245-1154x866.jpg
   - PORTGAL245-1999x1499.jpg
-  thumbnail: PORTGAL245-1999x1499.jpg
+  thumbnail: PORTGAL245-640x480.jpg
 
 - filename: PORTGAL223
   original: PORTGAL223-2738x3651.jpg
   sizes:
+  - PORTGAL223-480x640.jpg
   - PORTGAL223-866x1154.jpg
   - PORTGAL223-1499x1999.jpg
-  thumbnail: PORTGAL223-1499x1999.jpg
+  thumbnail: PORTGAL223-480x640.jpg
 
 - filename: PORTGAL222
   original: PORTGAL222-3651x2738.jpg
   sizes:
+  - PORTGAL222-640x480.jpg
   - PORTGAL222-1154x866.jpg
   - PORTGAL222-1999x1499.jpg
-  thumbnail: PORTGAL222-1999x1499.jpg
+  thumbnail: PORTGAL222-640x480.jpg
 
 - filename: PORTGAL221
   original: PORTGAL221-3651x2738.jpg
   sizes:
+  - PORTGAL221-640x480.jpg
   - PORTGAL221-1154x866.jpg
   - PORTGAL221-1999x1499.jpg
-  thumbnail: PORTGAL221-1999x1499.jpg
+  thumbnail: PORTGAL221-640x480.jpg
 
 - filename: PORTGAL201
   original: PORTGAL201-4216x2372.jpg
   sizes:
+  - PORTGAL201-640x360.jpg
   - PORTGAL201-1333x750.jpg
   - PORTGAL201-2309x1299.jpg
-  thumbnail: PORTGAL201-2309x1299.jpg
+  thumbnail: PORTGAL201-640x360.jpg
 
 - filename: PORTGAL220
   original: PORTGAL220-2738x3651.jpg
   sizes:
+  - PORTGAL220-480x640.jpg
   - PORTGAL220-866x1154.jpg
   - PORTGAL220-1499x1999.jpg
-  thumbnail: PORTGAL220-1499x1999.jpg
+  thumbnail: PORTGAL220-480x640.jpg
 
 - filename: PORTGAL227
   original: PORTGAL227-2715x3682.jpg
   sizes:
+  - PORTGAL227-472x640.jpg
   - PORTGAL227-858x1164.jpg
   - PORTGAL227-1487x2016.jpg
-  thumbnail: PORTGAL227-1487x2016.jpg
+  thumbnail: PORTGAL227-472x640.jpg
 
 - filename: PORTGAL226
   original: https://www.youtube.com/watch?v=5LKwLbw4uFM
   sizes:
+  - PORTGAL226-640x478.jpg
   - PORTGAL226-1157x864.jpg
   - PORTGAL226-2004x1497.jpg
-  thumbnail: PORTGAL226-2004x1497.jpg
+  thumbnail: PORTGAL226-640x478.jpg
 
 - filename: PORTGAL069
   original: PORTGAL069-4268x2342.jpg
   sizes:
+  - PORTGAL069-640x351.jpg
   - PORTGAL069-1349x740.jpg
   - PORTGAL069-2338x1283.jpg
-  thumbnail: PORTGAL069-2338x1283.jpg
+  thumbnail: PORTGAL069-640x351.jpg
 
 - filename: PORTGAL068
   original: PORTGAL068-2372x4216.jpg
   sizes:
+  - PORTGAL068-360x640.jpg
   - PORTGAL068-750x1333.jpg
   - PORTGAL068-1299x2309.jpg
-  thumbnail: PORTGAL068-1299x2309.jpg
+  thumbnail: PORTGAL068-360x640.jpg
 
 - filename: PORTGAL065
   original: PORTGAL065-4216x2372.jpg
   sizes:
+  - PORTGAL065-640x360.jpg
   - PORTGAL065-1333x750.jpg
   - PORTGAL065-2309x1299.jpg
-  thumbnail: PORTGAL065-2309x1299.jpg
+  thumbnail: PORTGAL065-640x360.jpg
 
 - filename: PORTGAL064
   original: PORTGAL064-4216x2372.jpg
   sizes:
+  - PORTGAL064-640x360.jpg
   - PORTGAL064-1333x750.jpg
   - PORTGAL064-2309x1299.jpg
-  thumbnail: PORTGAL064-2309x1299.jpg
+  thumbnail: PORTGAL064-640x360.jpg
 
 - filename: PORTGAL067
   original: PORTGAL067-2372x4216.jpg
   sizes:
+  - PORTGAL067-360x640.jpg
   - PORTGAL067-750x1333.jpg
   - PORTGAL067-1299x2309.jpg
-  thumbnail: PORTGAL067-1299x2309.jpg
+  thumbnail: PORTGAL067-360x640.jpg
 
 - filename: PORTGAL066
   original: PORTGAL066-4216x2372.jpg
   sizes:
+  - PORTGAL066-640x360.jpg
   - PORTGAL066-1333x750.jpg
   - PORTGAL066-2309x1299.jpg
-  thumbnail: PORTGAL066-2309x1299.jpg
+  thumbnail: PORTGAL066-640x360.jpg
 
 - filename: PORTGAL061
   original: PORTGAL061-4216x2372.jpg
   sizes:
+  - PORTGAL061-640x360.jpg
   - PORTGAL061-1333x750.jpg
   - PORTGAL061-2309x1299.jpg
-  thumbnail: PORTGAL061-2309x1299.jpg
+  thumbnail: PORTGAL061-640x360.jpg
 
 - filename: PORTGAL060
   original: PORTGAL060-4216x2372.jpg
   sizes:
+  - PORTGAL060-640x360.jpg
   - PORTGAL060-1333x750.jpg
   - PORTGAL060-2309x1299.jpg
-  thumbnail: PORTGAL060-2309x1299.jpg
+  thumbnail: PORTGAL060-640x360.jpg
 
 - filename: PORTGAL063
   original: PORTGAL063-4216x2372.jpg
   sizes:
+  - PORTGAL063-640x360.jpg
   - PORTGAL063-1333x750.jpg
   - PORTGAL063-2309x1299.jpg
-  thumbnail: PORTGAL063-2309x1299.jpg
+  thumbnail: PORTGAL063-640x360.jpg
 
 - filename: PORTGAL062
   original: PORTGAL062-4216x2372.jpg
   sizes:
+  - PORTGAL062-640x360.jpg
   - PORTGAL062-1333x750.jpg
   - PORTGAL062-2309x1299.jpg
-  thumbnail: PORTGAL062-2309x1299.jpg
+  thumbnail: PORTGAL062-640x360.jpg
 
 - filename: PORTGAL102
   original: PORTGAL102-4216x2372.jpg
   sizes:
+  - PORTGAL102-640x360.jpg
   - PORTGAL102-1333x750.jpg
   - PORTGAL102-2309x1299.jpg
-  thumbnail: PORTGAL102-2309x1299.jpg
+  thumbnail: PORTGAL102-640x360.jpg
 
 - filename: PORTGAL103
   original: https://www.youtube.com/watch?v=-OfHAi8KNHE
   sizes:
+  - PORTGAL103-640x360.jpg
   - PORTGAL103-1333x750.jpg
   - PORTGAL103-2309x1299.jpg
-  thumbnail: PORTGAL103-2309x1299.jpg
+  thumbnail: PORTGAL103-640x360.jpg
 
 - filename: PORTGAL100
   original: PORTGAL100-4216x2372.jpg
   sizes:
+  - PORTGAL100-640x360.jpg
   - PORTGAL100-1333x750.jpg
   - PORTGAL100-2309x1299.jpg
-  thumbnail: PORTGAL100-2309x1299.jpg
+  thumbnail: PORTGAL100-640x360.jpg
 
 - filename: PORTGAL101
   original: PORTGAL101-3798x2632.jpg
   sizes:
+  - PORTGAL101-640x443.jpg
   - PORTGAL101-1201x832.jpg
   - PORTGAL101-2080x1442.jpg
-  thumbnail: PORTGAL101-2080x1442.jpg
+  thumbnail: PORTGAL101-640x443.jpg
 
 - filename: PORTGAL106
   original: https://www.youtube.com/watch?v=-OfHAi8KNHE
   sizes:
+  - PORTGAL106-360x640.jpg
   - PORTGAL106-750x1333.jpg
   - PORTGAL106-1299x2309.jpg
-  thumbnail: PORTGAL106-1299x2309.jpg
+  thumbnail: PORTGAL106-360x640.jpg
 
 - filename: PORTGAL107
   original: PORTGAL107-2372x4216.jpg
   sizes:
+  - PORTGAL107-360x640.jpg
   - PORTGAL107-750x1333.jpg
   - PORTGAL107-1299x2309.jpg
-  thumbnail: PORTGAL107-1299x2309.jpg
+  thumbnail: PORTGAL107-360x640.jpg
 
 - filename: PORTGAL104
   original: PORTGAL104-2372x4216.jpg
   sizes:
+  - PORTGAL104-360x640.jpg
   - PORTGAL104-750x1333.jpg
   - PORTGAL104-1299x2309.jpg
-  thumbnail: PORTGAL104-1299x2309.jpg
+  thumbnail: PORTGAL104-360x640.jpg
 
 - filename: PORTGAL105
   original: PORTGAL105-2372x4216.jpg
   sizes:
+  - PORTGAL105-360x640.jpg
   - PORTGAL105-750x1333.jpg
   - PORTGAL105-1299x2309.jpg
-  thumbnail: PORTGAL105-1299x2309.jpg
+  thumbnail: PORTGAL105-360x640.jpg
 
 - filename: PORTGAL212
   original: PORTGAL212-4791x2087.jpg
   sizes:
+  - PORTGAL212-640x279.jpg
   - PORTGAL212-1515x660.jpg
   - PORTGAL212-2624x1143.jpg
-  thumbnail: PORTGAL212-2624x1143.jpg
+  thumbnail: PORTGAL212-640x279.jpg
 
 - filename: PORTGAL213
   original: PORTGAL213-4216x2372.jpg
   sizes:
+  - PORTGAL213-640x360.jpg
   - PORTGAL213-1333x750.jpg
   - PORTGAL213-2309x1299.jpg
-  thumbnail: PORTGAL213-2309x1299.jpg
+  thumbnail: PORTGAL213-640x360.jpg
 
 - filename: PORTGAL108
   original: PORTGAL108-2372x4216.jpg
   sizes:
+  - PORTGAL108-360x640.jpg
   - PORTGAL108-750x1333.jpg
   - PORTGAL108-1299x2309.jpg
-  thumbnail: PORTGAL108-1299x2309.jpg
+  thumbnail: PORTGAL108-360x640.jpg
 
 - filename: PORTGAL109
   original: PORTGAL109-4216x2372.jpg
   sizes:
+  - PORTGAL109-640x360.jpg
   - PORTGAL109-1333x750.jpg
   - PORTGAL109-2309x1299.jpg
-  thumbnail: PORTGAL109-2309x1299.jpg
+  thumbnail: PORTGAL109-640x360.jpg
 
 - filename: PORTGAL216
   original: PORTGAL216-2372x4216.jpg
   sizes:
+  - PORTGAL216-360x640.jpg
   - PORTGAL216-750x1333.jpg
   - PORTGAL216-1299x2309.jpg
-  thumbnail: PORTGAL216-1299x2309.jpg
+  thumbnail: PORTGAL216-360x640.jpg
 
 - filename: PORTGAL217
   original: PORTGAL217-4133x2419.jpg
   sizes:
+  - PORTGAL217-640x375.jpg
   - PORTGAL217-1307x765.jpg
   - PORTGAL217-2263x1325.jpg
-  thumbnail: PORTGAL217-2263x1325.jpg
+  thumbnail: PORTGAL217-640x375.jpg
 
 - filename: PORTGAL214
   original: PORTGAL214-4216x2372.jpg
   sizes:
+  - PORTGAL214-640x360.jpg
   - PORTGAL214-1333x750.jpg
   - PORTGAL214-2309x1299.jpg
-  thumbnail: PORTGAL214-2309x1299.jpg
+  thumbnail: PORTGAL214-640x360.jpg
 
 - filename: PORTGAL215
   original: PORTGAL215-4216x2372.jpg
   sizes:
+  - PORTGAL215-640x360.jpg
   - PORTGAL215-1333x750.jpg
   - PORTGAL215-2309x1299.jpg
-  thumbnail: PORTGAL215-2309x1299.jpg
+  thumbnail: PORTGAL215-640x360.jpg
 
 - filename: PORTGAL188
   original: PORTGAL188-4216x2372.jpg
   sizes:
+  - PORTGAL188-640x360.jpg
   - PORTGAL188-1333x750.jpg
   - PORTGAL188-2309x1299.jpg
-  thumbnail: PORTGAL188-2309x1299.jpg
+  thumbnail: PORTGAL188-640x360.jpg
 
 - filename: PORTGAL189
   original: PORTGAL189-2372x4216.jpg
   sizes:
+  - PORTGAL189-360x640.jpg
   - PORTGAL189-750x1333.jpg
   - PORTGAL189-1299x2309.jpg
-  thumbnail: PORTGAL189-1299x2309.jpg
+  thumbnail: PORTGAL189-360x640.jpg
 
 - filename: PORTGAL182
   original: PORTGAL182-4216x2372.jpg
   sizes:
+  - PORTGAL182-640x360.jpg
   - PORTGAL182-1333x750.jpg
   - PORTGAL182-2309x1299.jpg
-  thumbnail: PORTGAL182-2309x1299.jpg
+  thumbnail: PORTGAL182-640x360.jpg
 
 - filename: PORTGAL183
   original: PORTGAL183-2372x4216.jpg
   sizes:
+  - PORTGAL183-360x640.jpg
   - PORTGAL183-750x1333.jpg
   - PORTGAL183-1299x2309.jpg
-  thumbnail: PORTGAL183-1299x2309.jpg
+  thumbnail: PORTGAL183-360x640.jpg
 
 - filename: PORTGAL180
   original: PORTGAL180-2372x4216.jpg
   sizes:
+  - PORTGAL180-360x640.jpg
   - PORTGAL180-750x1333.jpg
   - PORTGAL180-1299x2309.jpg
-  thumbnail: PORTGAL180-1299x2309.jpg
+  thumbnail: PORTGAL180-360x640.jpg
 
 - filename: PORTGAL181
   original: PORTGAL181-2372x4216.jpg
   sizes:
+  - PORTGAL181-360x640.jpg
   - PORTGAL181-750x1333.jpg
   - PORTGAL181-1299x2309.jpg
-  thumbnail: PORTGAL181-1299x2309.jpg
+  thumbnail: PORTGAL181-360x640.jpg
 
 - filename: PORTGAL186
   original: PORTGAL186-3475x2878.jpg
   sizes:
+  - PORTGAL186-640x530.jpg
   - PORTGAL186-1098x909.jpg
   - PORTGAL186-1903x1576.jpg
-  thumbnail: PORTGAL186-1903x1576.jpg
+  thumbnail: PORTGAL186-640x530.jpg
 
 - filename: PORTGAL187
   original: PORTGAL187-3160x3164.jpg
   sizes:
+  - PORTGAL187-639x640.jpg
   - PORTGAL187-999x1000.jpg
   - PORTGAL187-1731x1733.jpg
-  thumbnail: PORTGAL187-1731x1733.jpg
+  thumbnail: PORTGAL187-639x640.jpg
 
 - filename: PORTGAL184
   original: PORTGAL184-4082x2450.jpg
   sizes:
+  - PORTGAL184-640x384.jpg
   - PORTGAL184-1290x774.jpg
   - PORTGAL184-2235x1341.jpg
-  thumbnail: PORTGAL184-2235x1341.jpg
+  thumbnail: PORTGAL184-640x384.jpg
 
 - filename: PORTGAL185
   original: PORTGAL185-4136x2417.jpg
   sizes:
+  - PORTGAL185-640x374.jpg
   - PORTGAL185-1308x764.jpg
   - PORTGAL185-2265x1324.jpg
-  thumbnail: PORTGAL185-2265x1324.jpg
+  thumbnail: PORTGAL185-640x374.jpg
 
 - filename: PORTGAL168
   original: PORTGAL168-2372x4216.jpg
   sizes:
+  - PORTGAL168-360x640.jpg
   - PORTGAL168-750x1333.jpg
   - PORTGAL168-1299x2309.jpg
-  thumbnail: PORTGAL168-1299x2309.jpg
+  thumbnail: PORTGAL168-360x640.jpg
 
 - filename: PORTGAL169
   original: PORTGAL169-4216x2372.jpg
   sizes:
+  - PORTGAL169-640x360.jpg
   - PORTGAL169-1333x750.jpg
   - PORTGAL169-2309x1299.jpg
-  thumbnail: PORTGAL169-2309x1299.jpg
+  thumbnail: PORTGAL169-640x360.jpg
 
 - filename: PORTGAL050
   original: PORTGAL050-3885x2573.jpg
   sizes:
+  - PORTGAL050-640x424.jpg
   - PORTGAL050-1228x813.jpg
   - PORTGAL050-2128x1409.jpg
-  thumbnail: PORTGAL050-2128x1409.jpg
+  thumbnail: PORTGAL050-640x424.jpg
 
 - filename: PORTGAL051
   original: PORTGAL051-4216x2372.jpg
   sizes:
+  - PORTGAL051-640x360.jpg
   - PORTGAL051-1333x750.jpg
   - PORTGAL051-2309x1299.jpg
-  thumbnail: PORTGAL051-2309x1299.jpg
+  thumbnail: PORTGAL051-640x360.jpg
 
 - filename: PORTGAL052
   original: PORTGAL052-2372x4216.jpg
   sizes:
+  - PORTGAL052-360x640.jpg
   - PORTGAL052-750x1333.jpg
   - PORTGAL052-1299x2309.jpg
-  thumbnail: PORTGAL052-1299x2309.jpg
+  thumbnail: PORTGAL052-360x640.jpg
 
 - filename: PORTGAL053
   original: PORTGAL053-4216x2372.jpg
   sizes:
+  - PORTGAL053-640x360.jpg
   - PORTGAL053-1333x750.jpg
   - PORTGAL053-2309x1299.jpg
-  thumbnail: PORTGAL053-2309x1299.jpg
+  thumbnail: PORTGAL053-640x360.jpg
 
 - filename: PORTGAL054
   original: PORTGAL054-2372x4216.jpg
   sizes:
+  - PORTGAL054-360x640.jpg
   - PORTGAL054-750x1333.jpg
   - PORTGAL054-1299x2309.jpg
-  thumbnail: PORTGAL054-1299x2309.jpg
+  thumbnail: PORTGAL054-360x640.jpg
 
 - filename: PORTGAL055
   original: PORTGAL055-4216x2372.jpg
   sizes:
+  - PORTGAL055-640x360.jpg
   - PORTGAL055-1333x750.jpg
   - PORTGAL055-2309x1299.jpg
-  thumbnail: PORTGAL055-2309x1299.jpg
+  thumbnail: PORTGAL055-640x360.jpg
 
 - filename: PORTGAL056
   original: PORTGAL056-3977x2514.jpg
   sizes:
+  - PORTGAL056-640x404.jpg
   - PORTGAL056-1257x794.jpg
   - PORTGAL056-2178x1377.jpg
-  thumbnail: PORTGAL056-2178x1377.jpg
+  thumbnail: PORTGAL056-640x404.jpg
 
 - filename: PORTGAL057
   original: PORTGAL057-4216x2372.jpg
   sizes:
+  - PORTGAL057-640x360.jpg
   - PORTGAL057-1333x750.jpg
   - PORTGAL057-2309x1299.jpg
-  thumbnail: PORTGAL057-2309x1299.jpg
+  thumbnail: PORTGAL057-640x360.jpg
 
 - filename: PORTGAL058
   original: PORTGAL058-4216x2372.jpg
   sizes:
+  - PORTGAL058-640x360.jpg
   - PORTGAL058-1333x750.jpg
   - PORTGAL058-2309x1299.jpg
-  thumbnail: PORTGAL058-2309x1299.jpg
+  thumbnail: PORTGAL058-640x360.jpg
 
 - filename: PORTGAL059
   original: PORTGAL059-4216x2372.jpg
   sizes:
+  - PORTGAL059-640x360.jpg
   - PORTGAL059-1333x750.jpg
   - PORTGAL059-2309x1299.jpg
-  thumbnail: PORTGAL059-2309x1299.jpg
+  thumbnail: PORTGAL059-640x360.jpg
 
 - filename: PORTGAL111
   original: PORTGAL111-2733x3658.jpg
   sizes:
+  - PORTGAL111-478x640.jpg
   - PORTGAL111-864x1156.jpg
   - PORTGAL111-1496x2003.jpg
-  thumbnail: PORTGAL111-1496x2003.jpg
+  thumbnail: PORTGAL111-478x640.jpg
 
 - filename: PORTGAL110
   original: PORTGAL110-3658x2733.jpg
   sizes:
+  - PORTGAL110-640x478.jpg
   - PORTGAL110-1156x864.jpg
   - PORTGAL110-2003x1496.jpg
-  thumbnail: PORTGAL110-2003x1496.jpg
+  thumbnail: PORTGAL110-640x478.jpg
 
 - filename: PORTGAL113
   original: PORTGAL113-3658x2733.jpg
   sizes:
+  - PORTGAL113-640x478.jpg
   - PORTGAL113-1156x864.jpg
   - PORTGAL113-2003x1496.jpg
-  thumbnail: PORTGAL113-2003x1496.jpg
+  thumbnail: PORTGAL113-640x478.jpg
 
 - filename: PORTGAL112
   original: PORTGAL112-4216x2372.jpg
   sizes:
+  - PORTGAL112-640x360.jpg
   - PORTGAL112-1333x750.jpg
   - PORTGAL112-2309x1299.jpg
-  thumbnail: PORTGAL112-2309x1299.jpg
+  thumbnail: PORTGAL112-640x360.jpg
 
 - filename: PORTGAL115
   original: PORTGAL115-4216x2372.jpg
   sizes:
+  - PORTGAL115-640x360.jpg
   - PORTGAL115-1333x750.jpg
   - PORTGAL115-2309x1299.jpg
-  thumbnail: PORTGAL115-2309x1299.jpg
+  thumbnail: PORTGAL115-640x360.jpg
 
 - filename: PORTGAL114
   original: PORTGAL114-2573x3886.jpg
   sizes:
+  - PORTGAL114-424x640.jpg
   - PORTGAL114-813x1228.jpg
   - PORTGAL114-1409x2128.jpg
-  thumbnail: PORTGAL114-1409x2128.jpg
+  thumbnail: PORTGAL114-424x640.jpg
 
 - filename: PORTGAL117
   original: PORTGAL117-2372x4216.jpg
   sizes:
+  - PORTGAL117-360x640.jpg
   - PORTGAL117-750x1333.jpg
   - PORTGAL117-1299x2309.jpg
-  thumbnail: PORTGAL117-1299x2309.jpg
+  thumbnail: PORTGAL117-360x640.jpg
 
 - filename: PORTGAL116
   original: PORTGAL116-4216x2372.jpg
   sizes:
+  - PORTGAL116-640x360.jpg
   - PORTGAL116-1333x750.jpg
   - PORTGAL116-2309x1299.jpg
-  thumbnail: PORTGAL116-2309x1299.jpg
+  thumbnail: PORTGAL116-640x360.jpg
 
 - filename: PORTGAL119
   original: PORTGAL119-2372x4216.jpg
   sizes:
+  - PORTGAL119-360x640.jpg
   - PORTGAL119-750x1333.jpg
   - PORTGAL119-1299x2309.jpg
-  thumbnail: PORTGAL119-1299x2309.jpg
+  thumbnail: PORTGAL119-360x640.jpg
 
 - filename: PORTGAL118
   original: PORTGAL118-2372x4216.jpg
   sizes:
+  - PORTGAL118-360x640.jpg
   - PORTGAL118-750x1333.jpg
   - PORTGAL118-1299x2309.jpg
-  thumbnail: PORTGAL118-1299x2309.jpg
+  thumbnail: PORTGAL118-360x640.jpg
 
 - filename: PORTGAL203
   original: https://www.youtube.com/watch?v=XbuhTXTsVVk
   sizes:
+  - PORTGAL203-360x640.jpg
   - PORTGAL203-750x1333.jpg
   - PORTGAL203-1299x2309.jpg
-  thumbnail: PORTGAL203-1299x2309.jpg
+  thumbnail: PORTGAL203-360x640.jpg
 
 - filename: PORTGAL202
   original: PORTGAL202-2372x4216.jpg
   sizes:
+  - PORTGAL202-360x640.jpg
   - PORTGAL202-750x1333.jpg
   - PORTGAL202-1299x2309.jpg
-  thumbnail: PORTGAL202-1299x2309.jpg
+  thumbnail: PORTGAL202-360x640.jpg
 
 - filename: PORTGAL205
   original: PORTGAL205-2372x4216.jpg
   sizes:
+  - PORTGAL205-360x640.jpg
   - PORTGAL205-750x1333.jpg
   - PORTGAL205-1299x2309.jpg
-  thumbnail: PORTGAL205-1299x2309.jpg
+  thumbnail: PORTGAL205-360x640.jpg
 
 - filename: PORTGAL204
   original: PORTGAL204-3161x3163.jpg
   sizes:
+  - PORTGAL204-639x640.jpg
   - PORTGAL204-999x1000.jpg
   - PORTGAL204-1731x1732.jpg
-  thumbnail: PORTGAL204-1731x1732.jpg
+  thumbnail: PORTGAL204-639x640.jpg
 
 - filename: PORTGAL207
   original: PORTGAL207-4216x2372.jpg
   sizes:
+  - PORTGAL207-640x360.jpg
   - PORTGAL207-1333x750.jpg
   - PORTGAL207-2309x1299.jpg
-  thumbnail: PORTGAL207-2309x1299.jpg
+  thumbnail: PORTGAL207-640x360.jpg
 
 - filename: PORTGAL206
   original: PORTGAL206-4216x2372.jpg
   sizes:
+  - PORTGAL206-640x360.jpg
   - PORTGAL206-1333x750.jpg
   - PORTGAL206-2309x1299.jpg
-  thumbnail: PORTGAL206-2309x1299.jpg
+  thumbnail: PORTGAL206-640x360.jpg
 
 - filename: PORTGAL199
   original: PORTGAL199-4216x2372.jpg
   sizes:
+  - PORTGAL199-640x360.jpg
   - PORTGAL199-1333x750.jpg
   - PORTGAL199-2309x1299.jpg
-  thumbnail: PORTGAL199-2309x1299.jpg
+  thumbnail: PORTGAL199-640x360.jpg
 
 - filename: PORTGAL198
   original: PORTGAL198-3556x2811.jpg
   sizes:
+  - PORTGAL198-640x506.jpg
   - PORTGAL198-1124x889.jpg
   - PORTGAL198-1947x1539.jpg
-  thumbnail: PORTGAL198-1947x1539.jpg
+  thumbnail: PORTGAL198-640x506.jpg
 
 - filename: PORTGAL191
   original: PORTGAL191-4216x2372.jpg
   sizes:
+  - PORTGAL191-640x360.jpg
   - PORTGAL191-1333x750.jpg
   - PORTGAL191-2309x1299.jpg
-  thumbnail: PORTGAL191-2309x1299.jpg
+  thumbnail: PORTGAL191-640x360.jpg
 
 - filename: PORTGAL190
   original: PORTGAL190-2372x4216.jpg
   sizes:
+  - PORTGAL190-360x640.jpg
   - PORTGAL190-750x1333.jpg
   - PORTGAL190-1299x2309.jpg
-  thumbnail: PORTGAL190-1299x2309.jpg
+  thumbnail: PORTGAL190-360x640.jpg
 
 - filename: PORTGAL193
   original: PORTGAL193-2372x4216.jpg
   sizes:
+  - PORTGAL193-360x640.jpg
   - PORTGAL193-750x1333.jpg
   - PORTGAL193-1299x2309.jpg
-  thumbnail: PORTGAL193-1299x2309.jpg
+  thumbnail: PORTGAL193-360x640.jpg
 
 - filename: PORTGAL192
   original: PORTGAL192-4216x2372.jpg
   sizes:
+  - PORTGAL192-640x360.jpg
   - PORTGAL192-1333x750.jpg
   - PORTGAL192-2309x1299.jpg
-  thumbnail: PORTGAL192-2309x1299.jpg
+  thumbnail: PORTGAL192-640x360.jpg
 
 - filename: PORTGAL195
   original: PORTGAL195-4216x2372.jpg
   sizes:
+  - PORTGAL195-640x360.jpg
   - PORTGAL195-1333x750.jpg
   - PORTGAL195-2309x1299.jpg
-  thumbnail: PORTGAL195-2309x1299.jpg
+  thumbnail: PORTGAL195-640x360.jpg
 
 - filename: PORTGAL194
   original: PORTGAL194-2372x4216.jpg
   sizes:
+  - PORTGAL194-360x640.jpg
   - PORTGAL194-750x1333.jpg
   - PORTGAL194-1299x2309.jpg
-  thumbnail: PORTGAL194-1299x2309.jpg
+  thumbnail: PORTGAL194-360x640.jpg
 
 - filename: PORTGAL197
   original: PORTGAL197-4216x2372.jpg
   sizes:
+  - PORTGAL197-640x360.jpg
   - PORTGAL197-1333x750.jpg
   - PORTGAL197-2309x1299.jpg
-  thumbnail: PORTGAL197-2309x1299.jpg
+  thumbnail: PORTGAL197-640x360.jpg
 
 - filename: PORTGAL196
   original: PORTGAL196-4216x2372.jpg
   sizes:
+  - PORTGAL196-640x360.jpg
   - PORTGAL196-1333x750.jpg
   - PORTGAL196-2309x1299.jpg
-  thumbnail: PORTGAL196-2309x1299.jpg
+  thumbnail: PORTGAL196-640x360.jpg
 
 - filename: PORTGAL238
   original: PORTGAL238-3651x2738.jpg
   sizes:
+  - PORTGAL238-640x480.jpg
   - PORTGAL238-1154x866.jpg
   - PORTGAL238-1999x1499.jpg
-  thumbnail: PORTGAL238-1999x1499.jpg
+  thumbnail: PORTGAL238-640x480.jpg
 
 - filename: PORTGAL242
   original: PORTGAL242-3659x2732.jpg
   sizes:
+  - PORTGAL242-640x478.jpg
   - PORTGAL242-1157x864.jpg
   - PORTGAL242-2004x1496.jpg
-  thumbnail: PORTGAL242-2004x1496.jpg
+  thumbnail: PORTGAL242-640x478.jpg
 
 - filename: PORTGAL239
   original: PORTGAL239-3651x2738.jpg
   sizes:
+  - PORTGAL239-640x480.jpg
   - PORTGAL239-1154x866.jpg
   - PORTGAL239-1999x1499.jpg
-  thumbnail: PORTGAL239-1999x1499.jpg
+  thumbnail: PORTGAL239-640x480.jpg
 
 - filename: PORTGAL047
   original: PORTGAL047-4216x2372.jpg
   sizes:
+  - PORTGAL047-640x360.jpg
   - PORTGAL047-1333x750.jpg
   - PORTGAL047-2309x1299.jpg
-  thumbnail: PORTGAL047-2309x1299.jpg
+  thumbnail: PORTGAL047-640x360.jpg
 
 - filename: PORTGAL046
   original: PORTGAL046-4216x2372.jpg
   sizes:
+  - PORTGAL046-640x360.jpg
   - PORTGAL046-1333x750.jpg
   - PORTGAL046-2309x1299.jpg
-  thumbnail: PORTGAL046-2309x1299.jpg
+  thumbnail: PORTGAL046-640x360.jpg
 
 - filename: PORTGAL045
   original: PORTGAL045-4216x2372.jpg
   sizes:
+  - PORTGAL045-640x360.jpg
   - PORTGAL045-1333x750.jpg
   - PORTGAL045-2309x1299.jpg
-  thumbnail: PORTGAL045-2309x1299.jpg
+  thumbnail: PORTGAL045-640x360.jpg
 
 - filename: PORTGAL044
   original: PORTGAL044-2372x4216.jpg
   sizes:
+  - PORTGAL044-360x640.jpg
   - PORTGAL044-750x1333.jpg
   - PORTGAL044-1299x2309.jpg
-  thumbnail: PORTGAL044-1299x2309.jpg
+  thumbnail: PORTGAL044-360x640.jpg
 
 - filename: PORTGAL043
   original: PORTGAL043-2372x4216.jpg
   sizes:
+  - PORTGAL043-360x640.jpg
   - PORTGAL043-750x1333.jpg
   - PORTGAL043-1299x2309.jpg
-  thumbnail: PORTGAL043-1299x2309.jpg
+  thumbnail: PORTGAL043-360x640.jpg
 
 - filename: PORTGAL042
   original: PORTGAL042-4216x2372.jpg
   sizes:
+  - PORTGAL042-640x360.jpg
   - PORTGAL042-1333x750.jpg
   - PORTGAL042-2309x1299.jpg
-  thumbnail: PORTGAL042-2309x1299.jpg
+  thumbnail: PORTGAL042-640x360.jpg
 
 - filename: PORTGAL041
   original: PORTGAL041-4216x2372.jpg
   sizes:
+  - PORTGAL041-640x360.jpg
   - PORTGAL041-1333x750.jpg
   - PORTGAL041-2309x1299.jpg
-  thumbnail: PORTGAL041-2309x1299.jpg
+  thumbnail: PORTGAL041-640x360.jpg
 
 - filename: PORTGAL040
   original: PORTGAL040-4216x2372.jpg
   sizes:
+  - PORTGAL040-640x360.jpg
   - PORTGAL040-1333x750.jpg
   - PORTGAL040-2309x1299.jpg
-  thumbnail: PORTGAL040-2309x1299.jpg
+  thumbnail: PORTGAL040-640x360.jpg
 
 - filename: PORTGAL049
   original: PORTGAL049-3885x2573.jpg
   sizes:
+  - PORTGAL049-640x424.jpg
   - PORTGAL049-1228x813.jpg
   - PORTGAL049-2128x1409.jpg
-  thumbnail: PORTGAL049-2128x1409.jpg
+  thumbnail: PORTGAL049-640x424.jpg
 
 - filename: PORTGAL048
   original: PORTGAL048-3651x2738.jpg
   sizes:
+  - PORTGAL048-640x480.jpg
   - PORTGAL048-1154x866.jpg
   - PORTGAL048-1999x1499.jpg
-  thumbnail: PORTGAL048-1999x1499.jpg
+  thumbnail: PORTGAL048-640x480.jpg
 
 - filename: PORTGAL124
   original: PORTGAL124-4216x2372.jpg
   sizes:
+  - PORTGAL124-640x360.jpg
   - PORTGAL124-1333x750.jpg
   - PORTGAL124-2309x1299.jpg
-  thumbnail: PORTGAL124-2309x1299.jpg
+  thumbnail: PORTGAL124-640x360.jpg
 
 - filename: PORTGAL125
   original: PORTGAL125-4216x2372.jpg
   sizes:
+  - PORTGAL125-640x360.jpg
   - PORTGAL125-1333x750.jpg
   - PORTGAL125-2309x1299.jpg
-  thumbnail: PORTGAL125-2309x1299.jpg
+  thumbnail: PORTGAL125-640x360.jpg
 
 - filename: PORTGAL126
   original: PORTGAL126-3651x2738.jpg
   sizes:
+  - PORTGAL126-640x480.jpg
   - PORTGAL126-1154x866.jpg
   - PORTGAL126-1999x1499.jpg
-  thumbnail: PORTGAL126-1999x1499.jpg
+  thumbnail: PORTGAL126-640x480.jpg
 
 - filename: PORTGAL127
   original: PORTGAL127-3658x2733.jpg
   sizes:
+  - PORTGAL127-640x478.jpg
   - PORTGAL127-1156x864.jpg
   - PORTGAL127-2003x1496.jpg
-  thumbnail: PORTGAL127-2003x1496.jpg
+  thumbnail: PORTGAL127-640x478.jpg
 
 - filename: PORTGAL120
   original: PORTGAL120-2372x4216.jpg
   sizes:
+  - PORTGAL120-360x640.jpg
   - PORTGAL120-750x1333.jpg
   - PORTGAL120-1299x2309.jpg
-  thumbnail: PORTGAL120-1299x2309.jpg
+  thumbnail: PORTGAL120-360x640.jpg
 
 - filename: PORTGAL121
   original: PORTGAL121-4216x2372.jpg
   sizes:
+  - PORTGAL121-640x360.jpg
   - PORTGAL121-1333x750.jpg
   - PORTGAL121-2309x1299.jpg
-  thumbnail: PORTGAL121-2309x1299.jpg
+  thumbnail: PORTGAL121-640x360.jpg
 
 - filename: PORTGAL122
   original: PORTGAL122-4216x2372.jpg
   sizes:
+  - PORTGAL122-640x360.jpg
   - PORTGAL122-1333x750.jpg
   - PORTGAL122-2309x1299.jpg
-  thumbnail: PORTGAL122-2309x1299.jpg
+  thumbnail: PORTGAL122-640x360.jpg
 
 - filename: PORTGAL123
   original: PORTGAL123-4216x2372.jpg
   sizes:
+  - PORTGAL123-640x360.jpg
   - PORTGAL123-1333x750.jpg
   - PORTGAL123-2309x1299.jpg
-  thumbnail: PORTGAL123-2309x1299.jpg
+  thumbnail: PORTGAL123-640x360.jpg
 
 - filename: PORTGAL234
   original: PORTGAL234-4216x2372.jpg
   sizes:
+  - PORTGAL234-640x360.jpg
   - PORTGAL234-1333x750.jpg
   - PORTGAL234-2309x1299.jpg
-  thumbnail: PORTGAL234-2309x1299.jpg
+  thumbnail: PORTGAL234-640x360.jpg
 
 - filename: PORTGAL235
   original: PORTGAL235-4216x2372.jpg
   sizes:
+  - PORTGAL235-640x360.jpg
   - PORTGAL235-1333x750.jpg
   - PORTGAL235-2309x1299.jpg
-  thumbnail: PORTGAL235-2309x1299.jpg
+  thumbnail: PORTGAL235-640x360.jpg
 
 - filename: PORTGAL236
   original: PORTGAL236-4216x2372.jpg
   sizes:
+  - PORTGAL236-640x360.jpg
   - PORTGAL236-1333x750.jpg
   - PORTGAL236-2309x1299.jpg
-  thumbnail: PORTGAL236-2309x1299.jpg
+  thumbnail: PORTGAL236-640x360.jpg
 
 - filename: PORTGAL237
   original: PORTGAL237-4216x2372.jpg
   sizes:
+  - PORTGAL237-640x360.jpg
   - PORTGAL237-1333x750.jpg
   - PORTGAL237-2309x1299.jpg
-  thumbnail: PORTGAL237-2309x1299.jpg
+  thumbnail: PORTGAL237-640x360.jpg
 
 - filename: PORTGAL128
   original: PORTGAL128-3874x2581.jpg
   sizes:
+  - PORTGAL128-640x426.jpg
   - PORTGAL128-1225x816.jpg
   - PORTGAL128-2121x1413.jpg
-  thumbnail: PORTGAL128-2121x1413.jpg
+  thumbnail: PORTGAL128-640x426.jpg
 
 - filename: PORTGAL129
   original: PORTGAL129-3658x2733.jpg
   sizes:
+  - PORTGAL129-640x478.jpg
   - PORTGAL129-1156x864.jpg
   - PORTGAL129-2003x1496.jpg
-  thumbnail: PORTGAL129-2003x1496.jpg
+  thumbnail: PORTGAL129-640x478.jpg
 
 - filename: PORTGAL232
   original: PORTGAL232-4216x2372.jpg
   sizes:
+  - PORTGAL232-640x360.jpg
   - PORTGAL232-1333x750.jpg
   - PORTGAL232-2309x1299.jpg
-  thumbnail: PORTGAL232-2309x1299.jpg
+  thumbnail: PORTGAL232-640x360.jpg
 
 - filename: PORTGAL233
   original: PORTGAL233-4216x2372.jpg
   sizes:
+  - PORTGAL233-640x360.jpg
   - PORTGAL233-1333x750.jpg
   - PORTGAL233-2309x1299.jpg
-  thumbnail: PORTGAL233-2309x1299.jpg
+  thumbnail: PORTGAL233-640x360.jpg
 
 - filename: PORTGAL230
   original: PORTGAL230-3658x2733.jpg
   sizes:
+  - PORTGAL230-640x478.jpg
   - PORTGAL230-1156x864.jpg
   - PORTGAL230-2003x1496.jpg
-  thumbnail: PORTGAL230-2003x1496.jpg
+  thumbnail: PORTGAL230-640x478.jpg
 
 - filename: PORTGAL231
   original: PORTGAL231-4216x2372.jpg
   sizes:
+  - PORTGAL231-640x360.jpg
   - PORTGAL231-1333x750.jpg
   - PORTGAL231-2309x1299.jpg
-  thumbnail: PORTGAL231-2309x1299.jpg
+  thumbnail: PORTGAL231-640x360.jpg
 
 - filename: PORTGAL211
   original: PORTGAL211-4216x2372.jpg
   sizes:
+  - PORTGAL211-640x360.jpg
   - PORTGAL211-1333x750.jpg
   - PORTGAL211-2309x1299.jpg
-  thumbnail: PORTGAL211-2309x1299.jpg
+  thumbnail: PORTGAL211-640x360.jpg
 
 - filename: PORTGAL139
   original: PORTGAL139-4216x2372.jpg
   sizes:
+  - PORTGAL139-640x360.jpg
   - PORTGAL139-1333x750.jpg
   - PORTGAL139-2309x1299.jpg
-  thumbnail: PORTGAL139-2309x1299.jpg
+  thumbnail: PORTGAL139-640x360.jpg
 
 - filename: PORTGAL138
   original: PORTGAL138-4216x2372.jpg
   sizes:
+  - PORTGAL138-640x360.jpg
   - PORTGAL138-1333x750.jpg
   - PORTGAL138-2309x1299.jpg
-  thumbnail: PORTGAL138-2309x1299.jpg
+  thumbnail: PORTGAL138-640x360.jpg
 
 - filename: PORTGAL162
   original: PORTGAL162-2372x4216.jpg
   sizes:
+  - PORTGAL162-360x640.jpg
   - PORTGAL162-750x1333.jpg
   - PORTGAL162-1299x2309.jpg
-  thumbnail: PORTGAL162-1299x2309.jpg
+  thumbnail: PORTGAL162-360x640.jpg
 
 - filename: PORTGAL133
   original: PORTGAL133-4216x2372.jpg
   sizes:
+  - PORTGAL133-640x360.jpg
   - PORTGAL133-1333x750.jpg
   - PORTGAL133-2309x1299.jpg
-  thumbnail: PORTGAL133-2309x1299.jpg
+  thumbnail: PORTGAL133-640x360.jpg
 
 - filename: PORTGAL132
   original: PORTGAL132-4216x2372.jpg
   sizes:
+  - PORTGAL132-640x360.jpg
   - PORTGAL132-1333x750.jpg
   - PORTGAL132-2309x1299.jpg
-  thumbnail: PORTGAL132-2309x1299.jpg
+  thumbnail: PORTGAL132-640x360.jpg
 
 - filename: PORTGAL131
   original: PORTGAL131-4216x2372.jpg
   sizes:
+  - PORTGAL131-640x360.jpg
   - PORTGAL131-1333x750.jpg
   - PORTGAL131-2309x1299.jpg
-  thumbnail: PORTGAL131-2309x1299.jpg
+  thumbnail: PORTGAL131-640x360.jpg
 
 - filename: PORTGAL130
   original: PORTGAL130-4216x2372.jpg
   sizes:
+  - PORTGAL130-640x360.jpg
   - PORTGAL130-1333x750.jpg
   - PORTGAL130-2309x1299.jpg
-  thumbnail: PORTGAL130-2309x1299.jpg
+  thumbnail: PORTGAL130-640x360.jpg
 
 - filename: PORTGAL137
   original: PORTGAL137-4216x2372.jpg
   sizes:
+  - PORTGAL137-640x360.jpg
   - PORTGAL137-1333x750.jpg
   - PORTGAL137-2309x1299.jpg
-  thumbnail: PORTGAL137-2309x1299.jpg
+  thumbnail: PORTGAL137-640x360.jpg
 
 - filename: PORTGAL136
   original: PORTGAL136-4216x2372.jpg
   sizes:
+  - PORTGAL136-640x360.jpg
   - PORTGAL136-1333x750.jpg
   - PORTGAL136-2309x1299.jpg
-  thumbnail: PORTGAL136-2309x1299.jpg
+  thumbnail: PORTGAL136-640x360.jpg
 
 - filename: PORTGAL135
   original: PORTGAL135-4216x2372.jpg
   sizes:
+  - PORTGAL135-640x360.jpg
   - PORTGAL135-1333x750.jpg
   - PORTGAL135-2309x1299.jpg
-  thumbnail: PORTGAL135-2309x1299.jpg
+  thumbnail: PORTGAL135-640x360.jpg
 
 - filename: PORTGAL134
   original: PORTGAL134-4216x2372.jpg
   sizes:
+  - PORTGAL134-640x360.jpg
   - PORTGAL134-1333x750.jpg
   - PORTGAL134-2309x1299.jpg
-  thumbnail: PORTGAL134-2309x1299.jpg
+  thumbnail: PORTGAL134-640x360.jpg
 
 - filename: PORTGAL032
   original: PORTGAL032-4216x2372.jpg
   sizes:
+  - PORTGAL032-640x360.jpg
   - PORTGAL032-1333x750.jpg
   - PORTGAL032-2309x1299.jpg
-  thumbnail: PORTGAL032-2309x1299.jpg
+  thumbnail: PORTGAL032-640x360.jpg
 
 - filename: PORTGAL033
   original: PORTGAL033-4216x2372.jpg
   sizes:
+  - PORTGAL033-640x360.jpg
   - PORTGAL033-1333x750.jpg
   - PORTGAL033-2309x1299.jpg
-  thumbnail: PORTGAL033-2309x1299.jpg
+  thumbnail: PORTGAL033-640x360.jpg
 
 - filename: PORTGAL030
   original: PORTGAL030-4216x2372.jpg
   sizes:
+  - PORTGAL030-640x360.jpg
   - PORTGAL030-1333x750.jpg
   - PORTGAL030-2309x1299.jpg
-  thumbnail: PORTGAL030-2309x1299.jpg
+  thumbnail: PORTGAL030-640x360.jpg
 
 - filename: PORTGAL031
   original: PORTGAL031-4216x2372.jpg
   sizes:
+  - PORTGAL031-640x360.jpg
   - PORTGAL031-1333x750.jpg
   - PORTGAL031-2309x1299.jpg
-  thumbnail: PORTGAL031-2309x1299.jpg
+  thumbnail: PORTGAL031-640x360.jpg
 
 - filename: PORTGAL036
   original: PORTGAL036-4216x2372.jpg
   sizes:
+  - PORTGAL036-640x360.jpg
   - PORTGAL036-1333x750.jpg
   - PORTGAL036-2309x1299.jpg
-  thumbnail: PORTGAL036-2309x1299.jpg
+  thumbnail: PORTGAL036-640x360.jpg
 
 - filename: PORTGAL037
   original: PORTGAL037-4216x2372.jpg
   sizes:
+  - PORTGAL037-640x360.jpg
   - PORTGAL037-1333x750.jpg
   - PORTGAL037-2309x1299.jpg
-  thumbnail: PORTGAL037-2309x1299.jpg
+  thumbnail: PORTGAL037-640x360.jpg
 
 - filename: PORTGAL034
   original: PORTGAL034-2372x4216.jpg
   sizes:
+  - PORTGAL034-360x640.jpg
   - PORTGAL034-750x1333.jpg
   - PORTGAL034-1299x2309.jpg
-  thumbnail: PORTGAL034-1299x2309.jpg
+  thumbnail: PORTGAL034-360x640.jpg
 
 - filename: PORTGAL035
   original: PORTGAL035-4216x2372.jpg
   sizes:
+  - PORTGAL035-640x360.jpg
   - PORTGAL035-1333x750.jpg
   - PORTGAL035-2309x1299.jpg
-  thumbnail: PORTGAL035-2309x1299.jpg
+  thumbnail: PORTGAL035-640x360.jpg
 
 - filename: PORTGAL225
   original: PORTGAL225-3162x3162.jpg
   sizes:
+  - PORTGAL225-640x640.jpg
   - PORTGAL225-1000x1000.jpg
   - PORTGAL225-1732x1732.jpg
-  thumbnail: PORTGAL225-1732x1732.jpg
+  thumbnail: PORTGAL225-640x640.jpg
 
 - filename: PORTGAL038
   original: PORTGAL038-2372x4216.jpg
   sizes:
+  - PORTGAL038-360x640.jpg
   - PORTGAL038-750x1333.jpg
   - PORTGAL038-1299x2309.jpg
-  thumbnail: PORTGAL038-1299x2309.jpg
+  thumbnail: PORTGAL038-360x640.jpg
 
 - filename: PORTGAL039
   original: PORTGAL039-2372x4216.jpg
   sizes:
+  - PORTGAL039-360x640.jpg
   - PORTGAL039-750x1333.jpg
   - PORTGAL039-1299x2309.jpg
-  thumbnail: PORTGAL039-1299x2309.jpg
+  thumbnail: PORTGAL039-360x640.jpg
 
 - filename: PORTGAL209
   original: PORTGAL209-4216x2372.jpg
   sizes:
+  - PORTGAL209-640x360.jpg
   - PORTGAL209-1333x750.jpg
   - PORTGAL209-2309x1299.jpg
-  thumbnail: PORTGAL209-2309x1299.jpg
+  thumbnail: PORTGAL209-640x360.jpg
 
 - filename: PORTGAL163
   original: PORTGAL163-3651x2738.jpg
   sizes:
+  - PORTGAL163-640x480.jpg
   - PORTGAL163-1154x866.jpg
   - PORTGAL163-1999x1499.jpg
-  thumbnail: PORTGAL163-1999x1499.jpg
+  thumbnail: PORTGAL163-640x480.jpg
 
 - filename: PORTGAL229
   original: PORTGAL229-3658x2733.jpg
   sizes:
+  - PORTGAL229-640x478.jpg
   - PORTGAL229-1156x864.jpg
   - PORTGAL229-2003x1496.jpg
-  thumbnail: PORTGAL229-2003x1496.jpg
+  thumbnail: PORTGAL229-640x478.jpg
 
 - filename: PORTGAL208
   original: PORTGAL208-4216x2372.jpg
   sizes:
+  - PORTGAL208-640x360.jpg
   - PORTGAL208-1333x750.jpg
   - PORTGAL208-2309x1299.jpg
-  thumbnail: PORTGAL208-2309x1299.jpg
+  thumbnail: PORTGAL208-640x360.jpg
 
 - filename: PORTGAL247
   original: PORTGAL247-3350x2984.jpg
   sizes:
+  - PORTGAL247-640x570.jpg
   - PORTGAL247-1059x943.jpg
   - PORTGAL247-1835x1635.jpg
-  thumbnail: PORTGAL247-1835x1635.jpg
+  thumbnail: PORTGAL247-640x570.jpg
 
 - filename: PORTGAL170
   original: PORTGAL170-2372x4216.jpg
   sizes:
+  - PORTGAL170-360x640.jpg
   - PORTGAL170-750x1333.jpg
   - PORTGAL170-1299x2309.jpg
-  thumbnail: PORTGAL170-1299x2309.jpg
+  thumbnail: PORTGAL170-360x640.jpg
 
 - filename: PORTGAL246
   original: PORTGAL246-3550x2816.jpg
   sizes:
+  - PORTGAL246-640x508.jpg
   - PORTGAL246-1122x890.jpg
   - PORTGAL246-1944x1542.jpg
-  thumbnail: PORTGAL246-1944x1542.jpg
+  thumbnail: PORTGAL246-640x508.jpg
 
 - filename: PORTGAL224
   original: PORTGAL224-3651x2738.jpg
   sizes:
+  - PORTGAL224-640x480.jpg
   - PORTGAL224-1154x866.jpg
   - PORTGAL224-1999x1499.jpg
-  thumbnail: PORTGAL224-1999x1499.jpg
+  thumbnail: PORTGAL224-640x480.jpg
 
 - filename: PORTGAL241
   original: PORTGAL241-2738x3651.jpg
   sizes:
+  - PORTGAL241-480x640.jpg
   - PORTGAL241-866x1154.jpg
   - PORTGAL241-1499x1999.jpg
-  thumbnail: PORTGAL241-1499x1999.jpg
+  thumbnail: PORTGAL241-480x640.jpg
 
 - filename: PORTGAL200
   original: PORTGAL200-2515x3974.jpg
   sizes:
+  - PORTGAL200-405x640.jpg
   - PORTGAL200-795x1256.jpg
   - PORTGAL200-1378x2177.jpg
-  thumbnail: PORTGAL200-1378x2177.jpg
+  thumbnail: PORTGAL200-405x640.jpg
 
 - filename: PORTGAL240
   original: PORTGAL240-2738x3651.jpg
   sizes:
+  - PORTGAL240-480x640.jpg
   - PORTGAL240-866x1154.jpg
   - PORTGAL240-1499x1999.jpg
-  thumbnail: PORTGAL240-1499x1999.jpg
+  thumbnail: PORTGAL240-480x640.jpg
