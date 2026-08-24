@@ -20,6 +20,7 @@
         <a href="{{ s3 }}{{ picture.original }}"
         data-srcset="{% for size in picture.sizes %}{{ s3 }}{{ size }} {{ size | split: '-' | last | split: '.' | first | split: 'x' | first }}w, {% endfor %}{{ s3 }}{{ picture.original }} {{ picture.original | split: '-' | last | split: '.' | first | split: 'x' | first }}w"
         data-sizes="100vw"
+        data-exthumbimage="{{ s3 }}{{ picture.thumbnail }}"
         class="image"
           {% if picture.title %}
               data-sub-html="<div class='lg-toolbar caption'><h4>{{ picture.title | escape }}</h4>
@@ -44,11 +45,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // lightGallery v2
   lightGallery(galleryElement, {
     plugins: [lgThumbnail],
-    // The strip would load every gallery image at full thumbnail size
-    // (~800 KB each, 232 of them) the moment the lightbox opens. Flip this
-    // back on once real small thumbnails exist on S3 and point
-    // data-exthumbimage at them.
-    thumbnail: false,
+    // The strip reads data-exthumbimage on each anchor, which points at the
+    // 640px file, so opening the lightbox costs about 10 MB for all 232
+    // instead of the 185 MB it used to.
+    thumbnail: true,
+    exThumbImage: 'data-exthumbimage',
     selector: '.image',
     licenseKey: '0000-0000-000-0000' // placeholder key for GPL use
   });
