@@ -30,7 +30,8 @@
   .seg button { flex: 1 1 auto; padding: 7px 10px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); border-radius: 6px; cursor: pointer; }
   .seg button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .ctl { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; margin-bottom: 10px; }
-  .ctl label { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; }
+  .ctl label { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .sub:empty { display: none; }
   .ctl label small { color: var(--muted); font-family: var(--mono); font-size: 11px; }
   input[type=range] { width: 100%; accent-color: var(--accent); }
   .num { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 5ch; text-align: right; font-size: 12px; }
@@ -80,7 +81,7 @@
   <aside class="rail">
     <div>
       <h1>KDP Frog Tongue</h1>
-      <p class="sub">Two-stage tongue, 48 in skull to tip: a 30 in nylon strip with rolling vertebrae and an 18 in disc-and-cable tentacle, built from the SolidCraft assembly. Drag to orbit, scroll to zoom, right-drag to pan.</p>
+      <p class="sub">Two-stage tongue, 48 in skull to tip: a 30 in nylon strip with rolling vertebrae and an 18 in disc-and-cable tentacle.</p>
       <p class="sub" id="status">Loading parts…</p>
     </div>
     <section>
@@ -114,7 +115,6 @@
           <circle id="padDot" class="pad-dot" cx="0" cy="0" r="11"></circle>
         </svg>
         <p class="sub" id="s2info">Curl</p>
-        <p class="sub">Drag the dot: pull it toward the operator to curl the tentacle up, push it toward the frog to curl it down, left and right bend it to the side. The rim is 220° of curl, both ways. Double-click to centre.</p>
       </div>
     </section>
     <section>
@@ -130,26 +130,18 @@
         <span class="num" id="skinOpacityVal">20%</span>
       </div>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cutaway" style="margin:0"><span>Cut away the near half of the skin (follows the curve)</span></label>
-      <details><summary class="legend" style="cursor:pointer">Optional: Balloon</summary>
-      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:6px"><input type="checkbox" id="balloonOn" style="margin:0"><span>Tip balloon (inflates to 12 in; Auto cycles it)</span></label>
-      <div class="ctl" id="balloonCtl" style="margin-top:4px">
-        <label for="balloonSl">Inflate</label>
-        <input type="range" id="balloonSl" min="0" max="100" step="any" value="0">
-        <span class="num" id="balloonVal">0 in</span>
-      </div>
-      </details>
     </section>
     <section>
       <h2>View</h2>
       <div class="ctl">
         <label for="headOpacity">Head opacity</label>
-        <input type="range" id="headOpacity" min="0" max="100" value="75">
-        <span class="num" id="headOpacityVal">75%</span>
+        <input type="range" id="headOpacity" min="0" max="100" value="96">
+        <span class="num" id="headOpacityVal">96%</span>
       </div>
       <div class="ctl">
         <label for="bodyOpacity">Body + barrel opacity</label>
-        <input type="range" id="bodyOpacity" min="0" max="100" value="75">
-        <span class="num" id="bodyOpacityVal">75%</span>
+        <input type="range" id="bodyOpacity" min="0" max="100" value="96">
+        <span class="num" id="bodyOpacityVal">96%</span>
       </div>
       <div class="seg" id="cams">
         <button type="button" data-cam="iso">3/4</button>
@@ -161,18 +153,36 @@
         <button type="button" data-cam="tip">Tip</button>
         <button type="button" data-cam="frog">Frog</button>
       </div>
-      <div class="legend" style="display:flex;gap:14px;align-items:center;margin-top:10px"><span>Barrel</span><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drum85" value="85" checked style="margin:0">85 gal salvage</label><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drum55" value="55" style="margin:0">55 gal drum</label></div>
-      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:10px"><input type="checkbox" id="showPullers" style="margin:0"><span>Show pullers (two people in harnesses on a tow frame)</span></label>
-      <details><summary class="legend" style="cursor:pointer">Puller settings</summary>
+      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:10px"><input type="checkbox" id="showPullers" style="margin:0" checked><span>Show Pullers</span></label>
+    </section>
+    <section>
+      <h2>Extra Settings</h2>
+      <details><summary class="legend" style="cursor:pointer">Puller Settings</summary>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="charlesMode" style="margin:0"><span>Charles mode</span></label>
       <div class="ctl"><label for="pullFwd">Pullers ahead of the crossbar <small>in</small></label><input type="range" id="pullFwd" min="6" max="120" value="55"><span class="num" id="pullFwdV">55</span></div>
       <div class="ctl"><label for="towLen">Tow frame past the barrel <small>in</small></label><input type="range" id="towLen" min="0" max="80" value="0"><span class="num" id="towLenV">0</span></div>
       <div class="ctl"><label for="towWid">Tow frame width <small>in, crossbar</small></label><input type="range" id="towWid" min="20" max="100" value="42"><span class="num" id="towWidV">42</span></div>
       <div class="ctl"><label for="pullSide">Pullers toward the centre line <small>in</small></label><input type="range" id="pullSide" min="-20" max="40" value="0"><span class="num" id="pullSideV">0</span></div>
       </details>
-    </section>
-    <section>
-      <h2>Frog body &amp; barrel (viewer only)</h2>
+      <details><summary class="legend" style="cursor:pointer">Optional: Balloon</summary>
+      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:6px"><input type="checkbox" id="balloonOn" style="margin:0"><span>Tip balloon (inflates to 12 in; Auto cycles it)</span></label>
+      <div class="ctl" id="balloonCtl" style="margin-top:4px">
+        <label for="balloonSl">Inflate</label>
+        <input type="range" id="balloonSl" min="0" max="100" step="any" value="0">
+        <span class="num" id="balloonVal">0 in</span>
+      </div>
+      </details>
+      <details><summary class="legend" style="cursor:pointer">Barrel Settings</summary>
+        <div>
+          <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:6px 18px">
+            <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drum85" value="85" checked style="margin:0">85 gal salvage</label>
+            <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drum55" value="55" style="margin:0">55 gal drum</label>
+            <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drumCustom" value="custom" style="margin:0">Custom</label>
+          </div>
+          <p class="sub">Length, width and height set the size (picking a preset fills them in; moving one switches to Custom).</p>
+          <div id="fs_barrel"></div>
+        </div>
+      </details>
       <details><summary class="legend" style="cursor:pointer">Move the Tongue Apparatus</summary>
       <div class="ctl"><label for="offX">In / out <small>+ = out toward the snout</small></label><input type="range" id="offX" min="-12" max="12" step="0.5" value="0"><span class="num" id="offXV">0.0 in</span></div>
       <div class="ctl"><label for="offY">Left / right <small>+ = left</small></label><input type="range" id="offY" min="-12" max="12" step="0.5" value="0"><span class="num" id="offYV">0.0 in</span></div>
@@ -180,10 +190,19 @@
       <div class="seg"><button type="button" id="offReset">Reset to 0</button></div>
       <p class="sub">Moves the tongue, skull and mount tube together against the frog, barrel and kart.</p>
       </details>
-      <details><summary class="legend" style="cursor:pointer">Frog position sliders (inches; the skin starts at a collar round the back of the head, limbs follow the points)</summary>
-        <div id="frogSliders"></div>
+      <details><summary class="legend" style="cursor:pointer">Frog Settings</summary>
+      <div>
+        <details><summary class="legend" style="cursor:pointer">Head</summary><div id="fs_head"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Body</summary><div id="fs_body"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Hind legs</summary><div id="fs_hind"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Front legs</summary><div id="fs_front"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: head and body</summary><div id="fc_green"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: body accents</summary><div id="fc_accent"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: eyes</summary><div id="fc_eye"></div></details>
+        <div id="fs_foot"></div>
+      </div>
       </details>
-      <details><summary class="legend" style="cursor:pointer">Kart: EZ-GO-style chassis (no motor) + 1 in pipe cage</summary>
+      <details><summary class="legend" style="cursor:pointer">Kart: EZ-GO UTV Settings</summary>
         <div id="kartSliders"></div>
       </details>
     </section>
@@ -250,7 +269,7 @@
   const tubMat = new THREE.MeshStandardMaterial({ color: 0x4a9f30, roughness: 0.7, metalness: 0.02, side: THREE.DoubleSide });   // inside of the standing tub: the body green, a little darker
   const fadeMats = [bodyMat, limbMat, padMat, drumMat, ringMat, tubMat];
   const kartMats = [pipeMat, railMat, tireMat, hubMat];
-  const DRUM = { r: 13.1, len: 40.7, dx: 0, dz: 0 };   // dx / dz keep the front edge and the bottom in place when the size changes (window.__setDrum)    // 85 gal salvage drum, 26.2 in dia x 40.7 in, lying on its side
+  const DRUM = { r: 13.1, rz: 13.1, len: 40.7, dx: 0, dz: 0 };   // r = half the fore/aft width, rz = half the height;   // dx / dz keep the front edge and the bottom in place when the size changes (window.__setDrum)    // 85 gal salvage drum, 26.2 in dia x 40.7 in, lying on its side
   // ---- standing tub: a rounded-U cavity cut into the top of the body (plan + side profile in the 2026-10-31 markup) ----
   // The body is the analytic loft below. The cavity is removed from its outer surface in the fragment shader (discard inside the cavity); the tub's own wall + floor
   // meshes are drawn only where they lie inside the loft (same analytic test in the shader), so the outer silhouette (flanks, legs, belly) is untouched and no hole shows.
@@ -309,30 +328,41 @@
   // adjustable points (inches, model coords); the 2026-10-27 placement as defaults
   const DEFAULTS = {
     head_x: 1, head_y: 0, head_z: 2, head_sx: 120, head_sy: 113, head_sz: 105.5,
-    barrel_x: 5, barrel_y: 0, barrel_z: -40.5,
+    barrel_x: 5, barrel_y: 0, barrel_z: -40.5, barrel_tilt: 15, drum_len: 40.7, drum_w: 26.2, drum_h: 26.2,
     collar_x: -10.5, body_x: -51.5, body_z: -14.5, body_len: 44.5, body_w: 38, body_h: 24,
     hip_x: -69, hip_y: 29, hip_z: -30.5,
     rear_x: -60, rear_y: 37, rear_z: -43,
-    front_x: 1, front_y: 14, front_z: -27.5,
+    front_x: 1, front_y: 14, front_z: -27.5, front_tilt: 15, leg_f: 80, leg_r: 80,
     kart_op: 100, cage_x: -61.5, cage_y: 0, cage_z: -39, cage_w: 48, cage_l: 108.5, cage_h: 57, pipe_d: 1.4,
     chassis_x: -59, wheelbase: 93.5, track: 58, tire_d: 21, tire_w: 9.1, ride: 23, wheel_dz: 0,
   };
 
-  const SLIDERS = [  // [key, label, min, max, group]
-    ["head_x", "Head fore/aft", -40, 40, "frog"], ["head_y", "Head left/right", -30, 30, "frog"], ["head_z", "Head height", -40, 40, "frog"],
-    ["head_sx", "Head length (%)", 50, 200, "frog"], ["head_sy", "Head width (%)", 50, 200, "frog"], ["head_sz", "Head height scale (%)", 50, 200, "frog"],
-    ["barrel_x", "Barrel fore/aft", -60, 80, "frog"], ["barrel_y", "Barrel left/right", -30, 30, "frog"], ["barrel_z", "Barrel height", -80, 10, "frog"],
-    ["collar_x", "Skin collar on the head (from head centre, scales with it)", -15, -2, "frog"],
-    ["body_x", "Body fore/aft", -110, -10, "frog"], ["body_z", "Body height", -70, 20, "frog"], ["body_len", "Body length", 16, 60, "frog"], ["body_w", "Body width", 10, 50, "frog"], ["body_h", "Body thickness", 8, 32, "frog"],
-    ["hip_x", "Hips fore/aft", -120, -30, "frog"], ["hip_y", "Hips spread", 10, 45, "frog"], ["hip_z", "Hips height", -70, 10, "frog"],
-    ["rear_x", "Rear feet fore/aft", -110, 20, "frog"], ["rear_y", "Rear feet spread", 10, 70, "frog"], ["rear_z", "Rear feet height", -80, 10, "frog"],
-    ["front_x", "Front feet fore/aft", -40, 60, "frog"], ["front_y", "Front feet spread", 5, 45, "frog"], ["front_z", "Front feet height", -80, 10, "frog"],
+  const SLIDERS = [  // [key, label, min, max, group, step?]
+    ["head_x", "Head fore/aft", -40, 40, "head"], ["head_y", "Head left/right", -30, 30, "head"], ["head_z", "Head height", -40, 40, "head"],
+    ["head_sx", "Head length (%)", 50, 200, "head"], ["head_sy", "Head width (%)", 50, 200, "head"], ["head_sz", "Head height scale (%)", 50, 200, "head"],
+    ["collar_x", "Skin collar on the head (from head centre, scales with it)", -15, -2, "head"],
+    ["drum_len", "Length (along the axle)", 12, 80, "barrel", 0.1], ["drum_w", "Width (fore/aft)", 8, 60, "barrel", 0.1], ["drum_h", "Height", 8, 60, "barrel", 0.1],
+    ["barrel_tilt", "Tilt (+ = left end up)", -45, 45, "barrel", 0.5],
+    ["barrel_x", "Barrel fore/aft", -60, 80, "barrel"], ["barrel_y", "Barrel left/right", -30, 30, "barrel"], ["barrel_z", "Barrel height", -80, 10, "barrel"],
+    ["body_x", "Body fore/aft", -110, -10, "body"], ["body_z", "Body height", -70, 20, "body"], ["body_len", "Body length", 16, 60, "body"], ["body_w", "Body width", 10, 50, "body"], ["body_h", "Body thickness", 8, 32, "body"],
+    ["hip_x", "Hips fore/aft", -120, -30, "hind"], ["hip_y", "Hips spread", 10, 45, "hind"], ["hip_z", "Hips height", -70, 10, "hind"],
+    ["rear_x", "Rear feet fore/aft", -110, 20, "hind"], ["rear_y", "Rear feet spread", 10, 70, "hind"], ["rear_z", "Rear feet height", -80, 10, "hind"],
+    ["leg_r", "Hind leg thickness (%)", 40, 160, "hind", 0.5],
+    ["front_x", "Front feet fore/aft", -40, 60, "front"], ["front_y", "Front feet spread", 5, 45, "front"], ["front_z", "Front feet height (above the barrel surface)", -80, 10, "front"],
+    ["front_tilt", "Front feet tilt (+ = left side up)", -45, 45, "front", 0.5], ["leg_f", "Front leg thickness (%)", 40, 160, "front", 0.5],
     ["kart_op", "Kart opacity (%)", 0, 100, "kart"],
     ["cage_x", "Cage fore/aft", -120, 40, "kart"], ["cage_y", "Cage left/right", -30, 30, "kart"], ["cage_z", "Cage base height", -80, 0, "kart"],
     ["cage_w", "Cage width", 24, 96, "kart"], ["cage_l", "Cage length", 24, 160, "kart"], ["cage_h", "Cage height", 24, 120, "kart"], ["pipe_d", "Pipe diameter", 0.5, 2.5, "kart"],
     ["chassis_x", "Chassis fore/aft", -120, 40, "kart"], ["wheelbase", "Wheelbase", 40, 140, "kart"], ["track", "Wheel width (track)", 30, 90, "kart"],
     ["tire_d", "Tire diameter", 14, 32, "kart"], ["tire_w", "Tire width", 5, 14, "kart"], ["ride", "Rail height above ground", 3, 40, "kart"], ["wheel_dz", "Wheel height (axle offset)", -30, 30, "kart"],
   ];
+  // colours: the green parts (head, body, legs), the accents (cream underside) and the eyes; hex strings
+  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f" };
+  const CO = Object.assign({}, COLOR_DEF);
+  try { const c = JSON.parse(localStorage.getItem("kdp_frog_colors_v1") || "null"); if (c) for (const k in COLOR_DEF) if (/^#[0-9a-f]{6}$/i.test(c[k])) CO[k] = c[k]; } catch (e) { }
+  const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const rgb2hex = c => "#" + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+  const TUBK = [0x4a / 0x5c, 0x9f / 0xc2, 0x30 / 0x38], LIDK = [76 / 91, 173 / 193, 51 / 56];   // the tub wall and the eyelids are a little darker than the green
   const FP = Object.assign({}, DEFAULTS);
   try { const s = JSON.parse(localStorage.getItem("kdp_frog_points_v5") || "null"); if (s) for (const k in DEFAULTS) if (typeof s[k] === "number") FP[k] = s[k]; } catch (e) { }
   window.__frogPoints = FP;
@@ -353,12 +383,17 @@
     const m = new THREE.Mesh(new THREE.CylinderGeometry(d / 2, d / 2, L, 14).rotateX(Math.PI / 2), mat || pipeMat);
     m.quaternion.setFromUnitVectors(V(0, 0, 1), dd.normalize()); m.position.copy(pa.clone().add(pb).multiplyScalar(0.5)); m.name = "kart"; kart.add(m); return m;
   }
-  function toes(from, to, s, spread, r) {
-    const d = V(...to).sub(V(...from)); const L = d.length(); const u = d.clone().normalize(); const side = V(-u.y, u.x, 0);
+  function toes(from, to, s, spread, r, tilt) {   // tilt (rad): the foot is rolled about the fore/aft axis so the soles lie on a surface sloping that much
+    const d = V(...to).sub(V(...from)); const L = d.length(); const u = d.clone().normalize(); const side = V(-u.y, u.x, 0), ct = Math.cos(tilt || 0), st = Math.sin(tilt || 0);
     for (const k of [-1, 0, 1]) {
-      const end = V(...from).add(u.clone().multiplyScalar(L)).add(side.clone().multiplyScalar(k * spread * s));
-      limb(limbMat, from, [end.x, end.y, end.z], r, r * 0.72); ell(padMat, [end.x + u.x * r, end.y + u.y * r, end.z], r * 1.3, r * 1.3, r * 0.7);
+      const o = side.clone().multiplyScalar(k * spread * s); o.set(o.x, o.y * ct - o.z * st, o.y * st + o.z * ct);
+      const end = V(...from).add(u.clone().multiplyScalar(L)).add(o);
+      limb(limbMat, from, [end.x, end.y, end.z], r, r * 0.72); ell(padMat, [end.x + u.x * r, end.y + u.y * r, end.z], r * 1.3, r * 1.3, r * 0.7, [tilt || 0, 0, 0]);
     }
+  }
+  function barrelRise(x, y) {   // how far the tilted barrel's top surface lies above where it would be untilted, at plan position (x, y)
+    const th = FP.barrel_tilt * Math.PI / 180, dxn = (x - (FP.barrel_x + DRUM.dx)) / DRUM.r, k = Math.sqrt(Math.max(0, 1 - dxn * dxn)) * DRUM.rz;
+    return (y - FP.barrel_y) * Math.tan(th) + k * (1 / Math.cos(th) - 1);
   }
 
   // ---- body skin: loft from the head collar to the tail ----
@@ -381,18 +416,40 @@
       }
     };
   }
+  let skinInfo = null;
+  function paintSkin() {
+    if (!skinInfo) return; const g = hex2rgb(CO.green), a = hex2rgb(CO.accent), arr = skinInfo.attr.array;
+    for (let i = 0; i < skinInfo.belly.length; i++) { const b = skinInfo.belly[i]; for (let k = 0; k < 3; k++) arr[i * 3 + k] = (g[k] * (1 - b) + a[k] * b) / 255; }
+    skinInfo.attr.needsUpdate = true;
+  }
+  function paintHead() {
+    const hg = window.__headGroup; if (!hg) return; const g = hex2rgb(CO.green), a = hex2rgb(CO.accent), e = hex2rgb(CO.eye);
+    hg.traverse(o => {
+      if (!o.isMesh) return;
+      const rgb = o.name === "head_skin" ? g : o.name === "head_lid" ? g.map((v, i) => v * LIDK[i]) : o.name === "head_belly" ? a : o.name === "head_eye" ? e : null;
+      const at = o.geometry && o.geometry.getAttribute("color"); if (!rgb || !at) return;
+      const f = at.array instanceof Float32Array ? 1 / 255 : 1;
+      for (let i = 0; i < at.count; i++) for (let k = 0; k < 3; k++) at.array[i * at.itemSize + k] = Math.max(0, Math.min(255, Math.round(rgb[k]))) * f;
+      at.needsUpdate = true;
+    });
+  }
+  function applyColors() {
+    const g = hex2rgb(CO.green); limbMat.color.setRGB(g[0] / 255, g[1] / 255, g[2] / 255); tubMat.color.setRGB(g[0] * TUBK[0] / 255, g[1] * TUBK[1] / 255, g[2] * TUBK[2] / 255);
+    paintSkin(); paintHead();
+  }
+  window.__applyFrogColors = applyColors;
   function buildSkin(P) {
     const prof = skinProfile(P); const N = 56, M = 40;
     const pos = [], col = [], idx = [];
-    const green = new THREE.Color(0x5cc238), cream = new THREE.Color(0xede9c7);
+    const belly = [];
     for (let i = 0; i <= N; i++) {
       const t = i / N; const x = prof.xc + (prof.xr - prof.xc) * (1 - Math.pow(1 - t, 1.6));   // denser near the collar
       let [ry, rz, zc] = prof.at(x); if (i === N) { ry = 0.05; rz = 0.05; }
       for (let j = 0; j <= M; j++) {
         const th = j / M * Math.PI * 2; const y = P.head_y * (1 - Math.min(1, (prof.xc - x) / 10)) + ry * Math.cos(th), z = zc + rz * Math.sin(th);
         pos.push(x, y, z);
-        const belly = sstep((-Math.sin(th) - 0.15) / 0.5);   // underside -> cream
-        const cc = green.clone().lerp(cream, belly); col.push(cc.r, cc.g, cc.b);
+        belly.push(sstep((-Math.sin(th) - 0.15) / 0.5));   // underside -> cream
+        col.push(0, 0, 0);
       }
     }
     for (let i = 0; i < N; i++) for (let j = 0; j < M; j++) {
@@ -402,6 +459,7 @@
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals();
     const m = new THREE.Mesh(g, bodyMat); m.name = "frog_body"; frog.add(m);
+    skinInfo = { attr: g.getAttribute("color"), belly }; paintSkin();
     return prof;
   }
 
@@ -415,6 +473,8 @@
     clear(frog); frog.add(kart);
     if (window.__applyHeadTransform) window.__applyHeadTransform();
     const P = FP; const a = P.body_len, b = P.body_w, c = P.body_h;
+    const kr = P.leg_r / 100, kf = P.leg_f / 100, tf = P.front_tilt * Math.PI / 180;
+    DRUM.r = P.drum_w / 2; DRUM.rz = P.drum_h / 2; DRUM.len = P.drum_len; DRUM.dx = 13.1 - DRUM.r; DRUM.dz = DRUM.rz - 13.1;   // the front edge and the bottom stay put when the size changes
     const prof = buildSkin(P);
     buildTub(P, prof);
     for (const s of [1, -1]) {
@@ -422,35 +482,37 @@
       const fx = Math.min(P.body_x - a * 0.3, prof.xc - 6); const [fry, frz, fzc] = prof.at(fx);
       const flank = [fx, s * fry * 0.6, fzc - frz * 0.2];
       const hip = [P.hip_x, s * P.hip_y, P.hip_z];
-      limb(limbMat, flank, hip, 9, 8);
+      limb(limbMat, flank, hip, 9 * kr, 8 * kr);
       const heel = [P.rear_x - 18, s * (P.rear_y - 2), P.rear_z + 6];
-      limb(limbMat, hip, heel, 7, 5.5);
-      limb(limbMat, heel, [P.rear_x, s * P.rear_y, P.rear_z], 5.5, 4.5);
-      toes([P.rear_x, s * P.rear_y, P.rear_z], [P.rear_x + 14, s * (P.rear_y + 2), P.rear_z], s, 7, 2.2);
+      limb(limbMat, hip, heel, 7 * kr, 5.5 * kr);
+      limb(limbMat, heel, [P.rear_x, s * P.rear_y, P.rear_z], 5.5 * kr, 4.5 * kr);
+      toes([P.rear_x, s * P.rear_y, P.rear_z], [P.rear_x + 14, s * (P.rear_y + 2), P.rear_z], s, 7, 2.2 * kr);
       // front leg: shoulder on the skin just behind the collar, elbow out, forearm to the front foot point, toes
       const sx = Math.min(P.body_x + a * 0.75, prof.xc - 4); const [sry, srz, szc] = prof.at(sx);
       const sh = [sx, s * sry * 0.75, szc];
-      const ft = [P.front_x, s * P.front_y, P.front_z];
+      const ft = [P.front_x, s * P.front_y, P.front_z + barrelRise(P.front_x, s * P.front_y)];   // the front feet ride on the (tilted) barrel
       const el = [(sh[0] + ft[0]) / 2, s * (Math.max(P.front_y, sry * 0.75) + 6), (sh[2] + ft[2]) / 2 - 2];
-      limb(limbMat, sh, el, 6.5, 5.2); limb(limbMat, el, ft, 5.2, 4.0);
-      toes(ft, [ft[0] + 11, ft[1], ft[2]], s, 6, 2.0);
+      limb(limbMat, sh, el, 6.5 * kf, 5.2 * kf); limb(limbMat, el, ft, 5.2 * kf, 4.0 * kf);
+      toes(ft, [ft[0] + 11, ft[1], ft[2]], s, 6, 2.0 * kf, tf);
     }
     // the barrel
-    const drum = new THREE.Group(); drum.position.set(P.barrel_x + DRUM.dx, P.barrel_y, P.barrel_z + DRUM.dz); frog.add(drum);
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(DRUM.r, DRUM.r, DRUM.len, 64), drumMat); body.name = "frog_drum"; drum.add(body);
-    for (const yy of [-DRUM.len * 0.26, 0, DRUM.len * 0.26]) { const h = new THREE.Mesh(new THREE.TorusGeometry(DRUM.r + 0.25, 0.6, 10, 72), drumMat); h.rotation.x = Math.PI / 2; h.position.y = yy; h.name = "frog_drum"; drum.add(h); }
+    const R = DRUM.rz, LEN = DRUM.len;
+    const drum = new THREE.Group(); drum.position.set(P.barrel_x + DRUM.dx, P.barrel_y, P.barrel_z + DRUM.dz); drum.rotation.x = P.barrel_tilt * Math.PI / 180; frog.add(drum);   // + tilt lifts the left end
+    const shp = new THREE.Group(); shp.scale.set(DRUM.r / R, 1, 1); drum.add(shp);   // oval section when width and height differ
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(R, R, LEN, 64), drumMat); body.name = "frog_drum"; shp.add(body);
+    for (const yy of [-LEN * 0.26, 0, LEN * 0.26]) { const h = new THREE.Mesh(new THREE.TorusGeometry(R + 0.25, 0.6, 10, 72), drumMat); h.rotation.x = Math.PI / 2; h.position.y = yy; h.name = "frog_drum"; shp.add(h); }
     for (const sy of [1, -1]) {
-      const rim = new THREE.Mesh(new THREE.TorusGeometry(DRUM.r + 0.1, 0.55, 10, 72), sy > 0 ? ringMat : drumMat); rim.rotation.x = Math.PI / 2; rim.position.y = sy * DRUM.len / 2; rim.name = "frog_drum"; drum.add(rim);
-      const cap = new THREE.Mesh(new THREE.CircleGeometry(DRUM.r - 0.3, 64), drumMat); cap.rotation.x = -sy * Math.PI / 2; cap.position.y = sy * (DRUM.len / 2 + 0.2); cap.name = "frog_drum"; drum.add(cap);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(R + 0.1, 0.55, 10, 72), sy > 0 ? ringMat : drumMat); rim.rotation.x = Math.PI / 2; rim.position.y = sy * LEN / 2; rim.name = "frog_drum"; shp.add(rim);
+      const cap = new THREE.Mesh(new THREE.CircleGeometry(R - 0.3, 64), drumMat); cap.rotation.x = -sy * Math.PI / 2; cap.position.y = sy * (LEN / 2 + 0.2); cap.name = "frog_drum"; shp.add(cap);
     }
-    const lug = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.6, 1.2), ringMat); lug.position.set(0, DRUM.len / 2, DRUM.r + 0.4); lug.name = "frog_drum"; drum.add(lug);
+    const lug = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.6, 1.2), ringMat); lug.position.set(0, LEN / 2, R + 0.4); lug.name = "frog_drum"; shp.add(lug);
     if (logoMat) {
-      const H = 22, arc = H * 0.81 / DRUM.r;
+      const H = 22, arc = H * 0.81 / R;
       for (const ang of [0.35, Math.PI + 0.35]) {
-        const g = new THREE.CylinderGeometry(DRUM.r + 0.12, DRUM.r + 0.12, H, 32, 1, true, 0, arc);
-        const m = new THREE.Mesh(g, logoMat); m.name = "frog_drum"; m.rotation.y = -(ang - arc / 2) + Math.PI / 2 + arc; drum.add(m);
+        const g = new THREE.CylinderGeometry(R + 0.12, R + 0.12, H, 32, 1, true, 0, arc);
+        const m = new THREE.Mesh(g, logoMat); m.name = "frog_drum"; m.rotation.y = -(ang - arc / 2) + Math.PI / 2 + arc; shp.add(m);
       }
-      for (const sy of [1, -1]) { const g = new THREE.PlaneGeometry(DRUM.r * 1.2 * 0.81, DRUM.r * 1.2); const m = new THREE.Mesh(g, logoMat); m.rotation.x = -sy * Math.PI / 2; m.rotation.z = sy > 0 ? Math.PI / 2 : -Math.PI / 2; m.position.y = sy * (DRUM.len / 2 + 0.3); m.name = "frog_drum"; drum.add(m); }
+      for (const sy of [1, -1]) { const g = new THREE.PlaneGeometry(R * 1.2 * 0.81, R * 1.2); const m = new THREE.Mesh(g, logoMat); m.rotation.x = -sy * Math.PI / 2; m.rotation.z = sy > 0 ? Math.PI / 2 : -Math.PI / 2; m.position.y = sy * (LEN / 2 + 0.3); m.name = "frog_drum"; shp.add(m); }
     }
     frog.traverse(o => { if (o.isMesh && o.name !== "kart") o.renderOrder = 1; });
     applyVisible();
@@ -495,29 +557,80 @@
   }
   function applyKartOpacity() { const o = FP.kart_op / 100; for (const m of kartMats) { m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; } }
   function applyVisible() { if (window.__frogVisibleState) for (const k in window.__frogVisibleState) frog.traverse(x => { if (x.isMesh && x.name === k) x.visible = window.__frogVisibleState[k]; }); }
-  function build() { buildFrog(); buildKart(); }
+  function build() { buildFrog(); buildKart(); applyColors(); }
   build();
 
-  // panel: sliders by group, readout, reset
+  // panel: sliders by group (each in its own drop-down), colour pickers, barrel presets, readout, reset
+  const DRUM_PRESETS = { "85": [40.7, 26.2, 26.2], "55": [34.5, 22.5, 22.5] };   // length, width, height (in): 85 gal salvage drum; 55 gal steel drum (22.5 in dia over the rings is 23.9)
   function makePanel() {
-    const hosts = { frog: document.getElementById("frogSliders"), kart: document.getElementById("kartSliders") };
-    if (!hosts.frog && !hosts.kart) return;
-    const rows = [];
-    for (const [key, label, lo, hi, grp] of SLIDERS) {
-      const host = hosts[grp]; if (!host) continue;
-      const row = document.createElement("div"); row.className = "ctl";
-      row.innerHTML = `<label>${label}</label><input type="range" min="${lo}" max="${hi}" step="${hi - lo > 20 ? 0.5 : 0.1}" value="${FP[key]}"><span class="num"></span>`;
-      const inp = row.querySelector("input"), num = row.querySelector(".num"); const unit = key === "kart_op" || /^head_s[xyz]$/.test(key) ? "%" : " in";
+    const HOST = { head: "fs_head", barrel: "fs_barrel", body: "fs_body", hind: "fs_hind", front: "fs_front", kart: "kartSliders" };
+    const rows = [], rowOf = {};
+    const unitOf = key => key === "kart_op" || /^head_s[xyz]$/.test(key) || /^leg_[fr]$/.test(key) ? "%" : /_tilt$/.test(key) ? "°" : " in";
+    for (const [key, label, lo, hi, grp, stp] of SLIDERS) {
+      const host = document.getElementById(HOST[grp]); if (!host) continue;
+      const row = document.createElement("div"); row.className = "ctl"; const step = stp || (hi - lo > 20 ? 0.5 : 0.1);
+      row.innerHTML = `<label>${label}</label><input type="range" min="${lo}" max="${hi}" step="${step}" value="${FP[key]}"><span class="num"></span>`;
+      const inp = row.querySelector("input"), num = row.querySelector(".num"), unit = unitOf(key);
       num.textContent = FP[key].toFixed(1) + unit;
-      inp.addEventListener("input", () => { FP[key] = +inp.value; num.textContent = FP[key].toFixed(1) + unit; if (key === "kart_op") applyKartOpacity(); else if (grp === "kart") buildKart(); else buildFrog(); save(); readout(); });
-      host.appendChild(row); rows.push([key, inp, num, unit]);
+      inp.addEventListener("input", () => {
+        FP[key] = +inp.value; num.textContent = FP[key].toFixed(1) + unit;
+        if (key === "kart_op") applyKartOpacity(); else if (grp === "kart") buildKart(); else buildFrog();
+        if (key.startsWith("drum_")) syncDrumRadio(true);
+        save(); readout();
+      });
+      host.appendChild(row); rows.push([key, inp, num, unit]); rowOf[key] = [inp, num, unit];
     }
-    const host = hosts.kart || hosts.frog;
-    const ro = document.createElement("div"); ro.className = "legend"; ro.id = "frogReadout"; ro.style.cssText = "font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:6px"; host.appendChild(ro);
-    const rb = document.createElement("button"); rb.type = "button"; rb.textContent = "Reset frog + kart"; rb.style.marginTop = "6px";
-    rb.addEventListener("click", () => { Object.assign(FP, DEFAULTS); for (const [k, inp, num, unit] of rows) { inp.value = FP[k]; num.textContent = FP[k].toFixed(1) + unit; } build(); save(); readout(); });
-    host.appendChild(rb);
-    function readout() { ro.textContent = "values: " + Object.keys(DEFAULTS).map(k => `${k}=${FP[k]}`).join("  "); }
+    // barrel presets: 85 gal, 55 gal, or Custom (the three size sliders)
+    const radio = id => document.getElementById(id);
+    function syncDrumRadio(custom) {
+      const m = Object.keys(DRUM_PRESETS).find(k => DRUM_PRESETS[k].every((v, i) => Math.abs(v - FP[["drum_len", "drum_w", "drum_h"][i]]) < 0.05));
+      const el = radio(!custom && m ? "drum" + m : "drumCustom"); if (el) el.checked = true;
+    }
+    for (const id of ["drum85", "drum55", "drumCustom"]) { const el = radio(id); if (el) el.addEventListener("change", ev => {
+      if (!ev.target.checked || ev.target.value === "custom") return;
+      ["drum_len", "drum_w", "drum_h"].forEach((k, i) => { FP[k] = DRUM_PRESETS[ev.target.value][i]; const r = rowOf[k]; if (r) { r[0].value = FP[k]; r[1].textContent = FP[k].toFixed(1) + r[2]; } });
+      buildFrog(); save(); readout();
+    }); }
+    syncDrumRadio(false);
+    // colour pickers: a swatch (the browser's colour wheel) plus red / green / blue sliders
+    const pickers = [];
+    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"]]) {
+      const host = document.getElementById(hostId); if (!host) continue;
+      host.innerHTML = `<div class="ctl"><label>Colour wheel</label><input type="color" style="width:100%;height:36px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--chip);cursor:pointer"><span class="num hexv"></span></div>` +
+        ["Red", "Green", "Blue"].map(n => `<div class="ctl"><label>${n}</label><input type="range" min="0" max="255" step="1" value="0"><span class="num"></span></div>`).join("") +
+        `<div class="seg" style="margin-bottom:10px"><button type="button">Reset this colour</button></div>`;
+      const wheel = host.querySelector("input[type=color]"), hexv = host.querySelector(".hexv"), sl = [...host.querySelectorAll("input[type=range]")], nums = [...host.querySelectorAll(".ctl .num")].slice(1);
+      const show = () => { const c = hex2rgb(CO[key]); wheel.value = CO[key]; hexv.textContent = CO[key]; sl.forEach((x, i) => { x.value = c[i]; nums[i].textContent = c[i]; }); };
+      const set = hex => { CO[key] = hex; show(); applyColors(); try { localStorage.setItem("kdp_frog_colors_v1", JSON.stringify(CO)); } catch (e) { } readout(); };
+      wheel.addEventListener("input", () => set(wheel.value));
+      sl.forEach(x => x.addEventListener("input", () => set(rgb2hex(sl.map(y => +y.value)))));
+      host.querySelector("button").addEventListener("click", () => set(COLOR_DEF[key]));
+      show(); pickers.push([key, set]);
+    }
+    // each section (frog, barrel, kart) gets its own selectable values readout and its own reset button
+    const SECTIONS = {
+      frog:   { host: "fs_foot",    groups: ["head", "body", "hind", "front"], label: "Reset frog",   colours: true },
+      barrel: { host: "fs_barrel",  groups: ["barrel"],                        label: "Reset barrel" },
+      kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
+    };
+    const grpOf = {}; for (const [key, , , , grp] of SLIDERS) grpOf[key] = grp;
+    const readouts = [];
+    for (const [name, sec] of Object.entries(SECTIONS)) {
+      const foot = document.getElementById(sec.host); if (!foot) continue;
+      const keys = Object.keys(DEFAULTS).filter(k => sec.groups.includes(grpOf[k]));
+      const ro = document.createElement("div"); ro.className = "legend"; ro.id = name + "Readout"; ro.style.cssText = "font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:6px"; foot.appendChild(ro);
+      const rb = document.createElement("button"); rb.type = "button"; rb.textContent = sec.label; rb.style.marginTop = "6px";
+      rb.addEventListener("click", () => {
+        for (const k of keys) FP[k] = DEFAULTS[k];
+        for (const [k, inp, num, unit] of rows) if (keys.includes(k)) { inp.value = FP[k]; num.textContent = FP[k].toFixed(1) + unit; }
+        if (name === "barrel") syncDrumRadio(false);
+        if (sec.colours) for (const [k, set] of pickers) set(COLOR_DEF[k]);
+        build(); save(); readout();
+      });
+      foot.appendChild(rb);
+      readouts.push(() => { ro.textContent = "values: " + keys.map(k => `${k}=${FP[k]}`).join("  ") + (sec.colours ? "  " + Object.keys(CO).map(k => `${k}=${CO[k]}`).join("  ") : ""); });
+    }
+    function readout() { for (const f of readouts) f(); }
     function save() { try { localStorage.setItem("kdp_frog_points_v5", JSON.stringify(FP)); } catch (e) { } }
     readout();
   }
@@ -528,7 +641,7 @@
   window.__frogVisible = (what, on) => { window.__frogVisibleState[what] = on; applyVisible(); };
   window.__DRUM = DRUM;
   window.__frogRebuild = build;
-  window.__setDrum = kind => { const d = kind === "55" ? { r: 11.25, len: 34.5 } : { r: 13.1, len: 40.7 }; DRUM.r = d.r; DRUM.len = d.len; DRUM.dx = 13.1 - d.r; DRUM.dz = d.r - 13.1; build(); };   // 85 gal salvage (default) or a standard 55 gal steel drum: 22.5 in dia (23.9 over the hoops) x 34.5 in
+  window.__setDrum = kind => { const p = DRUM_PRESETS[kind === "55" ? "55" : "85"]; FP.drum_len = p[0]; FP.drum_w = p[1]; FP.drum_h = p[2]; build(); };   // 85 gal salvage or 55 gal drum (the panel radios do this and keep the sliders in step)
   window.__GROUND_Z = GROUND_Z;
 })();
 
@@ -639,17 +752,17 @@
   }
 
   // ---------- head (static GLB, inline) ----------
-  const headGroup = new THREE.Group(); root.add(headGroup);
+  const headGroup = new THREE.Group(); root.add(headGroup); window.__headGroup = headGroup;
   window.__applyHeadTransform = () => { const P = window.__frogPoints || {}; headGroup.position.set(P.head_x || 0, P.head_y || 0, P.head_z || 0); headGroup.scale.set((P.head_sx || 100) / 100, (P.head_sy || 100) / 100, (P.head_sz || 100) / 100); };
   window.__applyHeadTransform();
   if (window.__frogGroup) { root.add(window.__frogGroup); }
-  let bodyOpacity = 0.75; function applyBody() { if (window.__frogSetOpacity) window.__frogSetOpacity(bodyOpacity); }
+  let bodyOpacity = 0.96; function applyBody() { if (window.__frogSetOpacity) window.__frogSetOpacity(bodyOpacity); }
   applyBody();
-  let headOpacity = 0.75;
+  let headOpacity = 0.96;
   (function loadHead() {
     const s = document.getElementById("glb_head").textContent.trim(); const bin = atob(s); const u = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    new THREE.GLTFLoader().parse(u.buffer, "", gltf => { headGroup.add(gltf.scene); applyHead(); }, () => {});
+    new THREE.GLTFLoader().parse(u.buffer, "", gltf => { headGroup.add(gltf.scene); applyHead(); if (window.__applyFrogColors) window.__applyFrogColors(); }, () => {});
   })();
   function applyHead() {
     headGroup.traverse(o => {
@@ -747,7 +860,7 @@
         placedGroup.add(mesh); instances.push({ mesh, frame: p.frame, M: new THREE.Matrix4().set(...p.M), pname: p.name });
       }
       buildStatics();
-      libReady = true; document.getElementById("status").textContent = `${DATA.placements.length} parts from the SolidCraft hybrid-48 assembly (${Object.keys(lib).length} products).`;
+      libReady = true; document.getElementById("status").textContent = "";
       update();
     };
     const onErr = err => { document.getElementById("status").textContent = "Could not load the part library."; console.error(err); };
@@ -1122,8 +1235,5 @@
     requestAnimationFrame(loop);
   })(0);
 })();
-
-// barrel size: 85 gal salvage (default) or a 55 gal steel drum
-for (const id of ["drum85", "drum55"]) document.getElementById(id).addEventListener("change", ev => { if (ev.target.checked) window.__setDrum(ev.target.value); });
 
 </script>
