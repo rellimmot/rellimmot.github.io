@@ -61,8 +61,11 @@
   table.cab td { padding: 2px 0; border-bottom: 1px solid var(--line); }
   table.cab td:last-child { text-align: right; color: var(--fg); }
   table.cab td:first-child { color: var(--muted); }
-  .hud { position: absolute; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-family: var(--mono); font-size: 12px;
-    color: var(--muted); background: color-mix(in srgb, var(--panel) 85%, transparent); padding: 6px 9px; border-radius: 6px; pointer-events: none; }
+  table.ten td.nm { white-space: nowrap; }
+  table.ten td.tn { text-align: right; width: 1%; white-space: nowrap; padding-left: 8px; }
+  table.ten td.tn span { display: block; line-height: 1.2; }
+  table.ten td.tn span.u { font-size: 10px; color: var(--muted); }
+  table.ten td.sp { text-align: center; width: 1%; padding: 0 0 0 8px; color: var(--muted); }
   code { font-family: var(--mono); font-size: 12px; }
   details { border: 1px solid var(--line); border-radius: 8px; background: var(--chip); margin-bottom: 8px; }
   details > summary { list-style: none; display: flex; flex-direction: row !important; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; font-weight: 500; line-height: 1.35; border-radius: 8px; user-select: none; }
@@ -94,8 +97,8 @@
       <h2>Auto</h2>
       <div class="ctl">
         <label for="autoSp">Auto motion <small id="autoHint">0 = off; drives the stage 1 curl and the joystick</small></label>
-        <input type="range" id="autoSp" min="0" max="10" step="0.1" value="3">
-        <span class="num" id="autoSpV">3</span>
+        <input type="range" id="autoSp" min="0" max="10" step="0.1" value="5">
+        <span class="num" id="autoSpV">5</span>
       </div>
     </section>
     <section id="s1Section">
@@ -135,7 +138,7 @@
         <input type="range" id="skinOpacity" min="10" max="100" value="20">
         <span class="num" id="skinOpacityVal">20%</span>
       </div>
-      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cutaway" style="margin:0"><span>Cut away the near half of the skin (follows the curve)</span></label>
+      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cutaway" style="margin:0"><span>Cut away the near half of the skin</span></label>
     </section>
     <section>
       <h2>View</h2>
@@ -174,7 +177,7 @@
       <div class="ctl"><label for="pullSide">Pullers toward the centre line <small>in</small></label><input type="range" id="pullSide" min="-20" max="40" value="0"><span class="num" id="pullSideV">0</span></div>
       </details>
       <details><summary class="legend" style="cursor:pointer">Optional: Balloon</summary>
-      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:6px"><input type="checkbox" id="balloonOn" style="margin:0"><span>Tip balloon (inflates to 12 in; Auto cycles it)</span></label>
+      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:6px"><input type="checkbox" id="balloonOn" style="margin:0"><span>Tongue tip balloon</span></label>
       <div class="ctl" id="balloonCtl" style="margin-top:4px">
         <label for="balloonSl">Inflate</label>
         <input type="range" id="balloonSl" min="0" max="100" step="any" value="0">
@@ -188,7 +191,6 @@
             <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drum55" value="55" style="margin:0">55 gal drum</label>
             <label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="radio" name="drumSize" id="drumCustom" value="custom" style="margin:0">Custom</label>
           </div>
-          <p class="sub">Length, width and height set the size (picking a preset fills them in; moving one switches to Custom).</p>
           <div id="fs_barrel"></div>
           <details><summary class="legend" style="cursor:pointer">Colour: barrel</summary><div id="fc_barrel"></div></details>
           <div id="fs_barrel_foot"></div>
@@ -199,7 +201,6 @@
       <div class="ctl"><label for="offY">Left / right <small>+ = left</small></label><input type="range" id="offY" min="-12" max="12" step="0.5" value="0"><span class="num" id="offYV">0.0 in</span></div>
       <div class="ctl"><label for="offZ">Up / down <small>+ = up</small></label><input type="range" id="offZ" min="-12" max="12" step="0.5" value="0"><span class="num" id="offZV">0.0 in</span></div>
       <div class="seg"><button type="button" id="offReset">Reset to 0</button></div>
-      <p class="sub">Moves the tongue, skull and mount tube together against the frog, barrel and kart.</p>
       </details>
       <details><summary class="legend" style="cursor:pointer">Frog Settings</summary>
       <div>
@@ -220,18 +221,32 @@
       <details><summary class="legend" style="cursor:pointer">Kart: EZ-GO UTV Settings</summary>
         <div id="kartSliders"></div>
       </details>
+      <details id="expBox"><summary class="legend" style="cursor:pointer">Export settings</summary>
+        <div>
+          <div class="seg" style="margin-bottom:8px"><button type="button" id="expCopy">Copy to clipboard</button></div>
+          <textarea id="expText" readonly spellcheck="false" rows="14" style="width:100%;box-sizing:border-box;font-family:var(--mono);font-size:11px;line-height:1.35;color:var(--fg);background:var(--bg,var(--chip));border:1px solid var(--line);border-radius:6px;padding:6px;resize:vertical"></textarea>
+        </div>
+      </details>
     </section>
     <section>
       <h2>Cable travel from straight</h2>
       <table class="cab" id="cab">
-        <tr><td>Strip cable, +y side (to the sacrum)</td><td id="cP">–</td></tr>
+        <tr><td>Strip cable, +y side</td><td id="cP">–</td></tr>
         <tr><td>Strip cable, −y side</td><td id="cM">–</td></tr>
-        <tr><td>Tentacle A (top), housing + bare cable</td><td id="cA">–</td></tr>
+        <tr><td>Tentacle A (top)</td><td id="cA">–</td></tr>
         <tr><td>Tentacle B (+y side)</td><td id="cB">–</td></tr>
         <tr><td>Tentacle C (bottom)</td><td id="cC">–</td></tr>
         <tr><td>Tentacle D (−y side)</td><td id="cD">–</td></tr>
       </table>
-      <p class="sub">Negative = pulled in, positive = pays out. Geometry only: the strip cables are measured from the back of the skull to the dead end past rod 7, the tentacle cables from the back of the skull along the housing lanes and through the discs to the tip cap. A curled strip is a polyline of 4 in rigid pieces, a few millimetres off the true arc.</p>
+      <h2 style="margin-top:14px">Cable pull tension, estimated</h2>
+      <table class="cab ten" id="ten">
+        <tr><td class="nm">Strip cable, +y side</td><td class="tn"><span id="tP">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tPn">–</span><span class="u">N</span></td></tr>
+        <tr><td class="nm">Strip cable, −y side</td><td class="tn"><span id="tM">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tMn">–</span><span class="u">N</span></td></tr>
+        <tr><td class="nm">Tentacle A (top)</td><td class="tn"><span id="tA">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tAn">–</span><span class="u">N</span></td></tr>
+        <tr><td class="nm">Tentacle B (+y side)</td><td class="tn"><span id="tB">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tBn">–</span><span class="u">N</span></td></tr>
+        <tr><td class="nm">Tentacle C (bottom)</td><td class="tn"><span id="tC">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tCn">–</span><span class="u">N</span></td></tr>
+        <tr><td class="nm">Tentacle D (−y side)</td><td class="tn"><span id="tD">–</span><span class="u">LBF</span></td><td class="sp">|</td><td class="tn"><span id="tDn">–</span><span class="u">N</span></td></tr>
+      </table>
     </section>
     <section>
       <h2>Parts</h2>
@@ -243,9 +258,7 @@
     </section>
   </aside>
   <div class="view">
-    <canvas id="c" tabindex="0" aria-label="3D view of the frog tongue mechanism"></canvas>
-    <div class="hud">grid: 12 in squares</div>
-  </div>
+    <canvas id="c" tabindex="0" aria-label="3D view of the frog tongue mechanism"></canvas>  </div>
 </div>
 
 <script type="application/json" id="placements">{"meta": {"hybrid": true, "strip_cables": {"p": [{"group": "skull", "s_in": 0.0, "p": [-4.5, 3.5, 3.0]}, {"group": "s1_seg00", "s_in": 4.0, "p": [-1.0359, 3.36667, 1.0]}, {"group": "s1_seg01", "s_in": 8.0, "p": [2.4282, 3.23333, -1.0]}, {"group": "s1_seg02", "s_in": 12.0, "p": [5.8923, 3.1, -3.0]}, {"group": "s1_seg03", "s_in": 16.0, "p": [9.35641, 2.96667, -5.0]}, {"group": "s1_seg04", "s_in": 20.0, "p": [12.82051, 2.83333, -7.0]}, {"group": "s1_seg05", "s_in": 24.0, "p": [16.28461, 2.04167, -9.0]}, {"group": "s1_seg06", "s_in": 28.0, "p": [19.74871, 1.25, -11.0]}, {"group": "s1_seg06", "s_in": 28.5, "p": [20.18172, 1.25, -11.25]}, {"group": "s1_seg06", "s_in": 28.945669, "p": [20.56768, 1.25, -11.47283]}], "m": [{"group": "skull", "s_in": 0.0, "p": [-4.5, -3.5, 3.0]}, {"group": "s1_seg00", "s_in": 4.0, "p": [-1.0359, -3.36667, 1.0]}, {"group": "s1_seg01", "s_in": 8.0, "p": [2.4282, -3.23333, -1.0]}, {"group": "s1_seg02", "s_in": 12.0, "p": [5.8923, -3.1, -3.0]}, {"group": "s1_seg03", "s_in": 16.0, "p": [9.35641, -2.96667, -5.0]}, {"group": "s1_seg04", "s_in": 20.0, "p": [12.82051, -2.83333, -7.0]}, {"group": "s1_seg05", "s_in": 24.0, "p": [16.28461, -2.04167, -9.0]}, {"group": "s1_seg06", "s_in": 28.0, "p": [19.74871, -1.25, -11.0]}, {"group": "s1_seg06", "s_in": 28.5, "p": [20.18172, -1.25, -11.25]}, {"group": "s1_seg06", "s_in": 28.945669, "p": [20.56768, -1.25, -11.47283]}]}, "strip_cable_d": 0.09375, "world_from_tongue": [[0.866025404, 0.0, 0.5, -4.5], [0.0, 1.0, 0.0, 0.0], [-0.5, 0.0, 0.866025404, 3.0], [0.0, 0.0, 0.0, 1.0]], "stage1": {"clamp_exit_s": 0.0, "free_strip_s": [0.0, 30.0], "neck_end_s": 2.0, "segment_boundaries_s": [2.0, 6.0, 10.0, 14.0, 18.0, 22.0, 26.0, 30.0], "vertebra_stations_s": [4.0, 8.0, 12.0, 16.0, 20.0, 24.0], "rod_stations_s": [4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0], "rod_lengths_in": [7.233333, 6.966667, 6.7, 6.433333, 6.166667, 4.583333, 3.0], "cable_offset_in": [3.366667, 3.233333, 3.1, 2.966667, 2.833333, 2.041667, 1.25], "strip_height_in": {"root": 6.0, "end": 4.0}, "sacrum_s": [28.5, 30.0]}, "stage2": {"root_s": 30.0, "discs": 12, "pitch_in": 1.5, "length_in": 18.0, "joint_s": [30.0, 31.5, 33.0, 34.5, 36.0, 37.5, 39.0, 40.5, 42.0, 43.5, 45.0, 46.5], "tip_s": 48.0}, "bounds": {"strip_tail": [-12.0, -0.125, -3.0, 2.0, 0.125, 3.0], "rod_tube": [-20.0, -0.625, -0.625, -12.0, 0.625, 0.625], "rod_1": [3.75, -3.6167, -0.2499, 4.25, 3.6167, 0.2499], "rod_2": [7.75, -3.4833, -0.2499, 8.25, 3.4833, 0.2499], "rod_3": [11.75, -3.35, -0.2499, 12.25, 3.35, 0.2499], "rod_4": [15.75, -3.2167, -0.2499, 16.25, 3.2167, 0.2499], "rod_5": [19.75, -3.0833, -0.2499, 20.25, 3.0833, 0.2499], "rod_6": [23.75, -2.2917, -0.2499, 24.25, 2.2917, 0.2499], "rod_7": [27.75, -1.5, -0.25, 28.25, 1.5, 0.25], "sacrum": [28.5, -1.55, -2.92, 30.0, 1.55, 2.92], "tip_cap": [47.4, -1.5, -1.4985, 48.0, 1.5, 1.4985]}, "kinematics": "Stage 1: every joint turns by the master value v (deg, + curls toward +y). Segment k = parent motion * rel(k); rel(k) for k = 0..5 is the rolling pin_slot: turn v about the nose-circle centre c_k = (SEG_B[k] + 1.5 in, 0, 0) and slide the centre r*v (r = 1.5 in) along +y; rel(6) is a plain turn about (26 in, 0, 0). The sweep A1 (tangent turn of an arc over the 30 in free strip) = 7.5 * v; limits v = +/-9.7333 (A1 +/-73). Stage 2: ball joint k at s = 30 + 1.5 (k-1); yaw about -y_tongue (+ curls toward +z), pitch about +z_tongue; A2 = 12 * yaw; limits +/-18.3333 (+/-220 deg of curl). The segments are rigid straight pieces hinged at the joints: a curled pose is a polyline whose joints lie within a few mm of the arc of the same A1/A2, not on it exactly (the first 2 in, the neck, stay straight).", "segments": {"s1_seg00": [2.0, 6.0, 4.0], "s1_seg01": [6.0, 10.0, 8.0], "s1_seg02": [10.0, 14.0, 12.0], "s1_seg03": [14.0, 18.0, 16.0], "s1_seg04": [18.0, 22.0, 20.0], "s1_seg05": [22.0, 26.0, 24.0], "s1_seg06": [26.0, 30.0, 28.0], "s2_seg01": [0.0, 1.5, 0.75], "s2_seg02": [1.5, 3.0, 2.25], "s2_seg03": [3.0, 4.5, 3.75], "s2_seg04": [4.5, 6.0, 5.25], "s2_seg05": [6.0, 7.5, 6.75], "s2_seg06": [7.5, 9.0, 8.25], "s2_seg07": [9.0, 10.5, 9.75], "s2_seg08": [10.5, 12.0, 11.25], "s2_seg09": [12.0, 13.5, 12.75], "s2_seg10": [13.5, 15.0, 14.25], "s2_seg11": [15.0, 16.5, 15.75], "s2_seg12": [16.5, 18.0, 17.25], "skull": [-12.0, 2.0, 0.0]}}, "placements": [{"name": "cheek_p", "product": "cheek_p", "colour": "ply", "frame": "skull", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "cheek_m", "product": "cheek_m", "colour": "ply", "frame": "skull", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_tail", "product": "strip_tail", "colour": "nylon", "frame": "skull", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_tube", "product": "rod_tube", "colour": "alu", "frame": "skull", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_00", "product": "strip_00", "colour": "nylon", "frame": "s1_seg00", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_1", "product": "rod_1", "colour": "alu", "frame": "s1_seg00", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_1p", "product": "ptfe_1p", "colour": "ptfe", "frame": "s1_seg00", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_1m", "product": "ptfe_1m", "colour": "ptfe", "frame": "s1_seg00", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C1", "product": "vertebra_C1", "colour": "vertebra", "frame": "s1_seg00", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_01", "product": "strip_01", "colour": "nylon", "frame": "s1_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_2", "product": "rod_2", "colour": "alu", "frame": "s1_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_2p", "product": "ptfe_2p", "colour": "ptfe", "frame": "s1_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_2m", "product": "ptfe_2m", "colour": "ptfe", "frame": "s1_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C2", "product": "vertebra_C2", "colour": "vertebra", "frame": "s1_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_02", "product": "strip_02", "colour": "nylon", "frame": "s1_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_3", "product": "rod_3", "colour": "alu", "frame": "s1_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_3p", "product": "ptfe_3p", "colour": "ptfe", "frame": "s1_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_3m", "product": "ptfe_3m", "colour": "ptfe", "frame": "s1_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C3", "product": "vertebra_C3", "colour": "vertebra", "frame": "s1_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_03", "product": "strip_03", "colour": "nylon", "frame": "s1_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_4", "product": "rod_4", "colour": "alu", "frame": "s1_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_4p", "product": "ptfe_4p", "colour": "ptfe", "frame": "s1_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_4m", "product": "ptfe_4m", "colour": "ptfe", "frame": "s1_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C4", "product": "vertebra_C4", "colour": "vertebra", "frame": "s1_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_04", "product": "strip_04", "colour": "nylon", "frame": "s1_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_5", "product": "rod_5", "colour": "alu", "frame": "s1_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_5p", "product": "ptfe_5p", "colour": "ptfe", "frame": "s1_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_5m", "product": "ptfe_5m", "colour": "ptfe", "frame": "s1_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C5", "product": "vertebra_C5", "colour": "vertebra", "frame": "s1_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_05", "product": "strip_05", "colour": "nylon", "frame": "s1_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_6", "product": "rod_6", "colour": "alu", "frame": "s1_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_6p", "product": "ptfe_6p", "colour": "ptfe", "frame": "s1_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_6m", "product": "ptfe_6m", "colour": "ptfe", "frame": "s1_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "vertebra_C6", "product": "vertebra_C6", "colour": "vertebra", "frame": "s1_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "strip_06", "product": "strip_06", "colour": "nylon", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "washer_7p", "product": "washer_7p", "colour": "nylon", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "cotter_pin_7p", "product": "cotter_pin_7p", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "washer_7m", "product": "washer_7m", "colour": "nylon", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "cotter_pin_7m", "product": "cotter_pin_7m", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "rod_7", "product": "rod_7", "colour": "alu", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_7p", "product": "ptfe_7p", "colour": "ptfe", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "ptfe_7m", "product": "ptfe_7m", "colour": "ptfe", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "sacrum", "product": "sacrum", "colour": "coupler", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_p", "product": "stop_sleeve_p", "colour": "copper", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_m", "product": "stop_sleeve_m", "colour": "copper", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "shcs_m4x25_sac1", "product": "shcs_m4x25_sac1", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_sac1", "product": "insert_m4_sac1", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "shcs_m4x25_sac2", "product": "shcs_m4x25_sac2", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_sac2", "product": "insert_m4_sac2", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "shcs_m4x25_sac3", "product": "shcs_m4x25_sac3", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_sac3", "product": "insert_m4_sac3", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "shcs_m4x25_sac4", "product": "shcs_m4x25_sac4", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_sac4", "product": "insert_m4_sac4", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_core1", "product": "insert_m4_core1", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "setscrew_m4x12_core1", "product": "setscrew_m4x12_core1", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_core2", "product": "insert_m4_core2", "colour": "brass", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "setscrew_m4x12_core2", "product": "setscrew_m4x12_core2", "colour": "steel", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_00", "product": "core_00", "colour": "core", "frame": "s1_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_01", "product": "core_01", "colour": "core", "frame": "s2_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_01", "product": "disc_01", "colour": "disc", "frame": "s2_seg01", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_02", "product": "core_02", "colour": "core", "frame": "s2_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_02", "product": "disc_02", "colour": "disc", "frame": "s2_seg02", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_03", "product": "core_03", "colour": "core", "frame": "s2_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_03", "product": "disc_03", "colour": "disc", "frame": "s2_seg03", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_04", "product": "core_04", "colour": "core", "frame": "s2_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_04", "product": "disc_04", "colour": "disc", "frame": "s2_seg04", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_05", "product": "core_05", "colour": "core", "frame": "s2_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_05", "product": "disc_05", "colour": "disc", "frame": "s2_seg05", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_06", "product": "core_06", "colour": "core", "frame": "s2_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_06", "product": "disc_06", "colour": "disc", "frame": "s2_seg06", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_07", "product": "core_07", "colour": "core", "frame": "s2_seg07", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_07", "product": "disc_07", "colour": "disc", "frame": "s2_seg07", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_08", "product": "core_08", "colour": "core", "frame": "s2_seg08", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_08", "product": "disc_08", "colour": "disc", "frame": "s2_seg08", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_09", "product": "core_09", "colour": "core", "frame": "s2_seg09", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_09", "product": "disc_09", "colour": "disc", "frame": "s2_seg09", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_10", "product": "core_10", "colour": "core", "frame": "s2_seg10", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_10", "product": "disc_10", "colour": "disc", "frame": "s2_seg10", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_11", "product": "core_11", "colour": "core", "frame": "s2_seg11", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_11", "product": "disc_11", "colour": "disc", "frame": "s2_seg11", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "core_12", "product": "core_12", "colour": "core", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "disc_12", "product": "disc_12", "colour": "disc", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "tip_cap", "product": "tip_cap", "colour": "tip", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_tip1", "product": "insert_m4_tip1", "colour": "brass", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "setscrew_m4x35_tip1", "product": "setscrew_m4x35_tip1", "colour": "steel", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "insert_m4_tip2", "product": "insert_m4_tip2", "colour": "brass", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "setscrew_m4x35_tip2", "product": "setscrew_m4x35_tip2", "colour": "steel", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_tip1", "product": "stop_sleeve_tip1", "colour": "copper", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_tip2", "product": "stop_sleeve_tip2", "colour": "copper", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_tip3", "product": "stop_sleeve_tip3", "colour": "copper", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}, {"name": "stop_sleeve_tip4", "product": "stop_sleeve_tip4", "colour": "copper", "frame": "s2_seg12", "index": 0, "M": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]}]}</script>
@@ -344,7 +357,7 @@
   // adjustable points (inches, model coords); the 2026-10-27 placement as defaults
   const DEFAULTS = {
     head_x: 1, head_y: 0, head_z: 2, head_sx: 100, head_sy: 100, head_sz: 100,
-    lipl_up: 0, lipl_dn: 0, mouth_w: 0, snout_w: 0, lip_up: 0, lip_dn: 0, jaw_open: 0, chin: 0, eye_sz: 0, eye_sp: 0, eye_h: 0, pupil_w: 0, pupil_h: 0,
+    lipl_up: 0, lipl_dn: -3.5, mouth_w: 0, snout_w: 0, lip_up: 0, lip_dn: 0, jaw_open: 0, chin: 0, eye_sz: 0, eye_sp: 0, eye_h: 0, pupil_w: 0, pupil_h: 0,
     lid_style: 1, lid_cover: 70, lid_drop: 35, lid_tilt: 16, lid_thick: 0.3,
     barrel_x: 5, barrel_y: 0, barrel_z: -40.5, barrel_tilt: 15, drum_len: 40.7, drum_w: 26.2, drum_h: 26.2,
     collar_x: -10.5, body_x: -51.5, body_z: -14.5, body_len: 44.5, body_w: 38, body_h: 24,
@@ -358,8 +371,8 @@
   const SLIDERS = [  // [key, label, min, max, group, step?]
     ["head_x", "Head fore/aft", -40, 40, "head"], ["head_y", "Head left/right", -30, 30, "head"], ["head_z", "Head height", -40, 40, "head"],
     ["head_sx", "Head length (%)", 50, 200, "head"], ["head_sy", "Head width (%)", 50, 200, "head"], ["head_sz", "Head height scale (%)", 50, 200, "head"],
-    ["collar_x", "Skin collar on the head (from head centre, scales with it)", -15, -2, "head"],
-    ["lipl_up", "Upper lip length (how far it reaches)", -8, 12, "shape", 0.5], ["lipl_dn", "Lower lip length (how far it reaches)", -8, 12, "shape", 0.5], ["mouth_w", "Mouth width (%)", -25, 25, "shape", 0.5], ["snout_w", "Snout width (%)", -30, 30, "shape", 0.5],
+    ["collar_x", "Skin collar on the head", -15, -2, "head"],
+    ["lipl_up", "Upper lip length", -8, 12, "shape", 0.5], ["lipl_dn", "Lower lip length", -8, 12, "shape", 0.5], ["mouth_w", "Mouth width (%)", -25, 25, "shape", 0.5], ["snout_w", "Snout width (%)", -30, 30, "shape", 0.5],
     ["lip_up", "Upper lip thickness", -1.2, 2.5, "shape", 0.1], ["lip_dn", "Lower lip thickness", -1.2, 2.5, "shape", 0.1], ["jaw_open", "Jaw opening", -12, 14, "shape", 0.5], ["chin", "Chin depth", -4, 5, "shape", 0.1],
     ["eye_sz", "Eye size (%)", -25, 30, "shape", 0.5], ["eye_sp", "Eye spread", -4, 4, "shape", 0.1], ["eye_h", "Eye height", -3, 3, "shape", 0.1],
     ["pupil_w", "Pupil width (%)", -70, 150, "shape", 1], ["pupil_h", "Pupil height (%)", -50, 80, "shape", 1],
@@ -387,7 +400,7 @@
   const rgb2hex = c => "#" + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
   const TUBK = [0x4a / 0x5c, 0x9f / 0xc2, 0x30 / 0x38], LIDK = [76 / 91, 173 / 193, 51 / 56];   // the tub wall and the eyelids are a little darker than the green
   const FP = Object.assign({}, DEFAULTS);
-  try { const s = JSON.parse(localStorage.getItem("kdp_frog_points_v5") || "null"); if (s) for (const k in DEFAULTS) if (typeof s[k] === "number" && (s.hv === 2 || !/^(head_|collar_)/.test(k))) FP[k] = s[k]; } catch (e) { }   // head settings saved before the sculpted head (no hv marker) are dropped
+  try { const s = JSON.parse(localStorage.getItem("kdp_frog_points_v5") || "null"); if (s) for (const k in DEFAULTS) if (typeof s[k] === "number" && (s.hv === 2 || !/^(head_|collar_)/.test(k)) && (s.dv >= 2 || k !== "lipl_dn")) FP[k] = s[k]; } catch (e) { }   // head settings saved before the sculpted head (no hv marker) are dropped; a lower lip length saved before dv 2 is dropped (the default moved)
   window.__frogPoints = FP;
 
   const sstep = t => { t = Math.min(Math.max(t, 0), 1); return t * t * (3 - 2 * t); };
@@ -602,7 +615,7 @@
     let s = [-n[1], n[0], 0]; const sl = Math.hypot(s[0], s[1]); s = [s[0] / sl, s[1] / sl, 0]; const u = [n[1] * s[2] - n[2] * s[1], n[2] * s[0] - n[0] * s[2], n[0] * s[1] - n[1] * s[0]];
     return { n, s, u, pc: [EYE.c[0] + n[0] * (EYE.r - 0.12), sy * EYE.c[1] + n[1] * (EYE.r - 0.12), EYE.c[2] + n[2] * (EYE.r - 0.12)] };
   });
-  const LID_STYLES = [["None", 0, 14, 0, 0.5], ["Soft hood", 70, 35, 16, 0.3], ["Level lid", 36, 20, 0, 0.5], ["Alert (inner corners lower)", 38, 16, -14, 0.5], ["Heavy hood", 50, 2, 0, 0.7], ["Droopy (outer corners lower)", 44, 8, 26, 0.6], ["Thin rim", 30, 24, 0, 0.35]];   // name, size (deg), edge above the pupil (deg), tilt (deg), thickness (in)
+  const LID_STYLES = [["None", 0, 14, 0, 0.5], ["Soft hood", 70, 35, 16, 0.3], ["Level lid", 36, 20, 0, 0.5], ["Alert", 38, 16, -14, 0.5], ["Heavy hood", 50, 2, 0, 0.7], ["Droopy", 44, 8, 26, 0.6], ["Thin rim", 30, 24, 0, 0.35]];   // name, size (deg), edge above the pupil (deg), tilt (deg), thickness (in)
   const sst =(a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
   const _wp = [0, 0, 0];
   function warp0(x, y, z, S) {   // where a head-local point goes (no lips): jaw opening, chin, mouth length, mouth and snout width
@@ -746,18 +759,17 @@
       host.querySelector("button").addEventListener("click", () => set(COLOR_DEF[key]));
       show(); pickers.push([key, set]);
     }
-    // each section (frog, barrel, kart) gets its own selectable values readout and its own reset button
+    // each section (frog, barrel, kart) gets its own reset button
     const SECTIONS = {
       frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "eye", "mouth", "pupil"] },
       barrel: { host: "fs_barrel_foot", groups: ["barrel"],                    label: "Reset barrel", colours: ["barrel"] },
       kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
     };
     const grpOf = {}; for (const [key, , , , grp] of SLIDERS) grpOf[key] = grp;
-    const readouts = [], resetters = [];
+    const resetters = [];
     for (const [name, sec] of Object.entries(SECTIONS)) {
       const foot = document.getElementById(sec.host); if (!foot) continue;
       const keys = Object.keys(DEFAULTS).filter(k => sec.groups.includes(grpOf[k]) || (sec.extra || []).includes(k));
-      const ro = document.createElement("div"); ro.className = "legend"; ro.id = name + "Readout"; ro.style.cssText = "font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:6px"; foot.appendChild(ro);
       const rb = document.createElement("button"); rb.type = "button"; rb.textContent = sec.label; rb.style.marginTop = "6px";
       const doReset = () => {
         for (const k of keys) FP[k] = DEFAULTS[k];
@@ -768,11 +780,40 @@
       };
       rb.addEventListener("click", doReset); resetters.push(doReset);
       foot.appendChild(rb);
-      readouts.push(() => { ro.textContent = "values: " + keys.map(k => `${k}=${FP[k]}`).join("  ") + (sec.colours ? "  " + sec.colours.map(k => `${k}=${CO[k]}`).join("  ") : ""); });
     }
     syncLidRadio(); window.__resetFrogAll = () => resetters.forEach(f => f());   // frog, barrel and kart settings and colours, all back to their defaults
-    function readout() { for (const f of readouts) f(); }
-    function save() { try { localStorage.setItem("kdp_frog_points_v5", JSON.stringify(Object.assign({ hv: 2 }, FP))); } catch (e) { } }
+    // Export settings: one plain name=value line per setting (every rail control, then the frog, barrel and kart values, then the colours)
+    const expBox = document.getElementById("expBox"), expText = document.getElementById("expText"), expCopy = document.getElementById("expCopy");
+    const r3 = v => String(+(+v).toFixed(3));
+    function exportText() {
+      const L = [];
+      document.querySelectorAll(".rail input").forEach(el => {
+        if (!el.id || el.type === "radio" || el.closest("#expBox, #fs_head, #fs_shape, #fs_lids, #fs_body, #fs_hind, #fs_front, #fs_barrel, #fs_foot, #kartSliders, [id^=fc_]")) return;
+        L.push(el.id + "=" + (el.type === "checkbox" ? (el.checked ? 1 : 0) : el.type === "range" ? r3(el.value) : el.value));
+        if (el.id === "sA1" && window.__pad) L.push("padX=" + r3(window.__pad.x), "padY=" + r3(window.__pad.y));
+      });
+      for (const k of Object.keys(DEFAULTS)) L.push(k + "=" + r3(FP[k]));
+      for (const k of Object.keys(COLOR_DEF)) L.push(k + "=" + CO[k]);
+      return L.join("\n");
+    }
+    let expLast = 0;
+    function readout(force) {   // refresh the export box while it is open (not while someone is selecting in it, not more than ~4 times a second)
+      if (!expBox || !expBox.open || !expText) return;
+      const now = performance.now(); if (!force && (document.activeElement === expText || now - expLast < 250)) return;
+      expLast = now; expText.value = exportText();
+    }
+    if (expBox) {
+      expBox.addEventListener("toggle", () => readout(true));
+      document.querySelector(".rail").addEventListener("input", () => readout());
+      document.querySelector(".rail").addEventListener("change", () => readout());
+      expCopy.addEventListener("click", () => {
+        expText.value = exportText();
+        const done = () => { expCopy.textContent = "Copied"; setTimeout(() => { expCopy.textContent = "Copy to clipboard"; }, 1500); };
+        const old = () => { expText.focus(); expText.select(); expText.setSelectionRange(0, expText.value.length); try { document.execCommand("copy"); done(); } catch (e) { } expText.blur(); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(expText.value).then(done, old); else old();
+      });
+    }
+    function save() { try { localStorage.setItem("kdp_frog_points_v5", JSON.stringify(Object.assign({ hv: 2, dv: 2 }, FP))); } catch (e) { } }
     readout();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", makePanel); else makePanel();
@@ -1177,6 +1218,21 @@
     if (!straightLens) straightLens = build(0, 0, 0);
     const lens = build(a1, curl, side); lastLens = lens;
     for (const k of ["P", "M", "A", "B", "C", "D"]) $("c" + k).textContent = fmt(lens[k] - straightLens[k]);
+    const tn = cableTension(Math.abs(a1), curl, side, lens.P - straightLens.P < lens.M - straightLens.M);
+    for (const k of ["P", "M", "A", "B", "C", "D"]) { $("t" + k).textContent = tn[k].toFixed(1); $("t" + k + "n").textContent = (tn[k] * LBF_N).toFixed(0); }
+  }
+  // Estimated cable pull tension (lbf in the cable, static, nominal, no run friction; N = lbf x 4.448). Not solved in the page: these tables are the calc session's, from calc/derivations/viewer_cable_tension.py
+  // (30 in strip + 18 in tip, 30 deg stance; commit 999227d on feat/calc-stick-coupling), interpolated here. Strip: the cable on the side the strip curls toward carries the table value, the other its 5 lbf take-up.
+  // Tip: each pair carries its own axis (curl = up/down, side = left/right) and the idle cable of a pair sits on its take-up (up/down 6, left/right 10 lbf). The solver's curl limit for this tip is 135 deg: past it the values are extrapolated.
+  const LBF_N = 4.44822;
+  const interp = (x, pts) => { if (x <= pts[0][0]) return pts[0][1]; for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return pts[pts.length - 1][1]; };
+  const STRIP_T = [[0, 5], [10, 12.4], [20, 19.7], [30, 27], [40, 34.2], [50, 41.4], [60, 48.4], [70, 55.3], [73, 57.4]];
+  const UD_A = [[-220, 6], [-20, 6.1], [0, 8.1], [20, 11], [40, 13.6], [60, 16.2], [80, 18.6], [100, 20.8], [120, 22.9], [135, 24.4], [140, 24.9], [160, 26.8], [180, 28.7], [200, 30.5], [220, 32.4]];   // top cable A versus curl (+ = up)
+  const UD_C = [[0, 6], [20, 7], [40, 9.9], [60, 12.9], [80, 15.8], [100, 18.6], [120, 21.4], [135, 23.4], [140, 24.1], [160, 26.6], [180, 29.1], [200, 31.5], [220, 33.7]];   // bottom cable C versus curl down (- curl)
+  const LR_T = [[0, 10.2], [20, 12.7], [40, 15.3], [60, 17.9], [80, 20.4], [100, 22.8], [120, 25.2], [135, 26.9], [140, 27.5], [160, 29.8], [180, 32.1], [200, 34.3], [220, 36.5]];   // the loaded side cable (B for + side, D for - side) versus side bend
+  function cableTension(sweep, curl, side, pIsPulledIn) {
+    const s = interp(Math.min(sweep, 73), STRIP_T);
+    return { P: pIsPulledIn ? s : 5, M: pIsPulledIn ? 5 : s, A: interp(curl, UD_A), C: interp(-curl, UD_C), B: side > 0 ? interp(side, LR_T) : 10, D: side < 0 ? interp(-side, LR_T) : 10 };
   }
   sA.addEventListener("input", update);
   // ---- auto mode: smooth random motion of the three sliders (so the sliders and the cable table show the live values)
