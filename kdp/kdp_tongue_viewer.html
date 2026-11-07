@@ -181,6 +181,8 @@
           </div>
           <p class="sub">Length, width and height set the size (picking a preset fills them in; moving one switches to Custom).</p>
           <div id="fs_barrel"></div>
+          <details><summary class="legend" style="cursor:pointer">Colour: barrel</summary><div id="fc_barrel"></div></details>
+          <div id="fs_barrel_foot"></div>
         </div>
       </details>
       <details><summary class="legend" style="cursor:pointer">Move the Tongue Apparatus</summary>
@@ -357,7 +359,7 @@
     ["tire_d", "Tire diameter", 14, 32, "kart"], ["tire_w", "Tire width", 5, 14, "kart"], ["ride", "Rail height above ground", 3, 40, "kart"], ["wheel_dz", "Wheel height (axle offset)", -30, 30, "kart"],
   ];
   // colours: the green parts (head, body, legs), the accents (cream underside) and the eyes; hex strings
-  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f" };
+  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f", barrel: "#d9b43b" };
   const CO = Object.assign({}, COLOR_DEF);
   try { const c = JSON.parse(localStorage.getItem("kdp_frog_colors_v1") || "null"); if (c) for (const k in COLOR_DEF) if (/^#[0-9a-f]{6}$/i.test(c[k])) CO[k] = c[k]; } catch (e) { }
   const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
@@ -435,6 +437,7 @@
   }
   function applyColors() {
     const g = hex2rgb(CO.green); limbMat.color.setRGB(g[0] / 255, g[1] / 255, g[2] / 255); tubMat.color.setRGB(g[0] * TUBK[0] / 255, g[1] * TUBK[1] / 255, g[2] * TUBK[2] / 255);
+    const d = hex2rgb(CO.barrel); drumMat.color.setRGB(d[0] / 255, d[1] / 255, d[2] / 255);   // the drum body, hoops and one end rim (the silver ring, lug and logo stay)
     paintSkin(); paintHead();
   }
   window.__applyFrogColors = applyColors;
@@ -594,7 +597,7 @@
     syncDrumRadio(false);
     // colour pickers: a swatch (the browser's colour wheel) plus red / green / blue sliders
     const pickers = [];
-    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"]]) {
+    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"], ["barrel", "fc_barrel"]]) {
       const host = document.getElementById(hostId); if (!host) continue;
       host.innerHTML = `<div class="ctl"><label>Colour wheel</label><input type="color" style="width:100%;height:36px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--chip);cursor:pointer"><span class="num hexv"></span></div>` +
         ["Red", "Green", "Blue"].map(n => `<div class="ctl"><label>${n}</label><input type="range" min="0" max="255" step="1" value="0"><span class="num"></span></div>`).join("") +
@@ -609,8 +612,8 @@
     }
     // each section (frog, barrel, kart) gets its own selectable values readout and its own reset button
     const SECTIONS = {
-      frog:   { host: "fs_foot",    groups: ["head", "body", "hind", "front"], label: "Reset frog",   colours: true },
-      barrel: { host: "fs_barrel",  groups: ["barrel"],                        label: "Reset barrel" },
+      frog:   { host: "fs_foot",    groups: ["head", "body", "hind", "front"], label: "Reset frog",   colours: ["green", "accent", "eye"] },
+      barrel: { host: "fs_barrel_foot", groups: ["barrel"],                    label: "Reset barrel", colours: ["barrel"] },
       kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
     };
     const grpOf = {}; for (const [key, , , , grp] of SLIDERS) grpOf[key] = grp;
@@ -624,11 +627,11 @@
         for (const k of keys) FP[k] = DEFAULTS[k];
         for (const [k, inp, num, unit] of rows) if (keys.includes(k)) { inp.value = FP[k]; num.textContent = FP[k].toFixed(1) + unit; }
         if (name === "barrel") syncDrumRadio(false);
-        if (sec.colours) for (const [k, set] of pickers) set(COLOR_DEF[k]);
+        if (sec.colours) for (const [k, set] of pickers) if (sec.colours.includes(k)) set(COLOR_DEF[k]);
         build(); save(); readout();
       });
       foot.appendChild(rb);
-      readouts.push(() => { ro.textContent = "values: " + keys.map(k => `${k}=${FP[k]}`).join("  ") + (sec.colours ? "  " + Object.keys(CO).map(k => `${k}=${CO[k]}`).join("  ") : ""); });
+      readouts.push(() => { ro.textContent = "values: " + keys.map(k => `${k}=${FP[k]}`).join("  ") + (sec.colours ? "  " + sec.colours.map(k => `${k}=${CO[k]}`).join("  ") : ""); });
     }
     function readout() { for (const f of readouts) f(); }
     function save() { try { localStorage.setItem("kdp_frog_points_v5", JSON.stringify(FP)); } catch (e) { } }
