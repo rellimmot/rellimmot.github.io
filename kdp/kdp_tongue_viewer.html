@@ -162,6 +162,9 @@
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:10px"><input type="checkbox" id="showPullers" style="margin:0" checked><span>Show Pullers</span></label>
     </section>
     <section>
+      <div class="seg"><button type="button" id="resetAll">Reset All to Default</button></div>
+    </section>
+    <section>
       <h2>Extra Settings</h2>
       <details><summary class="legend" style="cursor:pointer">Puller Settings</summary>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="charlesMode" style="margin:0"><span>Charles mode</span></label>
@@ -210,6 +213,7 @@
         <details><summary class="legend" style="cursor:pointer">Colour: body accents</summary><div id="fc_accent"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: eyes</summary><div id="fc_eye"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: mouth</summary><div id="fc_mouth"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: pupils</summary><div id="fc_pupil"></div></details>
         <div id="fs_foot"></div>
       </div>
       </details>
@@ -340,8 +344,8 @@
   // adjustable points (inches, model coords); the 2026-10-27 placement as defaults
   const DEFAULTS = {
     head_x: 1, head_y: 0, head_z: 2, head_sx: 100, head_sy: 100, head_sz: 100,
-    mouth_len: 0, mouth_w: 0, snout_w: 0, lip_up: 0, lip_dn: 0, jaw_open: 0, chin: 0, eye_sz: 0, eye_sp: 0, eye_h: 0,
-    lid_style: 1, lid_cover: 36, lid_drop: 20, lid_tilt: 0, lid_thick: 0.5,
+    lipl_up: 0, lipl_dn: 0, mouth_w: 0, snout_w: 0, lip_up: 0, lip_dn: 0, jaw_open: 0, chin: 0, eye_sz: 0, eye_sp: 0, eye_h: 0, pupil_w: 0, pupil_h: 0,
+    lid_style: 1, lid_cover: 70, lid_drop: 35, lid_tilt: 16, lid_thick: 0.3,
     barrel_x: 5, barrel_y: 0, barrel_z: -40.5, barrel_tilt: 15, drum_len: 40.7, drum_w: 26.2, drum_h: 26.2,
     collar_x: -10.5, body_x: -51.5, body_z: -14.5, body_len: 44.5, body_w: 38, body_h: 24,
     hip_x: -69, hip_y: 29, hip_z: -30.5,
@@ -355,9 +359,10 @@
     ["head_x", "Head fore/aft", -40, 40, "head"], ["head_y", "Head left/right", -30, 30, "head"], ["head_z", "Head height", -40, 40, "head"],
     ["head_sx", "Head length (%)", 50, 200, "head"], ["head_sy", "Head width (%)", 50, 200, "head"], ["head_sz", "Head height scale (%)", 50, 200, "head"],
     ["collar_x", "Skin collar on the head (from head centre, scales with it)", -15, -2, "head"],
-    ["mouth_len", "Mouth length (how far the lips reach)", -8, 12, "shape", 0.5], ["mouth_w", "Mouth width (%)", -25, 25, "shape", 0.5], ["snout_w", "Snout width (%)", -30, 30, "shape", 0.5],
+    ["lipl_up", "Upper lip length (how far it reaches)", -8, 12, "shape", 0.5], ["lipl_dn", "Lower lip length (how far it reaches)", -8, 12, "shape", 0.5], ["mouth_w", "Mouth width (%)", -25, 25, "shape", 0.5], ["snout_w", "Snout width (%)", -30, 30, "shape", 0.5],
     ["lip_up", "Upper lip thickness", -1.2, 2.5, "shape", 0.1], ["lip_dn", "Lower lip thickness", -1.2, 2.5, "shape", 0.1], ["jaw_open", "Jaw opening", -12, 14, "shape", 0.5], ["chin", "Chin depth", -4, 5, "shape", 0.1],
     ["eye_sz", "Eye size (%)", -25, 30, "shape", 0.5], ["eye_sp", "Eye spread", -4, 4, "shape", 0.1], ["eye_h", "Eye height", -3, 3, "shape", 0.1],
+    ["pupil_w", "Pupil width (%)", -70, 150, "shape", 1], ["pupil_h", "Pupil height (%)", -50, 80, "shape", 1],
     ["lid_cover", "Lid size (0 = no lid)", 0, 70, "lids", 1], ["lid_drop", "Lid edge above the pupil (low = sleepy)", -25, 45, "lids", 1], ["lid_tilt", "Lid tilt (+ = outer corner down, - = inner corner down)", -35, 35, "lids", 1], ["lid_thick", "Lid thickness", 0.1, 1.4, "lids", 0.05],
     ["drum_len", "Length (along the axle)", 12, 80, "barrel", 0.1], ["drum_w", "Width (fore/aft)", 8, 60, "barrel", 0.1], ["drum_h", "Height", 8, 60, "barrel", 0.1],
     ["barrel_tilt", "Tilt (+ = left end up)", -45, 45, "barrel", 0.5],
@@ -375,7 +380,7 @@
     ["tire_d", "Tire diameter", 14, 32, "kart"], ["tire_w", "Tire width", 5, 14, "kart"], ["ride", "Rail height above ground", 3, 40, "kart"], ["wheel_dz", "Wheel height (axle offset)", -30, 30, "kart"],
   ];
   // colours: the green parts (head, body, legs), the accents (cream underside) and the eyes; hex strings
-  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f", mouth: "#a8485a", barrel: "#d9b43b" };
+  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f", mouth: "#a8485a", pupil: "#0e090a", barrel: "#d9b43b" };
   const CO = Object.assign({}, COLOR_DEF);
   try { const c = JSON.parse(localStorage.getItem("kdp_frog_colors_v1") || "null"); if (c) for (const k in COLOR_DEF) if (/^#[0-9a-f]{6}$/i.test(c[k])) CO[k] = c[k]; } catch (e) { }
   const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
@@ -441,7 +446,7 @@
     skinInfo.attr.needsUpdate = true;
   }
   function paintHead() {   // head_skin / head_belly store per-vertex weights (green, cream, mouth; the remainder is the dark throat); the eyes store a brightness
-    const hg = window.__headGroup; if (!hg) return; const g = hex2rgb(CO.green), a = hex2rgb(CO.accent), e = hex2rgb(CO.eye), m = hex2rgb(CO.mouth), dp = m.map(v => v * 0.38);
+    const hg = window.__headGroup; if (!hg) return; const g = hex2rgb(CO.green), a = hex2rgb(CO.accent), e = hex2rgb(CO.eye), m = hex2rgb(CO.mouth), pu = hex2rgb(CO.pupil), dp = m.map(v => v * 0.38);
     hg.traverse(o => {
       if (!o.isMesh) return; const at = o.geometry && o.geometry.getAttribute("color"); if (!at) return;
       const n = o.name, it = at.itemSize, isF = at.array instanceof Float32Array, f = isF ? 1 / 255 : 1;
@@ -452,7 +457,7 @@
         if (n === "head_skin" || n === "head_belly") for (let k = 0; k < 3; k++) c[k] = g[k] * wg + a[k] * wa + m[k] * wm + dp[k] * wd;
         else if (n === "head_eye") for (let k = 0; k < 3; k++) c[k] = e[k] * wg;
         else if (n === "head_lid") for (let k = 0; k < 3; k++) c[k] = g[k] * LIDK[k];
-        else if (n === "head_pupil") { c[0] = 14; c[1] = 9; c[2] = 10; } else return;
+        else if (n === "head_pupil") { c[0] = pu[0]; c[1] = pu[1]; c[2] = pu[2]; } else return;
         for (let k = 0; k < 3; k++) at.array[i * it + k] = Math.max(0, Math.min(255, Math.round(c[k]))) * f;
       }
       at.needsUpdate = true;
@@ -592,14 +597,19 @@
   // numbers shared with make_head_mesh.py (head-local inches): the eyes, the jaw hinge and the 30 degree lip plane
   const EYE = { r: 6.0, c: [5.2, 16.5, 8.2], look: [0.55, 0.80, 0.22] };
   const JAW = { h: [-9, 0, 1], t: Math.tan(30 * Math.PI / 180) };
-  const LID_STYLES = [["None", 0, 14, 0, 0.5], ["Level lid", 36, 20, 0, 0.5], ["Alert (inner corners lower)", 38, 16, -14, 0.5], ["Heavy hood", 50, 2, 0, 0.7], ["Droopy (outer corners lower)", 44, 8, 26, 0.6], ["Thin rim", 30, 24, 0, 0.35]];   // name, size (deg), edge above the pupil (deg), tilt (deg), thickness (in)
+  const PUPIL_FRAME = [1, -1].map(sy => {   // the pupil lens sits on the eyeball in front of the look direction (frame: n = look, s = sideways, u = up), as built in make_head_mesh.py
+    const l = Math.hypot(EYE.look[0], EYE.look[1], EYE.look[2]), n = [EYE.look[0] / l, sy * EYE.look[1] / l, EYE.look[2] / l];
+    let s = [-n[1], n[0], 0]; const sl = Math.hypot(s[0], s[1]); s = [s[0] / sl, s[1] / sl, 0]; const u = [n[1] * s[2] - n[2] * s[1], n[2] * s[0] - n[0] * s[2], n[0] * s[1] - n[1] * s[0]];
+    return { n, s, u, pc: [EYE.c[0] + n[0] * (EYE.r - 0.12), sy * EYE.c[1] + n[1] * (EYE.r - 0.12), EYE.c[2] + n[2] * (EYE.r - 0.12)] };
+  });
+  const LID_STYLES = [["None", 0, 14, 0, 0.5], ["Soft hood", 70, 35, 16, 0.3], ["Level lid", 36, 20, 0, 0.5], ["Alert (inner corners lower)", 38, 16, -14, 0.5], ["Heavy hood", 50, 2, 0, 0.7], ["Droopy (outer corners lower)", 44, 8, 26, 0.6], ["Thin rim", 30, 24, 0, 0.35]];   // name, size (deg), edge above the pupil (deg), tilt (deg), thickness (in)
   const sst =(a, b, x) => { const t = Math.min(Math.max((x - a) / (b - a), 0), 1); return t * t * (3 - 2 * t); };
   const _wp = [0, 0, 0];
   function warp0(x, y, z, S) {   // where a head-local point goes (no lips): jaw opening, chin, mouth length, mouth and snout width
     const bis = z - 0.5 * (-0.9 + (JAW.h[2] - JAW.t * (x - JAW.h[0])));   // height above the bisector between the lip planes
     if (S.jaw_open) { const wj = (1 - sst(-3, 4, bis)) * sst(-14, -6, x); if (wj > 0) { const a = S.jaw_open * Math.PI / 180 * wj, c = Math.cos(a), sn = Math.sin(a), dx = x - JAW.h[0], dz = z - JAW.h[2]; x = JAW.h[0] + dx * c + dz * sn; z = JAW.h[2] - dx * sn + dz * c; } }
     if (S.chin) z -= S.chin * sst(3, 12, -bis) * sst(-12, 0, x);
-    if (S.mouth_len) x += S.mouth_len * sst(2, 20, x);
+    if (S.lipl_up || S.lipl_dn) { const wu = sst(-4, 4, bis); x += (S.lipl_up * wu + S.lipl_dn * (1 - wu)) * sst(2, 20, x); }   // each lip reaches on its own
     if (S.mouth_w) y *= 1 + S.mouth_w / 100 * sst(-12, -2, x) * (1 - sst(5, 12, z));
     if (S.snout_w) y *= 1 + S.snout_w / 100 * sst(4, 18, x);
     _wp[0] = x; _wp[1] = y; _wp[2] = z; return _wp;
@@ -632,11 +642,18 @@
           out[3 * i] = px_; out[3 * i + 1] = py_; out[3 * i + 2] = pz_; if (on) { on[3 * i] = mx; on[3 * i + 1] = my; on[3 * i + 2] = mz; }
         }
         pa.needsUpdate = true; if (g.attributes.normal) g.attributes.normal.needsUpdate = true;
-      } else if (n === "head_eye" || n === "head_pupil") {   // each eye scales about its own centre and moves apart / up
-        const k = 1 + S.eye_sz / 100;
+      } else if (n === "head_eye" || n === "head_pupil") {   // each eye scales about its own centre and moves apart / up; each pupil is laid on its eyeball and scaled in its own width and height
+        const k = 1 + S.eye_sz / 100, kw = 1 + S.pupil_w / 100, kh = 1 + S.pupil_h / 100;
         for (let i = 0; i < pa.count; i++) {
           const sy = bp[3 * i + 1] >= 0 ? 1 : -1, cx = EYE.c[0], cy = sy * EYE.c[1], cz = EYE.c[2], nx = cx, ny = sy * (EYE.c[1] + S.eye_sp), nz = cz + S.eye_h;
-          out[3 * i] = nx + (bp[3 * i] - cx) * k; out[3 * i + 1] = ny + (bp[3 * i + 1] - cy) * k; out[3 * i + 2] = nz + (bp[3 * i + 2] - cz) * k;
+          let x = bp[3 * i], y = bp[3 * i + 1], z = bp[3 * i + 2];
+          if (n === "head_pupil") {
+            const F = PUPIL_FRAME[sy > 0 ? 0 : 1], dx = x - F.pc[0], dy = y - F.pc[1], dz = z - F.pc[2];
+            const dn = dx * F.n[0] + dy * F.n[1] + dz * F.n[2], ds = (dx * F.s[0] + dy * F.s[1] + dz * F.s[2]) * kw, du = (dx * F.u[0] + dy * F.u[1] + dz * F.u[2]) * kh;
+            const wx = F.pc[0] - cx + F.s[0] * ds + F.u[0] * du, wy = F.pc[1] - cy + F.s[1] * ds + F.u[1] * du, wz = F.pc[2] - cz + F.s[2] * ds + F.u[2] * du, wl = Math.hypot(wx, wy, wz) || 1, rad = EYE.r - 0.12 + dn;
+            x = cx + wx / wl * rad; y = cy + wy / wl * rad; z = cz + wz / wl * rad;
+          }
+          out[3 * i] = nx + (x - cx) * k; out[3 * i + 1] = ny + (y - cy) * k; out[3 * i + 2] = nz + (z - cz) * k;
         }
         pa.needsUpdate = true;
       }
@@ -673,7 +690,7 @@
   function makePanel() {
     const HOST = { head: "fs_head", shape: "fs_shape", lids: "fs_lids", barrel: "fs_barrel", body: "fs_body", hind: "fs_hind", front: "fs_front", kart: "kartSliders" };
     const rows = [], rowOf = {};
-    const unitOf = key => key === "kart_op" || /^head_s[xyz]$/.test(key) || /^leg_[fr]$/.test(key) || /^(mouth_w|snout_w|eye_sz)$/.test(key) ? "%" : /(_tilt|_open|_cover|_drop)$/.test(key) ? "°" : " in";
+    const unitOf = key => key === "kart_op" || /^head_s[xyz]$/.test(key) || /^leg_[fr]$/.test(key) || /^(mouth_w|snout_w|eye_sz|pupil_w|pupil_h)$/.test(key) ? "%" : /(_tilt|_open|_cover|_drop)$/.test(key) ? "°" : " in";
     for (const [key, label, lo, hi, grp, stp] of SLIDERS) {
       const host = document.getElementById(HOST[grp]); if (!host) continue;
       const row = document.createElement("div"); row.className = "ctl"; const step = stp || (hi - lo > 20 ? 0.5 : 0.1);
@@ -716,7 +733,7 @@
     }
     // colour pickers: a swatch (the browser's colour wheel) plus red / green / blue sliders
     const pickers = [];
-    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"], ["mouth", "fc_mouth"], ["barrel", "fc_barrel"]]) {
+    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"], ["mouth", "fc_mouth"], ["pupil", "fc_pupil"], ["barrel", "fc_barrel"]]) {
       const host = document.getElementById(hostId); if (!host) continue;
       host.innerHTML = `<div class="ctl"><label>Colour wheel</label><input type="color" style="width:100%;height:36px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--chip);cursor:pointer"><span class="num hexv"></span></div>` +
         ["Red", "Green", "Blue"].map(n => `<div class="ctl"><label>${n}</label><input type="range" min="0" max="255" step="1" value="0"><span class="num"></span></div>`).join("") +
@@ -731,28 +748,29 @@
     }
     // each section (frog, barrel, kart) gets its own selectable values readout and its own reset button
     const SECTIONS = {
-      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "eye", "mouth"] },
+      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "eye", "mouth", "pupil"] },
       barrel: { host: "fs_barrel_foot", groups: ["barrel"],                    label: "Reset barrel", colours: ["barrel"] },
       kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
     };
     const grpOf = {}; for (const [key, , , , grp] of SLIDERS) grpOf[key] = grp;
-    const readouts = [];
+    const readouts = [], resetters = [];
     for (const [name, sec] of Object.entries(SECTIONS)) {
       const foot = document.getElementById(sec.host); if (!foot) continue;
       const keys = Object.keys(DEFAULTS).filter(k => sec.groups.includes(grpOf[k]) || (sec.extra || []).includes(k));
       const ro = document.createElement("div"); ro.className = "legend"; ro.id = name + "Readout"; ro.style.cssText = "font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:6px"; foot.appendChild(ro);
       const rb = document.createElement("button"); rb.type = "button"; rb.textContent = sec.label; rb.style.marginTop = "6px";
-      rb.addEventListener("click", () => {
+      const doReset = () => {
         for (const k of keys) FP[k] = DEFAULTS[k];
         for (const [k, inp, num, unit] of rows) if (keys.includes(k)) { inp.value = FP[k]; num.textContent = FP[k].toFixed(1) + unit; }
         if (name === "barrel") syncDrumRadio(false);
         if (sec.colours) for (const [k, set] of pickers) if (sec.colours.includes(k)) set(COLOR_DEF[k]);
         build(); applyShape(); syncLidRadio(); if (window.__tongueUpdate) window.__tongueUpdate(); save(); readout();
-      });
+      };
+      rb.addEventListener("click", doReset); resetters.push(doReset);
       foot.appendChild(rb);
       readouts.push(() => { ro.textContent = "values: " + keys.map(k => `${k}=${FP[k]}`).join("  ") + (sec.colours ? "  " + sec.colours.map(k => `${k}=${CO[k]}`).join("  ") : ""); });
     }
-    syncLidRadio();
+    syncLidRadio(); window.__resetFrogAll = () => resetters.forEach(f => f());   // frog, barrel and kart settings and colours, all back to their defaults
     function readout() { for (const f of readouts) f(); }
     function save() { try { localStorage.setItem("kdp_frog_points_v5", JSON.stringify(Object.assign({ hv: 2 }, FP))); } catch (e) { } }
     readout();
@@ -1260,6 +1278,18 @@
     if (canvas.width !== Math.floor(w * pr) || canvas.height !== Math.floor(h * pr)) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
   }
   function tick() { autoStep(performance.now()); resize(); controls.update(); renderer.render(scene, camera); requestAnimationFrame(tick); }
+  // Reset All to Default: every control goes back to the value the page starts with. The panel's own controls carry their start value in the page
+  // (default value / default checked), so each is set back and told about it; the frog, barrel and kart controls (built later) have their own reset.
+  $("resetAll").addEventListener("click", () => {
+    document.querySelectorAll(".rail input").forEach(el => {
+      if (el.closest("#fs_head, #fs_shape, #fs_lids, #fs_body, #fs_hind, #fs_front, #fs_barrel, #fs_foot, #kartSliders, [id^=fc_]") || el.name === "drumSize" || el.name === "lidStyle") return;
+      if (el.type === "checkbox") { if (el.checked !== el.defaultChecked) { el.checked = el.defaultChecked; el.dispatchEvent(new Event("change", { bubbles: true })); } }
+      else if (el.type === "range") { el.value = el.defaultValue; el.dispatchEvent(new Event("input", { bubbles: true })); }
+    });
+    pad.x = 0; pad.y = -0.55; for (const k of ["x", "y", "z"]) off[k] = 0;
+    if (window.__resetFrogAll) window.__resetFrogAll();
+    offUpdate(); update(); setCam("iso");
+  });
   update(); started = true; window.__tongueUpdate = update; setCam("iso"); tick(); loadLibrary();
 })();
 
