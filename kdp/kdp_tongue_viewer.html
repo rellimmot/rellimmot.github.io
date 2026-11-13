@@ -145,8 +145,8 @@
       </div>
       <div class="ctl" style="margin-top:10px">
         <label for="skinOpacity">Skin opacity</label>
-        <input type="range" id="skinOpacity" min="10" max="100" value="20">
-        <span class="num" id="skinOpacityVal">20%</span>
+        <input type="range" id="skinOpacity" min="10" max="100" value="70">
+        <span class="num" id="skinOpacityVal">70%</span>
       </div>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="cutaway" style="margin:0"><span>Cut away the near half of the skin</span></label>
     </section>
@@ -173,7 +173,7 @@
         <button type="button" data-cam="frog">Frog</button>
       </div>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:10px"><input type="checkbox" id="showPullers" style="margin:0" checked><span>Show Pullers</span></label>
-      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:8px"><input type="checkbox" id="showCam" style="margin:0" checked><span>Show Camera Position</span></label>
+      <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:8px"><input type="checkbox" id="showCam" style="margin:0"><span>Show Camera Position</span></label>
       <label class="legend" style="display:flex;gap:8px;align-items:center;cursor:pointer;margin-top:8px"><input type="checkbox" id="eyeLights" style="margin:0" checked><span>Eye Lights</span></label>
     </section>
     <section>
@@ -208,7 +208,6 @@
           <div id="fs_barrel_foot"></div>
         </div>
       </details>
-      <details><summary class="legend" style="cursor:pointer">Colour: tongue</summary><div id="fc_tongue"></div></details>
       <details><summary class="legend" style="cursor:pointer">Move the Tongue Apparatus</summary>
       <div class="ctl"><label for="offX">In / out <small>+ = out toward the snout</small></label><input type="range" id="offX" min="-12" max="12" step="0.5" value="0"><span class="num" id="offXV">0.0 in</span></div>
       <div class="ctl"><label for="offY">Left / right <small>+ = left</small></label><input type="range" id="offY" min="-12" max="12" step="0.5" value="0"><span class="num" id="offYV">0.0 in</span></div>
@@ -230,6 +229,7 @@
         <details><summary class="legend" style="cursor:pointer">Colour: eyes</summary><div id="fc_eye"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: mouth</summary><div id="fc_mouth"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: pupils</summary><div id="fc_pupil"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: tongue</summary><div id="fc_tongue"></div></details>
         <div id="fs_foot"></div>
       </div>
       </details>
@@ -1034,7 +1034,7 @@
     }
     // each section (frog, barrel, kart) gets its own reset button
     const SECTIONS = {
-      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "spot", "spot2", "eye", "mouth", "pupil"] },
+      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "spot", "spot2", "eye", "mouth", "pupil", "tongue"] },
       barrel: { host: "fs_barrel_foot", groups: ["barrel"],                    label: "Reset barrel", colours: ["barrel"] },
       kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
     };
@@ -1054,7 +1054,7 @@
       rb.addEventListener("click", doReset); resetters.push(doReset);
       foot.appendChild(rb);
     }
-    syncLidRadio(); window.__resetFrogAll = () => { resetters.forEach(f => f()); for (const [k, set] of pickers) if (k === "tongue") set(COLOR_DEF.tongue); };   // frog, barrel and kart settings and colours, all back to their defaults
+    syncLidRadio(); window.__resetFrogAll = () => resetters.forEach(f => f());   // frog, barrel and kart settings and colours, all back to their defaults
     // Export settings: one plain name=value line per setting (every rail control, then the frog, barrel and kart values, then the colours)
     const expBox = document.getElementById("expBox"), expText = document.getElementById("expText"), expCopy = document.getElementById("expCopy");
     const r3 = v => String(+(+v).toFixed(3));
@@ -1201,13 +1201,16 @@
     const sw = document.getElementById("sockSw"); if (sw) sw.style.background = "#" + new THREE.Color().copy(c).convertLinearToSRGB().getHexString();
   }
   window.__setTongueColor = setTongueColor; setTongueColor("#c3405b");
-  const skinOn = { skin_foam: true, skin_mesh: true, skin_sock: true, skin_seam: true }; let skinOpacity = 0.2; let cutaway = false;
+  const skinOn = { skin_foam: true, skin_mesh: true, skin_sock: true, skin_seam: true }; let skinOpacity = 0.7; let cutaway = false;
   let balOn = false, balV = 0;   // tip balloon: on and inflation 0..1
   function applySkin() {
     skinOn.skin_seam = skinOn.skin_sock;
     for (const k in skinMats) { const m = skinMats[k];
       if (k !== "skin_mesh") { m.transparent = skinOpacity < 0.999; m.opacity = skinOpacity; m.depthWrite = skinOpacity > 0.5; } }
-    mech.traverse(o => { if (o.isMesh && o.name.startsWith("skin_")) o.visible = skinOn[o.name]; });
+    // On purpose (the builder, 2026-11-13): while the sock is on, the foam and the power mesh under it are not drawn. The sock alone shows, and at a lower
+    // opacity the mechanism shows through it; at 100 % it is the whole closed sock. Switch the sock off to see the foam and the mesh.
+    const under = n => n === "skin_foam" || n === "skin_mesh";
+    mech.traverse(o => { if (o.isMesh && o.name.startsWith("skin_")) o.visible = skinOn[o.name] && !(skinOn.skin_sock && under(o.name)); });
   }
 
   // ---------- head (static GLB, inline) ----------
@@ -1630,7 +1633,7 @@
   // y left, z up), plus the same as an orbit around the look-at point: azimuth from the +x direction toward +y, elevation above the horizontal.
   // A screenshot then carries its own camera position; window.__cam(position, lookAt) puts the camera back there.
   const camStrip = $("camstrip"); let camText = "";
-  { const cb = $("showCam"); if (cb && camStrip) { const f = () => { camStrip.hidden = !cb.checked; }; cb.addEventListener("change", f); f(); } }   // the "Show Camera Position" box
+  { const cb = $("showCam"); if (cb && camStrip) { const f = () => { camStrip.hidden = !cb.checked; if (cb.checked) camReadout(); }; cb.addEventListener("change", f); f(); } }   // the "Show Camera Position" box
   function camPose() {
     const p = camera.position, t = controls.target, pos = [p.x, -p.z, p.y], tgt = [t.x, -t.z, t.y], d = pos.map((v, i) => v - tgt[i]), r = Math.hypot(d[0], d[1], d[2]);
     const a = Math.atan2(d[1], d[0]) * 180 / Math.PI;
