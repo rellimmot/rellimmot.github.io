@@ -212,6 +212,8 @@
         <details><summary class="legend" style="cursor:pointer">Front legs</summary><div id="fs_front"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: head and body</summary><div id="fc_green"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: body accents</summary><div id="fc_accent"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: skin spots</summary><div id="fc_spot"></div></details>
+        <details><summary class="legend" style="cursor:pointer">Colour: spot highlights</summary><div id="fc_spot2"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: eyes</summary><div id="fc_eye"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: mouth</summary><div id="fc_mouth"></div></details>
         <details><summary class="legend" style="cursor:pointer">Colour: pupils</summary><div id="fc_pupil"></div></details>
@@ -285,9 +287,10 @@
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const frog = new THREE.Group(); window.__frogGroup = frog;
   const kart = new THREE.Group(); frog.add(kart);
-  const bodyMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.65, metalness: 0.02, side: THREE.DoubleSide });
-  const limbMat = new THREE.MeshStandardMaterial({ color: 0x5cc238, roughness: 0.65, metalness: 0.02, side: THREE.DoubleSide });
-  const padMat = new THREE.MeshStandardMaterial({ color: 0xf0944a, roughness: 0.7, metalness: 0.02, side: THREE.DoubleSide });
+  const SKIN_ROUGH = 0.24;   // wet, glossy skin (the head's skin uses the same value in sim2_script.js applyHead)
+  const bodyMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: SKIN_ROUGH, metalness: 0.02, side: THREE.DoubleSide });
+  const limbMat = new THREE.MeshStandardMaterial({ color: 0x5cc238, roughness: SKIN_ROUGH, metalness: 0.02, side: THREE.DoubleSide });
+  const padMat = new THREE.MeshStandardMaterial({ color: 0xf0944a, roughness: SKIN_ROUGH, metalness: 0.02, side: THREE.DoubleSide });
   const drumMat = new THREE.MeshStandardMaterial({ color: 0xd9b43b, roughness: 0.45, metalness: 0.35, side: THREE.DoubleSide });
   const ringMat = new THREE.MeshStandardMaterial({ color: 0xc8cbd0, roughness: 0.35, metalness: 0.7, side: THREE.DoubleSide });
   const pipeMat = new THREE.MeshStandardMaterial({ color: 0x3b3f46, roughness: 0.5, metalness: 0.6, side: THREE.DoubleSide });
@@ -295,7 +298,7 @@
   const tireMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1e, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
   const hubMat = new THREE.MeshStandardMaterial({ color: 0xb8bcc2, roughness: 0.4, metalness: 0.7, side: THREE.DoubleSide });
   const tubMat = new THREE.MeshStandardMaterial({ color: 0x4a9f30, roughness: 0.7, metalness: 0.02, side: THREE.DoubleSide });   // inside of the standing tub: the body green, a little darker
-  const lidMat = new THREE.MeshStandardMaterial({ color: 0x4dad33, roughness: 0.55, metalness: 0.04, side: THREE.DoubleSide });   // the eyelids (built in the head shape code below)
+  const lidMat = new THREE.MeshStandardMaterial({ color: 0x4dad33, roughness: SKIN_ROUGH, metalness: 0.04, side: THREE.DoubleSide });   // the eyelids (built in the head shape code below)
   const fadeMats = [bodyMat, limbMat, padMat, drumMat, ringMat, tubMat];
   const kartMats = [pipeMat, railMat, tireMat, hubMat];
   const DRUM = { r: 13.1, rz: 13.1, len: 40.7, dx: 0, dz: 0 };   // r = half the fore/aft width, rz = half the height;   // dx / dz keep the front edge and the bottom in place when the size changes (window.__setDrum)    // 85 gal salvage drum, 26.2 in dia x 40.7 in, lying on its side
@@ -319,16 +322,56 @@
       float ry = max((1.0 - w) * u_p3.x + w * b * f, u_p3.x * g * 0.9), rz = max((1.0 - w) * u_p3.y + w * c * f, u_p3.y * g * 0.9), zc = (1.0 - w) * u_p3.z + w * cz;
       return pow(p.y / ry, 2.0) + pow((p.z - zc) / rz, 2.0) < 1.0;
     }`;
-  function tubShader(mat, key, test) {   // test: GLSL condition that discards the fragment
+  // ---- skin pattern: dark blotches (the "spot" colour), some with a lighter core ("spot2"), over the base colour. It is a 3D noise of the position in the scene,
+  // worked out per pixel in the fragment shader, so it runs unbroken over the head, the body and the legs: no texture, no seams. ----
+  const PAT = { spot: { value: new THREE.Color() }, spot2: { value: new THREE.Color() }, pk: { value: new THREE.Vector4(0.075, 0.5, 0.012, 1.5) } };   // pk: blotch scale (1 / in), threshold (0.5 = half covered), edge half-width, warp
+  const PAT_PARS = `uniform vec3 u_spot, u_spot2; uniform vec4 u_pk; varying vec3 vPat;
+    float pH(vec3 p) { p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+    float pN(vec3 x) { vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(mix(pH(i), pH(i + vec3(1.0, 0.0, 0.0)), f.x), mix(pH(i + vec3(0.0, 1.0, 0.0)), pH(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+                 mix(mix(pH(i + vec3(0.0, 0.0, 1.0)), pH(i + vec3(1.0, 0.0, 1.0)), f.x), mix(pH(i + vec3(0.0, 1.0, 1.0)), pH(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z); }
+    vec2 skinPat(vec3 p) {   // x: 1 inside a blotch; y: 1 in the light core of some blotches
+      vec3 q = p * u_pk.x;
+      vec3 w = vec3(pN(q * 1.7 + 11.3), pN(q * 1.7 + 27.1), pN(q * 1.7 + 43.7)) - 0.5;
+      float n = pN(q + w * u_pk.w);
+      float k = smoothstep(u_pk.y - u_pk.z, u_pk.y + u_pk.z, n);
+      float l = smoothstep(u_pk.y + 0.09, u_pk.y + 0.12, n) * smoothstep(0.55, 0.60, pN(q * 0.45 + 71.7));
+      return vec2(k, l);
+    }`;
+  function skinShader(mat, key, opt) {   // opt.discard: GLSL test that drops the fragment (the tub); opt.pat: draw the pattern; opt.attr: weigh the pattern by the per-vertex attribute aPat (the head: none inside the mouth)
     mat.onBeforeCompile = sh => {
-      for (const k in TU) sh.uniforms["u_" + k] = TU[k];
-      sh.vertexShader = "varying vec3 vObj;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n vObj = position;");
-      sh.fragmentShader = TUB_PARS + "\n" + sh.fragmentShader.replace("void main() {", "void main() {\n if (" + test + ") discard;");
+      let vpar = "", vmain = "", fpar = "", fmain = "", fcol = "";
+      if (opt.discard) { for (const k in TU) sh.uniforms["u_" + k] = TU[k]; vpar += "varying vec3 vObj;\n"; vmain += " vObj = position;"; fpar += TUB_PARS + "\n"; fmain = "\n if (" + opt.discard + ") discard;"; }
+      if (opt.pat) {
+        for (const k in PAT) sh.uniforms["u_" + k] = PAT[k];
+        vpar += "varying vec3 vPat;\n" + (opt.attr ? "attribute float aPat; varying float vPatW;\n" : ""); vmain += " vPat = (modelMatrix * vec4(position, 1.0)).xyz;" + (opt.attr ? " vPatW = aPat;" : "");
+        fpar += PAT_PARS + "\n" + (opt.attr ? "varying float vPatW;\n" : "");
+        fcol = "\n { vec2 pk = skinPat(vPat); vec3 pc = mix(mix(diffuseColor.rgb, u_spot, pk.x), u_spot2, pk.y); diffuseColor.rgb = mix(diffuseColor.rgb, pc, " + (opt.attr ? "clamp(vPatW, 0.0, 1.0)" : "1.0") + "); }";
+      }
+      sh.vertexShader = vpar + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n" + vmain);
+      sh.fragmentShader = fpar + sh.fragmentShader.replace("void main() {", "void main() {" + fmain).replace("#include <color_fragment>", "#include <color_fragment>" + fcol);
     };
     mat.customProgramCacheKey = () => key;
   }
-  tubShader(bodyMat, "tubBody", "inCavity(vObj)");
-  tubShader(tubMat, "tubWall", "!inLoft(vObj)");
+  window.__frogSkinShader = skinShader;
+  skinShader(bodyMat, "tubBody", { discard: "inCavity(vObj)", pat: true });
+  skinShader(tubMat, "tubWall", { discard: "!inLoft(vObj)" });
+  skinShader(limbMat, "patLimb", { pat: true }); skinShader(lidMat, "patLid", { pat: true });
+  // ---- wet sheen: the skin mirrors a plain studio dome (dim horizon, light sky, two soft light panels). Built once, when the renderer exists. ----
+  let skinEnv = null, envTried = false; const ENV_K = 1.0;
+  function ensureEnv() {
+    const R = window.__renderer; if (skinEnv || envTried || !R || !THREE.PMREMGenerator) return;
+    envTried = true;
+    try {
+      const sc = new THREE.Scene(), g = new THREE.SphereGeometry(60, 32, 16), p = g.getAttribute("position"), c = new Float32Array(p.count * 3);
+      for (let i = 0; i < p.count; i++) { const h = p.getY(i) / 60, t = Math.min(Math.max((h + 0.25) / 1.1, 0), 1), v = 0.06 + 0.5 * t * t * (3 - 2 * t); c[i * 3] = v * 0.95; c[i * 3 + 1] = v; c[i * 3 + 2] = v * 1.05; }
+      g.setAttribute("color", new THREE.BufferAttribute(c, 3)); sc.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+      const panel = (w, h, pos, k) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(k, k, k), side: THREE.DoubleSide })); m.position.set(pos[0], pos[1], pos[2]); m.lookAt(0, 0, 0); sc.add(m); };
+      panel(46, 30, [14, 44, 18], 7); panel(14, 44, [-40, 16, -22], 3.5);
+      const pm = new THREE.PMREMGenerator(R); skinEnv = pm.fromScene(sc, 0.03).texture; pm.dispose();
+      for (const m of [bodyMat, limbMat, lidMat, padMat]) { m.envMap = skinEnv; m.envMapIntensity = ENV_K; m.needsUpdate = true; }
+    } catch (e) { skinEnv = null; }
+  }
   function tubOutline(d, xb) {   // rounded U (open at the rear), offset inward by d: rear-left -> round the front -> rear-right; same point count for every d
     const xf = TUB.front - d, hw = TUB.inset !== undefined ? TUB.hw - d : 0, R = Math.max(TUB.corner - d, 0.05), pts = [];
     const ln = (x0, y0, x1, y1, n) => { for (let i = 0; i < n; i++) pts.push([x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n]); };
@@ -392,10 +435,12 @@
     ["chassis_x", "Chassis fore/aft", -120, 40, "kart"], ["wheelbase", "Wheelbase", 40, 140, "kart"], ["track", "Wheel width (track)", 30, 90, "kart"],
     ["tire_d", "Tire diameter", 14, 32, "kart"], ["tire_w", "Tire width", 5, 14, "kart"], ["ride", "Rail height above ground", 3, 40, "kart"], ["wheel_dz", "Wheel height (axle offset)", -30, 30, "kart"],
   ];
-  // colours: the green parts (head, body, legs), the accents (cream underside) and the eyes; hex strings
-  const COLOR_DEF = { green: "#5cc238", accent: "#ede9c7", eye: "#db190f", mouth: "#a8485a", pupil: "#0e090a", barrel: "#d9b43b" };
+  // colours (hex strings): "green" = the base skin of the head, body and legs (blue by default), "accent" = the underside and the toe pads (lighter blue),
+  // "spot" = the blotches of the skin pattern (deep violet), "spot2" = the light core of some blotches (lavender), then the eyes, mouth, pupils and the barrel.
+  // The renderer shows these values lighter than the hex reads (sRGB output on unconverted colours): #0d0152 draws as a deep violet near #3f0e9a, #0058f0 as a bright blue near #029ffa.
+  const COLOR_DEF = { green: "#003cbb", accent: "#0054c4", spot: "#0a013e", spot2: "#471fb8", eye: "#05060f", mouth: "#a8485a", pupil: "#0e090a", barrel: "#d9b43b" };
   const CO = Object.assign({}, COLOR_DEF);
-  try { const c = JSON.parse(localStorage.getItem("kdp_frog_colors_v1") || "null"); if (c) for (const k in COLOR_DEF) if (/^#[0-9a-f]{6}$/i.test(c[k])) CO[k] = c[k]; } catch (e) { }
+  try { const c = JSON.parse(localStorage.getItem("kdp_frog_colors_v1") || "null"); if (c) for (const k in COLOR_DEF) if (/^#[0-9a-f]{6}$/i.test(c[k]) && (c.cv >= 2 || k === "barrel")) CO[k] = c[k]; } catch (e) { }   // frog colours saved before cv 2 are dropped (the default scheme changed); a saved barrel colour is kept
   const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
   const rgb2hex = c => "#" + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
   const TUBK = [0x4a / 0x5c, 0x9f / 0xc2, 0x30 / 0x38], LIDK = [76 / 91, 173 / 193, 51 / 56];   // the tub wall and the eyelids are a little darker than the green
@@ -465,6 +510,11 @@
       const n = o.name, it = at.itemSize, isF = at.array instanceof Float32Array, f = isF ? 1 / 255 : 1;
       if (!o.userData.w) { o.userData.w = new Float32Array(at.count * 3); for (let i = 0; i < at.count; i++) for (let k = 0; k < 3; k++) { const v = at.array[i * it + k]; o.userData.w[i * 3 + k] = isF ? v : v / 255; } }
       const w = o.userData.w, c = [0, 0, 0];
+      if ((n === "head_skin" || n === "head_belly") && !o.geometry.getAttribute("aPat")) {   // the skin pattern goes on the skin only (green + cream weights), not inside the mouth
+        const pa = new Float32Array(at.count); for (let i = 0; i < at.count; i++) pa[i] = Math.min(1, w[i * 3] + w[i * 3 + 1]);
+        o.geometry.setAttribute("aPat", new THREE.BufferAttribute(pa, 1)); skinShader(o.material, "patHead", { pat: true, attr: true }); o.material.needsUpdate = true;
+      }
+      if (skinEnv && !o.userData.isPre && o.material.envMap !== skinEnv && n !== "head_mount") { o.material.envMap = skinEnv; o.material.envMapIntensity = ENV_K; o.material.needsUpdate = true; }
       for (let i = 0; i < at.count; i++) {
         const wg = w[i * 3], wa = w[i * 3 + 1], wm = w[i * 3 + 2], wd = Math.max(0, 1 - wg - wa - wm);
         if (n === "head_skin" || n === "head_belly") for (let k = 0; k < 3; k++) c[k] = g[k] * wg + a[k] * wa + m[k] * wm + dp[k] * wd;
@@ -480,7 +530,9 @@
     const g = hex2rgb(CO.green); limbMat.color.setRGB(g[0] / 255, g[1] / 255, g[2] / 255); tubMat.color.setRGB(g[0] * TUBK[0] / 255, g[1] * TUBK[1] / 255, g[2] * TUBK[2] / 255);
     const d = hex2rgb(CO.barrel); drumMat.color.setRGB(d[0] / 255, d[1] / 255, d[2] / 255);   // the drum body, hoops and one end rim (the silver ring, lug and logo stay)
     lidMat.color.setRGB(g[0] * LIDK[0] / 255, g[1] * LIDK[1] / 255, g[2] * LIDK[2] / 255);
-    paintSkin(); paintHead();
+    const a = hex2rgb(CO.accent); padMat.color.setRGB(a[0] / 255, a[1] / 255, a[2] / 255);   // the toe pads take the accent colour
+    const s1 = hex2rgb(CO.spot), s2 = hex2rgb(CO.spot2); PAT.spot.value.setRGB(s1[0] / 255, s1[1] / 255, s1[2] / 255); PAT.spot2.value.setRGB(s2[0] / 255, s2[1] / 255, s2[2] / 255);
+    ensureEnv(); paintSkin(); paintHead();
   }
   window.__applyFrogColors = applyColors;
   function buildSkin(P) {
@@ -746,14 +798,14 @@
     }
     // colour pickers: a swatch (the browser's colour wheel) plus red / green / blue sliders
     const pickers = [];
-    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["eye", "fc_eye"], ["mouth", "fc_mouth"], ["pupil", "fc_pupil"], ["barrel", "fc_barrel"]]) {
+    for (const [key, hostId] of [["green", "fc_green"], ["accent", "fc_accent"], ["spot", "fc_spot"], ["spot2", "fc_spot2"], ["eye", "fc_eye"], ["mouth", "fc_mouth"], ["pupil", "fc_pupil"], ["barrel", "fc_barrel"]]) {
       const host = document.getElementById(hostId); if (!host) continue;
       host.innerHTML = `<div class="ctl"><label>Colour wheel</label><input type="color" style="width:100%;height:36px;padding:2px;border:1px solid var(--line);border-radius:6px;background:var(--chip);cursor:pointer"><span class="num hexv"></span></div>` +
         ["Red", "Green", "Blue"].map(n => `<div class="ctl"><label>${n}</label><input type="range" min="0" max="255" step="1" value="0"><span class="num"></span></div>`).join("") +
         `<div class="seg" style="margin-bottom:10px"><button type="button">Reset this colour</button></div>`;
       const wheel = host.querySelector("input[type=color]"), hexv = host.querySelector(".hexv"), sl = [...host.querySelectorAll("input[type=range]")], nums = [...host.querySelectorAll(".ctl .num")].slice(1);
       const show = () => { const c = hex2rgb(CO[key]); wheel.value = CO[key]; hexv.textContent = CO[key]; sl.forEach((x, i) => { x.value = c[i]; nums[i].textContent = c[i]; }); };
-      const set = hex => { CO[key] = hex; show(); applyColors(); try { localStorage.setItem("kdp_frog_colors_v1", JSON.stringify(CO)); } catch (e) { } readout(); };
+      const set = hex => { CO[key] = hex; show(); applyColors(); try { localStorage.setItem("kdp_frog_colors_v1", JSON.stringify(Object.assign({ cv: 2 }, CO))); } catch (e) { } readout(); };
       wheel.addEventListener("input", () => set(wheel.value));
       sl.forEach(x => x.addEventListener("input", () => set(rgb2hex(sl.map(y => +y.value)))));
       host.querySelector("button").addEventListener("click", () => set(COLOR_DEF[key]));
@@ -761,7 +813,7 @@
     }
     // each section (frog, barrel, kart) gets its own reset button
     const SECTIONS = {
-      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "eye", "mouth", "pupil"] },
+      frog:   { host: "fs_foot",    groups: ["head", "shape", "lids", "body", "hind", "front"], extra: ["lid_style"], label: "Reset frog",   colours: ["green", "accent", "spot", "spot2", "eye", "mouth", "pupil"] },
       barrel: { host: "fs_barrel_foot", groups: ["barrel"],                    label: "Reset barrel", colours: ["barrel"] },
       kart:   { host: "kartSliders", groups: ["kart"],                         label: "Reset kart" },
     };
@@ -867,7 +919,7 @@
     ["coupler", "Sacrum coupler"], ["cable1", "Strip cables"], ["cable2", "Tentacle cables"], ["housing2", "Tentacle cable housings and clips"], ["disc", "Tentacle discs"], ["core", "Core"], ["tip", "Tip cap"],
     ["head_skin", "Head"], ["head_belly", "Lower jaw"], ["head_eye", "Eyes"], ["head_lid", "Eyelids"], ["head_pupil", "Pupils"],
   ];
-  const SWATCH = { head_mount: "#8c9199", head_skin: "#5cc238", head_belly: "#ede9c7", head_eye: "#db1a0f", head_lid: "#4dad33", head_pupil: "#080505" };
+  const SWATCH = { head_mount: "#8c9199", head_skin: "#3f0e9a", head_belly: "#029ffa", head_eye: "#05060f", head_lid: "#0284d6", head_pupil: "#080505" };
   const HEAD_FADE = new Set(["head_skin", "head_belly", "head_lid"]);
 
   // ---------- three.js setup ----------
@@ -971,7 +1023,7 @@
     const metas = []; headGroup.traverse(o => { if (o.isMesh && !o.userData.isPre) metas.push(o); });
     for (const o of metas) {
       const n = o.name; o.visible = visible[n] !== false && !(n === "head_lid" && window.__frogPoints && window.__frogPoints.lid_cover <= 0); o.material.side = THREE.DoubleSide;
-      o.material.roughness = n === "head_eye" ? 0.25 : n === "head_pupil" ? 0.2 : 0.55; o.material.metalness = n === "head_mount" ? 0.5 : 0.04;
+      o.material.roughness = n === "head_eye" ? 0.1 : n === "head_pupil" ? 0.1 : n === "head_mount" ? 0.55 : 0.24;   // glossy eyes; the skin is wet-looking (same value as SKIN_ROUGH in sim2_frog.js) o.material.metalness = n === "head_mount" ? 0.5 : 0.04;
       if (HEAD_FADE.has(n)) {
         const tr = headOpacity < 0.999, pre = tr && headOpacity > 0.6;
         o.material.transparent = tr; o.material.opacity = headOpacity; o.material.depthWrite = !tr; o.renderOrder = 1;
