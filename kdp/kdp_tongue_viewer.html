@@ -319,7 +319,8 @@
     diag_front_d: 0.75,       // T for the diameter, S and photos for the end points: the front diagonal, from the foot of the front upright up to the same point
     short_at: [13, 25, 43],   // S, scaled from the sketch, low confidence: short verticals between the upper support bar and the top bar
     short_d: 1.0,             // S
-    front_corner_r: 4,        // E, by eye from the front photo: bend radius where the front bottom cross bar turns up into the corner uprights
+    // No bar of the cart frame is bent: every bar is straight with square ends (the builder, 2026-11-13). The earlier drawing rounded the two bottom front corners
+    // (a bend radius of about 4, estimated by eye from the front photo) and ran the bottom bars' last bay into that bend; both are withdrawn.
     // the front of the tub, as the builder described it from his two tape photos (2026-11-13)
     front_cross_d: 1.25,      // T: a cross pipe on the front face at the height of the upper support bar; it meets the centre upright
     centre_upright_d: 1.25,   // T for the diameter and for its top (it runs on up to the top bar). 3D (within 2): it stands on the front bottom bar at the mouth centre
@@ -347,7 +348,7 @@
     tie_fwd: 14,              // E: how far they sit ahead of the front axle (4 ahead of the cart frame's front face)
   };
   const GROUND_Z = -KART.lip_corner_h;    // tire-contact ground: the lip corner (model z = 0) is lip_corner_h above it
-  const MOUTH_X = 0;                      // G: model x of the lip corners. Where the tongue mount sits on the kart is not measured. With 0 and the apparatus default (BASE in sim2_script.js) the tongue root is 11.5 in ahead of the lip corners, the tongue leaves through the lip opening, and the rear end of the mount tube is at the cart frame's front face, on the centre upright, about 4 below the front cross pipe
+  const MOUTH_X = 0;                      // G: model x of the lip corners. Where the tongue mount sits on the kart is not measured. With 0 and the apparatus default (BASE in sim2_script.js) the tongue root is 11.3 in ahead of the lip corners, the tongue leaves through the lip opening, and the rear end of the 1 1/4 in mount tube is on the axis of the centre upright of the cart frame's front face, 4 below the front cross pipe: the tongue is mounted to that upright (the builder's decision, 2026-11-13)
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const frog = new THREE.Group(); window.__frogGroup = frog;
   const kart = new THREE.Group(); frog.add(kart);
@@ -706,31 +707,22 @@
   }
 
   // ---- kart: the cart frame (the welded pipe cage) on its UTV chassis (rails, suspension, wheels, decks; no motor). Numbers: the KART dimension set at the top. ----
-  function tubeAlong(pts, d, mat) {   // one bent tube through the points (straight between them; the points on a bend are close together)
-    const c = new THREE.CatmullRomCurve3(pts.map(p => V(...p)), false, "catmullrom", 0);
-    const m = new THREE.Mesh(new THREE.TubeGeometry(c, 150, d / 2, 12, false), mat || pipeMat); m.name = "kart"; kart.add(m); return m;
-  }
   function box(c, sz, mat) { const m = new THREE.Mesh(new THREE.BoxGeometry(sz[0], sz[1], sz[2]), mat); m.position.set(c[0], c[1], c[2]); m.name = "kart"; kart.add(m); return m; }
   function buildCartFrame(P) {   // two equal side frames (G: the left and right sides are assumed equal) and the cross bars
     const K = KART, d = P.pipe_d, L = P.cage_l, kx = L / K.frame_len, x0 = P.cage_x - L / 2, x1 = x0 + L, Y = P.cage_y, yc = Math.max((P.cage_w - d) / 2, 1);
     const z0 = P.cage_z, z1 = z0 + P.cage_h, zs = z0 + P.cage_h * K.support_h / K.frame_h, ux = K.upright_at.map(u => x0 + u * kx);
-    const rc = Math.min(K.front_corner_r, yc * 0.5, P.cage_h * 0.3), q = 0.293 * rc;   // q: where the 45 degree point of the front corner bend lies
     for (const s of [1, -1]) {
       const y = Y + s * yc;
-      pipe([x0, y, z0], [ux[2], y, z0], d); pipe([ux[2], y, z0], [x1, y - s * q, z0 + q], d);   // bottom bar; its last bay runs into the rounded front corner
+      pipe([x0, y, z0], [x1, y, z0], d);                                                          // bottom bar, one straight bar, full length
       pipe([x0, y, z1], [x1, y, z1], d);                                                          // top bar
       pipe([x0, y, zs], [x1, y, zs], K.support_d);                                                // upper support bar, full length
-      for (let i = 0; i < 3; i++) pipe([ux[i], y, z0], [ux[i], y, z1], K.upright_d[i]);          // uprights at 0, 31.5 and 63.5 (the front one is part of the front hoop below)
+      for (let i = 0; i < 4; i++) pipe([ux[i], y, z0], [ux[i], y, z1], K.upright_d[i]);          // uprights at 0, 31.5, 63.5 and 95 (the last one is the front corner upright)
       pipe([ux[1], y, z0], [ux[2], y, zs], K.diag_rear_d);                                        // rear-side diagonal
-      pipe([x1, y, z0 + rc], [ux[2], y, zs], K.diag_front_d);                                     // front-side diagonal, to the same point on the upright at 63.5
+      pipe([x1, y, z0], [ux[2], y, zs], K.diag_front_d);                                          // front-side diagonal, from the foot of the front upright to the same point on the upright at 63.5
       for (const u of K.short_at) pipe([x0 + u * kx, y, zs], [x0 + u * kx, y, z1], K.short_d);   // short verticals under the top bar
     }
-    // front face: one hoop. The bottom cross bar turns up through rounded corners into the two corner uprights
-    const pts = [[x1, Y + yc, z1], [x1, Y + yc, z0 + rc]], n = 8;
-    for (let i = 1; i <= n; i++) { const a = i / n * Math.PI / 2; pts.push([x1, Y + yc - rc * (1 - Math.cos(a)), z0 + rc * (1 - Math.sin(a))]); }
-    for (let i = n; i >= 0; i--) { const a = i / n * Math.PI / 2; pts.push([x1, Y - yc + rc * (1 - Math.cos(a)), z0 + rc * (1 - Math.sin(a))]); }
-    pts.push([x1, Y - yc, z1]); tubeAlong(pts, K.upright_d[3]);   // one bent pipe, drawn at the uprights' diameter (the dimension set gives its bottom run 1 1/4 in)
-    pipe([x1, Y - yc, z1], [x1, Y + yc, z1], d);                                                  // top front cross bar (G)
+    // front face: square corners, like the rear face. Straight bottom and top cross bars between the two corner uprights
+    for (const z of [z0, z1]) pipe([x1, Y - yc, z], [x1, Y + yc, z], d);                          // front cross bars, bottom and top (the top one: G)
     for (const z of [z0, z1]) pipe([x0, Y - yc, z], [x0, Y + yc, z], d);                          // rear cross bars, bottom (G) and top
     pipe([x0, Y - yc, zs], [x0, Y + yc, zs], K.support_d);                                        // rear face: an upper bar under the top bar, as on the sides, and no X brace (the builder's word, 2026-11-13; its height and diameter are taken from the side bar: G)
     // the front of the tub: cross pipe and centre upright on the front face, the two wood posts behind them, the flat 2x4 between the posts
@@ -1461,7 +1453,7 @@
     sweepProfile("skin_foam", samples, foamR, 28); sweepProfile("skin_mesh", samples, meshR, 28);
     applySkin();
     const lens = { P: pathLen(strip.P), M: pathLen(strip.M) }; for (const n in ten) lens[n] = pathLen(hsg[n]) + pathLen(ten[n]);
-    lens._tip = pt("s2_seg12", S_TIP, 0, 0); lens._sacrum = pt("s1_seg06", 29.25, 0, 0); lens._root = pt("skull", 2, 0, 0);
+    lens._tip = pt("s2_seg12", S_TIP, 0, 0); lens._sacrum = pt("s1_seg06", 29.25, 0, 0); lens._root = pt("skull", 2, 0, 0); lens._mount = pt("skull", MOUNT_S0, 0, 0);
     return lens;
   }
 
@@ -1574,7 +1566,10 @@
   const op = $("headOpacity"); op.addEventListener("input", () => { headOpacity = op.value / 100; $("headOpacityVal").textContent = op.value + "%"; applyHead(); });
 
   // move the whole apparatus (tongue, skull, mount tube) relative to the frog, barrel and kart
-  const BASE = [16, 0, -12], off = { x: 0, y: 0, z: 0 };   // the apparatus default (In/out +16, Up/down -12 in from the CAD position; 4 further out and 4 lower since 2026-11-13) is the sliders' zero
+  // The apparatus default is the sliders' zero. It puts the centre of the mount tube's rear end (s = MOUNT_S0 on the skull axis) on the axis of the centre upright of the cart frame's
+  // front face (model x = -6, y = 0), 64.5 in above the ground: the tongue is mounted to that 1 1/4 in upright (the builder's decision, 2026-11-13). In/out +15.82, Up/down -12 in from
+  // the CAD position; the builder's own setting of that morning was +16, 0.18 in further out.
+  const BASE = [15.82, 0, -12], off = { x: 0, y: 0, z: 0 };
   const offUpdate = () => { mech.position.set(BASE[0] + off.x, BASE[1] + off.y, BASE[2] + off.z); for (const k of ["x", "y", "z"]) $("off" + k.toUpperCase() + "V").textContent = (off[k] > 0 ? "+" : "") + off[k].toFixed(1) + " in"; if (started) update(); };   // the skin's root is anchored in the head, so it follows
   for (const k of ["x", "y", "z"]) $("off" + k.toUpperCase()).addEventListener("input", ev => { off[k] = +ev.target.value; offUpdate(); });
   $("offReset").addEventListener("click", () => { for (const k of ["x", "y", "z"]) { off[k] = 0; $("off" + k.toUpperCase()).value = 0; } offUpdate(); });
@@ -1608,6 +1603,7 @@
   }
   window.__cam = (pos, tgt) => { camera.position.copy(toYup(pos)); controls.target.copy(toYup(tgt)); controls.update(); };
   window.__setCam = setCam; window.__tip = () => lastLens && lastLens._tip;
+  window.__mount = () => lastLens && lastLens._mount.clone().add(mech.position).toArray();   // debug (tools/check_kart.js): the centre of the mount tube's rear end, model inches
   window.__partSlab = (x0, x1) => {   // debug (tools/sock_dims.js): the placed CAD parts cut at three stations of the straight tongue (tongue-local x = x0, the middle, x1; inches): the extents and taut girth of those cuts in the cross-section (y, z)
     const pts = [], P = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], planes = [x0, (x0 + x1) / 2, x1];
     for (const it of instances) { if (it.proc) continue; const g = it.mesh.geometry, pa = g.attributes.position, ix = g.index, M4 = new THREE.Matrix4().copy(Wbi).multiply(it.M), nT = (ix ? ix.count : pa.count) / 3;
