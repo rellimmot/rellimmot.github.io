@@ -116,7 +116,7 @@ function progress(e, c) {
     const p = Math.min(100, 100 * e.loaded / e.total);
     track.classList.remove('unknown');
     fill.style.width = p.toFixed(1) + '%';
-    $('loadnum').textContent = Math.round(p) + ' %  ·  ' + mb(e.loaded) + ' of ' + mb(e.total);
+    $('loadnum').textContent = Math.round(p) + ' %  ·  ' + mb(e.loaded);  // no 'of total': servers that compress report a smaller total
   } else {
     track.classList.add('unknown');
     $('loadnum').textContent = mb(e.loaded || 0) + ' so far';
