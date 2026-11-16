@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KDP Kart Point Cloud</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #121212; color: #ddd; font: 13px/1.4 system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 8px; left: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; z-index: 2; }
+  button { background: #2a2a2a; color: #ddd; border: 1px solid #555; border-radius: 4px; padding: 5px 9px; font: inherit; cursor: pointer; }
+  button:hover { background: #3a3a3a; }
+  button.on { border-color: #e8c84a; color: #e8c84a; }
+  label { display: flex; gap: 5px; align-items: center; }
+  .sep { opacity: .5; }
+  #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
+  #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
+  #loader { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 3; pointer-events: none; }
+  #loader[hidden] { display: none; }
+  #loadbox { width: min(360px, 80vw); background: rgba(20,20,20,.92); border: 1px solid #444; border-radius: 8px; padding: 16px 18px; text-align: center; }
+  #loadtitle { margin-bottom: 10px; font-size: 14px; }
+  #track { height: 10px; background: #2c2c2c; border-radius: 5px; overflow: hidden; }
+  #fill { height: 100%; width: 0; background: #e8c84a; border-radius: 5px; transition: width .15s linear; }
+  #track.unknown #fill { width: 35%; animation: slide 1.1s ease-in-out infinite alternate; }
+  @keyframes slide { from { margin-left: 0; } to { margin-left: 65%; } }
+  #loadnum { margin-top: 8px; color: #aaa; font-variant-numeric: tabular-nums; }
+  #loader.error #fill { background: #d9534f; }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="bar">
+  <span id="pick">
+    <button id="bVoxel" class="on">Thinned (17 MB)</button>
+    <button id="bFull">Full (88 MB)</button>
+    <span class="sep">|</span>
+  </span>
+  <button data-view="iso">3/4</button>
+  <button data-view="left">Left</button>
+  <button data-view="right">Right</button>
+  <button data-view="front">Front</button>
+  <button data-view="rear">Rear</button>
+  <button data-view="top">Top</button>
+  <span class="sep">|</span>
+  <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
+  <label><input id="axes" type="checkbox" checked> Axes and floor grid</label>
+</div>
+<div id="loader" role="status" aria-live="polite">
+  <div id="loadbox">
+    <div id="loadtitle">Loading the kart…</div>
+    <div id="track"><div id="fill"></div></div>
+    <div id="loadnum">Starting…</div>
+  </div>
+</div>
+<div id="status"></div>
+<div id="help">Drag: rotate · Right-drag: pan · Wheel: zoom · Inches; X forward (red), Y left (green), Z up (blue)</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
+
+// Web export: only the thinned cloud is offered.
+const THINNED = { file: 'kdp_pointcloud.ply', name: 'kart' };
+const FULL = null;
+const CLOUDS = { voxel: THINNED, full: FULL };
+const CENTER = new THREE.Vector3(-35, 0, 45);
+
+const $ = (id) => document.getElementById(id);
+const statusEl = $('status'), loader = $('loader'), track = $('track'), fill = $('fill');
+if (!FULL) $('pick').hidden = true;
+
+THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x121212);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 5000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.copy(CENTER);
+controls.enableDamping = true;
+
+const helpers = new THREE.Group();
+const grid = new THREE.GridHelper(240, 20, 0x666666, 0x333333); // 12 in squares
+grid.rotation.x = Math.PI / 2; grid.position.set(-35, 0, 0);
+helpers.add(grid, new THREE.AxesHelper(36));
+scene.add(helpers);
+
+const material = new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true });
+const loaded = {};
+let current = null, wanted = null;
+
+const VIEWS = {
+  iso: [220, 210, 110], left: [0, 330, 0], right: [0, -330, 0],
+  front: [330, 0, 0], rear: [-330, 0, 0], top: [0, 0.01, 380],
+};
+function setView(name) {
+  const o = VIEWS[name];
+  camera.position.set(CENTER.x + o[0], CENTER.y + o[1], CENTER.z + o[2]);
+  controls.target.copy(CENTER);
+  controls.update();
+}
+setView('iso');
+
+const mb = (b) => (b / 1048576).toFixed(1) + ' MB';
+function progress(e, c) {
+  if (e.lengthComputable && e.total) {
+    const p = Math.min(100, 100 * e.loaded / e.total);
+    track.classList.remove('unknown');
+    fill.style.width = p.toFixed(1) + '%';
+    $('loadnum').textContent = Math.round(p) + ' %  ·  ' + mb(e.loaded) + ' of ' + mb(e.total);
+  } else {
+    track.classList.add('unknown');
+    $('loadnum').textContent = mb(e.loaded || 0) + ' so far';
+  }
+}
+
+function show(kind) {
+  const c = CLOUDS[kind];
+  if (!c) return;
+  wanted = kind;
+  $('bVoxel').classList.toggle('on', kind === 'voxel');
+  $('bFull').classList.toggle('on', kind === 'full');
+  const done = () => {
+    if (wanted !== kind) return;
+    loader.hidden = true;
+    if (current) scene.remove(current);
+    current = loaded[kind]; scene.add(current);
+    const n = current.geometry.attributes.position.count;
+    statusEl.textContent = n.toLocaleString() + ' points';
+    window.__kart = { kind, points: n };
+  };
+  if (loaded[kind]) return done();
+  loader.hidden = false; loader.classList.remove('error');
+  track.classList.remove('unknown'); fill.style.width = '0';
+  $('loadtitle').textContent = 'Loading the ' + c.name + '…';
+  $('loadnum').textContent = 'Starting…';
+  new PLYLoader().load(c.file, (geo) => {
+    if (geo.attributes.normal) geo.deleteAttribute('normal');
+    loaded[kind] = new THREE.Points(geo, material);
+    done();
+  }, (e) => { if (wanted === kind) progress(e, c); }, (err) => {
+    loader.classList.add('error'); track.classList.remove('unknown'); fill.style.width = '100%';
+    $('loadtitle').textContent = 'Could not load the ' + c.name;
+    $('loadnum').textContent = (err && err.message) || 'Check the connection and reload the page.';
+  });
+}
+
+$('bVoxel').onclick = () => show('voxel');
+$('bFull').onclick = () => show('full');
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+$('size').oninput = (e) => { material.size = +e.target.value; };
+$('axes').onchange = (e) => { helpers.visible = e.target.checked; };
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+show('voxel');
+</script>
+</body>
+</html>
