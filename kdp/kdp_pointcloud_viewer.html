@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KDP Kart Point Cloud</title>
+<title>KDP Kart 3D Viewer</title>
 <style>
   html, body { margin: 0; height: 100%; background: #121212; color: #ddd; font: 13px/1.4 system-ui, sans-serif; overflow: hidden; }
   #bar { position: fixed; top: 8px; left: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; z-index: 2; }
   button { background: #2a2a2a; color: #ddd; border: 1px solid #555; border-radius: 4px; padding: 5px 9px; font: inherit; cursor: pointer; }
   button:hover { background: #3a3a3a; }
   button.on { border-color: #e8c84a; color: #e8c84a; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
   label { display: flex; gap: 5px; align-items: center; }
+  [hidden] { display: none !important; }
   .sep { opacity: .5; }
   #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
   #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
@@ -36,8 +38,9 @@
 <body>
 <div id="bar">
   <span id="pick">
-    <button id="bVoxel" class="on">Thinned (17 MB)</button>
-    <button id="bFull">Full (88 MB)</button>
+    <button id="bVoxel" class="on">Point cloud (9 MB)</button>
+    <button id="bTextured">Photo mesh (15 MB)</button>
+    <label id="clayL" hidden><input id="clay" type="checkbox"></label>
     <span class="sep">|</span>
   </span>
   <button data-view="iso">3/4</button>
@@ -63,16 +66,21 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// Web export: only the thinned cloud is offered.
-const THINNED = { file: 'kdp_pointcloud.ply', name: 'kart' };
+// Web export: the thinned point cloud and the quarter-size photo-textured mesh.
 const FULL = null;
-const CLOUDS = { voxel: THINNED, full: FULL };
+const CLOUDS = {
+  voxel: { file: 'kdp_pointcloud.ply', name: 'point cloud' },
+  textured: { file: 'kdp_mesh.ply', name: 'photo mesh', texture: 'kdp_mesh.jpg' } };
+const BUTTONS = { voxel: 'bVoxel', textured: 'bTextured' };
+// The mesh is in COLMAP model units; this moves it into the kart frame.
+const TO_KART = new THREE.Matrix4().set(26.448866, 0.51306803, -0.250351353, -43.8972887, 0.300778971, -2.66296169, 26.3189398, 6.85119062, 0.485228414, -26.3156573, -2.66817487, 60.5748317, 0, 0, 0, 1);
 const CENTER = new THREE.Vector3(-35, 0, 45);
 
 const $ = (id) => document.getElementById(id);
 const statusEl = $('status'), loader = $('loader'), track = $('track'), fill = $('fill');
-if (!FULL) $('pick').hidden = true;
+
 
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -95,6 +103,12 @@ helpers.add(grid, new THREE.AxesHelper(36));
 scene.add(helpers);
 
 const material = new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true });
+// Mesh: lit so the shape reads; the light rides with the camera.
+const meshMat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
+const clayMat = new THREE.MeshLambertMaterial({ color: 0xb8b8b8, side: THREE.DoubleSide });
+scene.add(new THREE.HemisphereLight(0xffffff, 0x555555, 1.6));
+const headlamp = new THREE.DirectionalLight(0xffffff, 1.6);
+camera.add(headlamp); scene.add(camera);
 const loaded = {};
 let current = null, wanted = null;
 
@@ -127,35 +141,69 @@ function show(kind) {
   const c = CLOUDS[kind];
   if (!c) return;
   wanted = kind;
-  $('bVoxel').classList.toggle('on', kind === 'voxel');
-  $('bFull').classList.toggle('on', kind === 'full');
+  for (const k in BUTTONS) $(BUTTONS[k]).classList.toggle('on', k === kind);
+  $('clayL').hidden = !c.mesh;
   const done = () => {
     if (wanted !== kind) return;
     loader.hidden = true;
     if (current) scene.remove(current);
     current = loaded[kind]; scene.add(current);
-    const n = current.geometry.attributes.position.count;
-    statusEl.textContent = n.toLocaleString() + ' points';
-    window.__kart = { kind, points: n };
+    let n = 0, faces = 0;
+    current.traverse(o => { if (o.geometry) { n += o.geometry.attributes.position.count; if (o.isMesh) faces += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
+    statusEl.textContent = faces ? faces.toLocaleString() + ' faces · ' + n.toLocaleString() + ' vertices' : n.toLocaleString() + ' points';
+    window.__kart = { kind, points: n, faces };
   };
   if (loaded[kind]) return done();
   loader.hidden = false; loader.classList.remove('error');
   track.classList.remove('unknown'); fill.style.width = '0';
   $('loadtitle').textContent = 'Loading the ' + c.name + '…';
   $('loadnum').textContent = 'Starting…';
+  const onError = (err) => {
+    if (wanted !== kind) return;  // the user already moved on to something else
+    loader.classList.add('error'); track.classList.remove('unknown'); fill.style.width = '100%';
+    $('loadtitle').textContent = 'Could not load the ' + c.name;
+    $('loadnum').textContent = (err && err.message) || 'Check the connection and reload the page.';
+  };
+  if (c.glb) {
+    new GLTFLoader().load(c.file, (g) => {
+      g.scene.traverse(o => { if (o.isMesh) { // photo texture shown as is, no lighting
+        o.material = new THREE.MeshBasicMaterial({ map: o.material.map, side: THREE.DoubleSide }); } });
+      g.scene.applyMatrix4(TO_KART);
+      loaded[kind] = g.scene; done();
+    }, (e) => { if (wanted === kind) progress(e, c); }, onError);
+    return;
+  }
   new PLYLoader().load(c.file, (geo) => {
     if (geo.attributes.normal) geo.deleteAttribute('normal');
-    loaded[kind] = new THREE.Points(geo, material);
+    if (c.texture) {  // COLMAP mesh_texturer output: per-face UVs, model units, one atlas image
+      $('loadnum').textContent = 'Loading the photo texture…'; track.classList.add('unknown');
+      new THREE.TextureLoader().load(c.texture, (tex) => {  // show the mesh only once its texture is in
+        tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+        m.applyMatrix4(TO_KART); loaded[kind] = m; done();
+      }, undefined, () => onError(new Error('The photo texture did not load.')));
+      return;
+    } else if (c.mesh) { geo.computeVertexNormals(); loaded[kind] = new THREE.Mesh(geo, $('clay').checked ? clayMat : meshMat); }
+    else loaded[kind] = new THREE.Points(geo, material);
     done();
   }, (e) => { if (wanted === kind) progress(e, c); }, (err) => {
+    if (wanted !== kind) return;  // the user already moved on to something else
     loader.classList.add('error'); track.classList.remove('unknown'); fill.style.width = '100%';
     $('loadtitle').textContent = 'Could not load the ' + c.name;
     $('loadnum').textContent = (err && err.message) || 'Check the connection and reload the page.';
   });
 }
 
-$('bVoxel').onclick = () => show('voxel');
-$('bFull').onclick = () => show('full');
+for (const k in BUTTONS) $(BUTTONS[k]).onclick = () => show(k);
+$('clay').onchange = (e) => { for (const k in loaded) if (CLOUDS[k].mesh && loaded[k].isMesh) loaded[k].material = e.target.checked ? clayMat : meshMat; };
+const want = new URLSearchParams(location.search).get('show');
+// Grey out anything whose file is not there (yet), so a click cannot end in an error box.
+for (const k in BUTTONS) {
+  if (!CLOUDS[k]) continue;
+  fetch(CLOUDS[k].file, { method: 'HEAD', cache: 'no-store' }).then(r => {
+    if (!r.ok) { const b = $(BUTTONS[k]); b.disabled = true; b.textContent += ' (not ready)'; b.title = 'This file has not been made yet. Reload the page later.'; }
+  }).catch(() => {});
+}
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 $('size').oninput = (e) => { material.size = +e.target.value; };
 $('axes').onchange = (e) => { helpers.visible = e.target.checked; };
@@ -164,7 +212,7 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
-show('voxel');
+show(CLOUDS[want] ? want : 'voxel');
 </script>
 </body>
 </html>
