@@ -50,7 +50,7 @@
   <button data-view="rear">Rear</button>
   <button data-view="top">Top</button>
   <span class="sep">|</span>
-  <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
+  <label id="sizeL">Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
   <label><input id="axes" type="checkbox" checked> Axes and floor grid</label>
 </div>
 <div id="loader" role="status" aria-live="polite">
@@ -143,6 +143,7 @@ function show(kind) {
   wanted = kind;
   for (const k in BUTTONS) $(BUTTONS[k]).classList.toggle('on', k === kind);
   $('clayL').hidden = !c.mesh;
+  $('sizeL').hidden = !!(c.mesh || c.texture || c.glb);  // point size only applies to point clouds
   const done = () => {
     if (wanted !== kind) return;
     loader.hidden = true;
