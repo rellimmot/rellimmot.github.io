@@ -38,7 +38,7 @@
 <body>
 <div id="bar">
   <span id="pick">
-    <button id="bVoxel" class="on">Point cloud (9 MB)</button>
+    <button id="bVoxel">Point cloud (9 MB)</button>
     <button id="bTextured">Photo mesh (15 MB)</button>
     <label id="clayL" hidden><input id="clay" type="checkbox"></label>
     <span class="sep">|</span>
@@ -212,7 +212,7 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
-show(CLOUDS[want] ? want : 'voxel');
+show(CLOUDS[want] ? want : 'textured');  // photo mesh by default; ?show=voxel opens on the point cloud
 </script>
 </body>
 </html>
