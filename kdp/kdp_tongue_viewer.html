@@ -44,6 +44,11 @@
   .ctl { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; margin-bottom: 10px; }
   .ctl label { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .sub:empty { display: none; }
+  .ov button.load { grid-column: 1 / -1; padding: 7px 10px; border: 1px solid var(--line); background: var(--chip); color: var(--fg); border-radius: 6px; cursor: pointer; text-align: left; }
+  .ov button.load:disabled { cursor: progress; opacity: 0.7; }
+  .ov .bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--chip); border: 1px solid var(--line); overflow: hidden; }
+  .ov .bar > i { display: block; height: 100%; width: 0; background: var(--accent); }
+  .ov .msg { grid-column: 1 / -1; font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .ctl label small { color: var(--muted); font-family: var(--mono); font-size: 11px; }
   input[type=range] { width: 100%; accent-color: var(--accent); }
   .num { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); min-width: 5ch; text-align: right; font-size: 12px; }
@@ -163,6 +168,8 @@
         <span class="num" id="bodyOpacityVal">96%</span>
       </div>
       <div id="viewKart"></div>
+      <div class="ctl ov" id="ov_cloud"><label>Scan: point cloud</label><button type="button" class="load">Load point cloud (9 MB)</button></div>
+      <div class="ctl ov" id="ov_mesh"><label>Scan: photo mesh</label><button type="button" class="load">Load photo mesh (15 MB)</button></div>
       <div class="seg" id="cams">
         <button type="button" data-cam="iso">3/4</button>
         <button type="button" data-cam="side">Side</button>
@@ -289,6 +296,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/PLYLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
 <script>
 // ---------- the rest of the frog, the KDP barrel and the kart (viewer only; placeholder shapes) ----------
@@ -1059,6 +1067,8 @@
     clear(kart);
     const frame = buildCartFrame(FP); buildInterior(FP, frame); buildChassis(FP, frame);
     applyKartOpacity(); applyVisible();
+    window.__kartShift = [FP.cage_x - DEFAULTS.cage_x, FP.cage_y - DEFAULTS.cage_y, FP.cage_z - DEFAULTS.cage_z];   // how far the cart frame sliders moved the kart: the scan overlays follow it
+    if (window.__onKartBuilt) window.__onKartBuilt();
   }
   function applyKartOpacity() { const o = FP.kart_op / 100; for (const m of kartMats) { m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; } }
   function applyVisible() { if (window.__frogVisibleState) for (const k in window.__frogVisibleState) frog.traverse(x => { if (x.isMesh && x.name === k) x.visible = window.__frogVisibleState[k]; }); }
@@ -1840,6 +1850,50 @@
   $("cutaway").addEventListener("change", ev => { cutaway = ev.target.checked; update(); });
   const bop = $("bodyOpacity"); bop.addEventListener("input", () => { bodyOpacity = bop.value / 100; $("bodyOpacityVal").textContent = bop.value + "%"; applyBody(); });
   const op = $("headOpacity"); op.addEventListener("input", () => { headOpacity = op.value / 100; $("headOpacityVal").textContent = op.value + "%"; applyHead(); });
+
+  // ---- the real kart's scan as an overlay: the point cloud and the photo mesh of the walk-around of 2026-11-15, the same files as the kart scan page beside this one.
+  // Not loaded until asked (9 and 15 MB): a button loads one, shows a load bar, then turns into its opacity slider. Both files are in the kart frame (inches,
+  // origin on the floor under the middle of the cart frame's front face) except the mesh, which is in the reconstruction's own units and comes in through TO_KART;
+  // the model frame is the kart frame moved 6 in back and 63.5 in down. The overlay follows the cart frame sliders.
+  const TO_KART = new THREE.Matrix4().set(26.448866, 0.51306803, -0.250351353, -43.8972887, 0.300778971, -2.66296169, 26.3189398, 6.85119062, 0.485228414, -26.3156573, -2.66817487, 60.5748317, 0, 0, 0, 1);
+  const scanGroup = new THREE.Group(); root.add(scanGroup);
+  const placeScan = () => { const s = window.__kartShift || [0, 0, 0]; scanGroup.position.set(-6 + s[0], s[1], -63.5 + s[2]); };
+  window.__onKartBuilt = placeScan; placeScan();
+  const SCAN = {
+    ov_cloud: { file: "kdp_pointcloud.ply", name: "point cloud" },
+    ov_mesh: { file: "kdp_mesh.ply", texture: "kdp_mesh.jpg", name: "photo mesh" },
+  };
+  const SCAN_START = 50;   // opacity a scan shows at once it has loaded (%)
+  const scanSetOpacity = (obj, o) => { const m = obj.material; m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; obj.visible = o > 0.001; };
+  window.__scan = {};
+  for (const id in SCAN) {
+    const c = SCAN[id], row = $(id), btn = row.querySelector("button");
+    btn.addEventListener("click", () => {
+      btn.disabled = true; btn.textContent = "Loading the " + c.name + "...";
+      const bar = document.createElement("div"); bar.className = "bar"; bar.innerHTML = "<i></i>"; const msg = document.createElement("div"); msg.className = "msg"; msg.textContent = "Starting...";
+      row.appendChild(bar); row.appendChild(msg);
+      const mb = b => (b / 1048576).toFixed(1) + " MB";
+      const progress = (e, part) => { if (e.lengthComputable && e.total) { bar.firstChild.style.width = Math.min(100, 100 * e.loaded / e.total).toFixed(1) + "%"; msg.textContent = part + Math.round(100 * e.loaded / e.total) + " %  ·  " + mb(e.loaded); } else msg.textContent = part + mb(e.loaded || 0) + " so far"; };
+      const fail = () => { bar.firstChild.style.width = "100%"; msg.textContent = "Could not load the " + c.name + ". Check the connection and try again."; btn.disabled = false; btn.textContent = "Load " + c.name + " (try again)"; bar.remove(); };
+      const ready = obj => {   // the button and the bar give way to the opacity slider
+        scanGroup.add(obj); window.__scan[id] = obj; scanSetOpacity(obj, SCAN_START / 100);
+        btn.remove(); bar.remove(); msg.remove();
+        const inp = document.createElement("input"); inp.type = "range"; inp.min = 0; inp.max = 100; inp.value = SCAN_START; const num = document.createElement("span"); num.className = "num"; num.textContent = SCAN_START + "%";
+        row.appendChild(inp); row.appendChild(num);
+        inp.addEventListener("input", () => { num.textContent = inp.value + "%"; scanSetOpacity(obj, inp.value / 100); });
+      };
+      const loadPly = (name, retry) => new THREE.PLYLoader().load(name, geo => {
+        if (geo.attributes.normal) geo.deleteAttribute("normal");
+        if (!c.texture) { ready(new THREE.Points(geo, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true }))); return; }
+        msg.textContent = "Loading the photo texture..."; bar.firstChild.style.width = "100%";
+        new THREE.TextureLoader().load(c.texture, tex => {   // the mesh shows only once its texture is in
+          tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8;
+          const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })); m.applyMatrix4(TO_KART); ready(m);
+        }, undefined, fail);
+      }, e => progress(e, c.texture ? "Mesh: " : ""), retry ? () => loadPly(c.file + ".wasm", false) : fail);   // the private copy of this page serves the scan under a binary type its host accepts
+      loadPly(c.file, true);
+    });
+  }
 
   // move the whole apparatus (tongue, skull, mount tube) relative to the frog, barrel and kart
   // The apparatus default is the sliders' zero. It puts the centre of the mount tube's rear end (s = MOUNT_S0 on the skull axis) on the axis of the centre upright of the cart frame's
