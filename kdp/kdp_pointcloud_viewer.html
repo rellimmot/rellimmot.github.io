@@ -10,6 +10,7 @@
   button { background: #2a2a2a; color: #ddd; border: 1px solid #555; border-radius: 4px; padding: 5px 9px; font: inherit; cursor: pointer; }
   button:hover { background: #3a3a3a; }
   button.on { border-color: #e8c84a; color: #e8c84a; }
+  select { background: #2a2a2a; color: #ddd; border: 1px solid #555; border-radius: 4px; padding: 4px 6px; font: inherit; }
   label { display: flex; gap: 5px; align-items: center; }
   [hidden] { display: none !important; }
   .sep { opacity: .5; }
@@ -50,6 +51,8 @@
   <button data-view="top">Top</button>
   <button data-view="below">Below</button>
   <span class="sep">|</span>
+  <label title="How many points the clouds are loaded with. Applies to every cloud that comes in more than one density.">Density
+    <select id="density"><option value="light">Light</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></label>
   <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
   <label><input id="tint" type="checkbox"> Colour by layer</label>
   <label><input id="axes" type="checkbox" checked> Axes and floor grid</label>
@@ -69,9 +72,12 @@ import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 // All of them are in the kart frame (inches), so they overlay each other.
 const LAYERS = [
   { group: 'Scan 1 · outside' },
-  { id: 'voxel', label: 'Point cloud', file: 'kdp_pointcloud.ply', mb: 9 },
+  { id: 'voxel', label: 'Point cloud', variants: [
+    { key: 'light', file: 'kdp_pointcloud_light.ply', mb: 3.1 },
+    { key: 'medium', file: 'kdp_pointcloud.ply', mb: 9 },
+    { key: 'full', file: 'kdp_pointcloud_full.ply', mb: 46 } ] },
   { id: 'textured', label: 'Photo mesh', file: 'kdp_mesh.ply', texture: 'kdp_mesh.jpg', mb: 15 },
-  { group: 'Scan 2 · inside and underside', sub: 'preliminary placement' },
+  { group: 'Scan 2 · inside and underside', sub: 'placed in the kart frame with scan 1' },
   { id: 'scan2sparse', label: 'Sparse points', file: 'kdp_scan2_sparse.ply', mb: 8 },
   { id: 'scan2path', label: 'Camera path', file: 'kdp_scan2_campath.ply', path: true, mb: 0.03 },
 ];
@@ -120,6 +126,24 @@ setView('iso');
 
 const state = {};   // id -> { def, object, material, points, faces, loading, row }
 let pointSize = 2, tintOn = false, tintNo = 0;
+const RANK = { light: 0, medium: 1, full: 2 };
+let density = RANK[new URLSearchParams(location.search).get('density')] !== undefined ? new URLSearchParams(location.search).get('density') : 'medium';
+// The file of a layer at the chosen density (the closest one it has).
+function pick(def) {
+  if (!def.variants) return def;
+  let best = null;
+  for (const v of def.variants) if (!best || Math.abs(RANK[v.key] - RANK[density]) < Math.abs(RANK[best.key] - RANK[density])) best = v;
+  return best;
+}
+function checkFile(s) {
+  // Grey out anything whose file is not there (yet), so a click cannot end in an error.
+  const src = pick(s.def), tok = s.token;
+  s.box.disabled = false; s.row.classList.remove('off'); s.row.title = s.def.title || src.file;
+  fetch(src.file, { method: 'HEAD', cache: 'no-store' }).then(r => {
+    if (tok !== s.token || r.ok) return;
+    s.box.disabled = true; s.box.checked = false; s.row.classList.add('off'); s.stEl.textContent = 'not ready'; s.row.title = 'This file has not been made yet. Reload the page later.';
+  }).catch(() => {});
+}
 
 function fmtMb(mb) { return mb == null ? '' : (mb < 1 ? Math.round(mb * 1000) + ' KB' : (mb >= 10 ? Math.round(mb) : mb.toFixed(1)) + ' MB'); }
 
@@ -130,13 +154,13 @@ function addRow(def) {
     if (def.sub) { const s = document.createElement('div'); s.className = 'sub'; s.textContent = def.sub; list.appendChild(s); }
     return;
   }
-  const st = state[def.id] = { def, tint: TINTS[tintNo++ % TINTS.length] };
+  const st = state[def.id] = { def, tint: TINTS[tintNo++ % TINTS.length], token: 0 };
   const row = document.createElement('label');
   row.innerHTML = '<input type="checkbox"><span class="sw"></span><span class="nm"></span><span class="sz"></span><span class="st"></span>';
   row.querySelector('.nm').textContent = def.label;
-  row.querySelector('.sz').textContent = fmtMb(def.mb);
+  st.szEl = row.querySelector('.sz');
+  st.szEl.textContent = fmtMb(pick(def).mb);
   row.querySelector('.sw').style.background = def.path ? 'linear-gradient(90deg, rgb(40,80,255), rgb(40,220,80), rgb(255,50,30))' : (def.texture ? '#777' : '#' + st.tint.toString(16).padStart(6, '0'));
-  row.title = def.title || def.file;
   st.row = row; st.box = row.querySelector('input'); st.stEl = row.querySelector('.st');
   st.box.onchange = () => toggle(def.id, st.box.checked);
   list.appendChild(row);
@@ -145,10 +169,24 @@ function addRow(def) {
     lg.innerHTML = '<div class="ramp"></div><div class="ends"><span>start of the walk</span><span>end</span></div>';
     list.appendChild(lg); st.legend = lg;
   }
-  // Grey out anything whose file is not there (yet), so a click cannot end in an error.
-  fetch(def.file, { method: 'HEAD', cache: 'no-store' }).then(r => {
-    if (!r.ok) { st.box.disabled = true; row.classList.add('off'); st.stEl.textContent = 'not ready'; row.title = 'This file has not been made yet. Reload the page later.'; }
-  }).catch(() => {});
+  checkFile(st);
+}
+
+function setDensity(d) {
+  density = d;
+  for (const id in state) {
+    const s = state[id];
+    if (!s.def.variants) continue;
+    s.szEl.textContent = fmtMb(pick(s.def).mb);
+    if (s.loadedKey === pick(s.def).key && s.object) continue;
+    const wasOn = s.box.checked;
+    s.token++; s.loading = false;                    // anything still loading for the old density is dropped
+    if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); }); s.object = null; }
+    s.points = 0; s.faces = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
+    checkFile(s);
+    if (wasOn) toggle(id, true);
+  }
+  refresh();
 }
 
 function refresh() {
@@ -192,16 +230,18 @@ function toggle(id, on) {
   if (s.object) { s.object.visible = on; refresh(); return; }
   if (!on || s.loading) { refresh(); return; }
   s.loading = true; s.stEl.classList.remove('err'); s.stEl.textContent = '0 %';
-  const fail = (err) => { s.loading = false; s.box.checked = false; s.stEl.classList.add('err'); s.stEl.textContent = 'failed'; s.row.title = (err && err.message) || 'Could not load this file.'; refresh(); };
+  const src = pick(s.def), tok = s.token;
+  const fail = (err) => { if (tok !== s.token) return; s.loading = false; s.box.checked = false; s.stEl.classList.add('err'); s.stEl.textContent = 'failed'; s.row.title = (err && err.message) || 'Could not load this file.'; refresh(); };
   const ready = (obj) => {
-    s.loading = false; s.object = obj; obj.visible = s.box.checked; scene.add(obj);
+    if (tok !== s.token) { obj.traverse(o => { if (o.geometry) o.geometry.dispose(); }); return; }   // density changed meanwhile
+    s.loading = false; s.object = obj; s.loadedKey = src.key; obj.visible = s.box.checked; scene.add(obj);
     let n = 0, f = 0;
     obj.traverse(o => { if (o.isPoints) n += o.geometry.attributes.position.count; if (o.isMesh) { n += o.geometry.attributes.position.count; f += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
     s.points = f ? 0 : n; s.faces = f;
     s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : (n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : (n / 1000).toFixed(0) + 'k');
     refresh();
   };
-  new PLYLoader().load(s.def.file, (geo) => {
+  new PLYLoader().load(src.file, (geo) => {
     if (geo.attributes.normal) geo.deleteAttribute('normal');
     if (s.def.texture) {   // photo mesh: per-face UVs and one atlas image
       s.stEl.textContent = 'photo…';
@@ -215,7 +255,7 @@ function toggle(id, on) {
       s.material = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
       applyTint(s); ready(new THREE.Points(geo, s.material));
     }
-  }, (e) => { if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
+  }, (e) => { if (tok !== s.token) return; if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
 }
 
 for (const def of LAYERS) addRow(def);
@@ -227,12 +267,14 @@ for (const id of want) if (state[id]) toggle(id, true);
 fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
   if (!j || !Array.isArray(j.layers)) return;
   if (j.group) addRow({ group: j.group, sub: j.sub });
-  for (const d of j.layers) { if (d && d.id && d.file && !state[d.id]) addRow(d); }
+  for (const d of j.layers) { if (d && d.id && (d.file || d.variants) && !state[d.id]) addRow(d); }
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
 }).catch(() => {});
 
 $('layersHead').onclick = () => { const c = $('layers').classList.toggle('closed'); $('layersTog').textContent = c ? 'show' : 'hide'; };
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+$('density').value = density;
+$('density').onchange = (e) => setDensity(e.target.value);
 $('size').oninput = (e) => { pointSize = +e.target.value; for (const id in state) if (state[id].material) state[id].material.size = pointSize; };
 $('tint').onchange = (e) => { tintOn = e.target.checked; for (const id in state) applyTint(state[id]); };
 $('axes').onchange = (e) => { helpers.visible = e.target.checked; };
