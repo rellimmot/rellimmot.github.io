@@ -40,6 +40,7 @@
   <span id="pick">
     <button id="bVoxel">Point cloud (9 MB)</button>
     <button id="bTextured">Photo mesh (15 MB)</button>
+    <button id="bScan2Sparse" title="Second scan (inside and underside), sparse points with the camera path. Preliminary placement.">Scan 2: sparse + camera path (6 MB)</button>
     <label id="clayL" hidden><input id="clay" type="checkbox"></label>
     <span class="sep">|</span>
   </span>
@@ -72,8 +73,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const FULL = null;
 const CLOUDS = {
   voxel: { file: 'kdp_pointcloud.ply', name: 'point cloud' },
-  textured: { file: 'kdp_mesh.ply', name: 'photo mesh', texture: 'kdp_mesh.jpg' } };
-const BUTTONS = { voxel: 'bVoxel', textured: 'bTextured' };
+  textured: { file: 'kdp_mesh.ply', name: 'photo mesh', texture: 'kdp_mesh.jpg' },
+  // Second scan (inside and underside). Already in the kart frame; placement is preliminary.
+  scan2sparse: { file: 'kdp_scan2_sparse.ply', name: 'second scan (sparse points and camera path)',
+    note: 'Scan 2, preliminary placement · camera path: blue = start of the walk, red = end' } };
+const BUTTONS = { voxel: 'bVoxel', textured: 'bTextured', scan2sparse: 'bScan2Sparse' };
 // The mesh is in COLMAP model units; this moves it into the kart frame.
 const TO_KART = new THREE.Matrix4().set(26.448866, 0.51306803, -0.250351353, -43.8972887, 0.300778971, -2.66296169, 26.3189398, 6.85119062, 0.485228414, -26.3156573, -2.66817487, 60.5748317, 0, 0, 0, 1);
 const CENTER = new THREE.Vector3(-35, 0, 45);
@@ -151,7 +155,7 @@ function show(kind) {
     current = loaded[kind]; scene.add(current);
     let n = 0, faces = 0;
     current.traverse(o => { if (o.geometry) { n += o.geometry.attributes.position.count; if (o.isMesh) faces += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
-    statusEl.textContent = faces ? faces.toLocaleString() + ' faces · ' + n.toLocaleString() + ' vertices' : n.toLocaleString() + ' points';
+    statusEl.textContent = (faces ? faces.toLocaleString() + ' faces · ' + n.toLocaleString() + ' vertices' : n.toLocaleString() + ' points') + (c.note ? ' · ' + c.note : '');
     window.__kart = { kind, points: n, faces };
   };
   if (loaded[kind]) return done();
