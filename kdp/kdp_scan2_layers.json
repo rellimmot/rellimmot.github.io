@@ -5,6 +5,10 @@
     { "id": "scan2in1", "label": "Inside 1", "variants": [
       { "key": "light", "file": "kdp_scan2_inside_01_light.ply", "mb": 1.1 },
       { "key": "medium", "file": "kdp_scan2_inside_01.ply", "mb": 5.0 },
-      { "key": "full", "file": "kdp_scan2_inside_01_full.ply", "mb": 39.7 } ] }
+      { "key": "full", "file": "kdp_scan2_inside_01_full.ply", "mb": 39.7 } ] },
+    { "id": "scan2in2", "label": "Inside 2", "variants": [
+      { "key": "light", "file": "kdp_scan2_inside_02_light.ply", "mb": 0.8 },
+      { "key": "medium", "file": "kdp_scan2_inside_02.ply", "mb": 3.6 },
+      { "key": "full", "file": "kdp_scan2_inside_02_full.ply", "mb": 57.3 } ] }
   ]
 }
