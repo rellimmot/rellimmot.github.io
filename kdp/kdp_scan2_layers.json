@@ -64,6 +64,27 @@
                                             "mb":  44.6
                                         }
                                     ]
+                   },
+                   {
+                       "id":  "scan2un1",
+                       "label":  "Underside 1",
+                       "variants":  [
+                                        {
+                                            "key":  "light",
+                                            "file":  "kdp_scan2_under_01_light.ply",
+                                            "mb":  0.7
+                                        },
+                                        {
+                                            "key":  "medium",
+                                            "file":  "kdp_scan2_under_01.ply",
+                                            "mb":  2.6
+                                        },
+                                        {
+                                            "key":  "full",
+                                            "file":  "kdp_scan2_under_01_full.ply",
+                                            "mb":  23.4
+                                        }
+                                    ]
                    }
                ]
 }
