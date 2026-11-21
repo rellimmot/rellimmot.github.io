@@ -30,6 +30,18 @@
   #legend { margin: 2px 0 2px 22px; }
   #legend .ramp { height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgb(40,80,255), rgb(0,210,255), rgb(40,220,80), rgb(255,220,0), rgb(255,50,30)); }
   #legend .ends { display: flex; justify-content: space-between; color: #999; font-size: 11px; }
+  #cut { position: fixed; top: 46px; right: 8px; width: 290px; background: rgba(0,0,0,.66); border: 1px solid #333; border-radius: 6px; padding: 6px 8px 8px; z-index: 2; }
+  #cut.closed .body { display: none; }
+  #cut h3 { margin: 0; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  #cut .sub { color: #999; font-size: 11px; margin: 4px 0 6px; }
+  #cut .cutrow { margin: 7px 0 0; }
+  #cut .cutrow .top { display: flex; align-items: center; gap: 6px; }
+  #cut .cutrow label { flex: 1; cursor: pointer; }
+  #cut .cutrow .val { color: #999; font-variant-numeric: tabular-nums; white-space: nowrap; min-width: 62px; text-align: right; }
+  #cut .cutrow button { padding: 2px 7px; min-width: 62px; }
+  #cut .cutrow input[type=range] { width: 100%; margin: 3px 0 0; }
+  #cut .row2 { display: flex; gap: 6px; margin-top: 8px; }
+  @media (max-width: 640px) { #cut { top: auto; bottom: 70px; left: 8px; right: 8px; width: auto; } }
   #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
   #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
   canvas { display: block; }
@@ -60,6 +72,25 @@
 <div id="layers">
   <h3 id="layersHead"><span>Layers</span><span id="layersTog">hide</span></h3>
   <div class="body" id="layerList"></div>
+</div>
+<div id="cut">
+  <h3 id="cutHead"><span>Split view</span><span id="cutTog">hide</span></h3>
+  <div class="body">
+    <div class="sub">Slide to cut the model open along an axis. The button picks the side that stays.</div>
+    <div class="cutrow" data-axis="0" data-low="Rear" data-high="Front">
+      <div class="top"><label><input type="checkbox"> Along the length (X)</label><span class="val"></span><button></button></div>
+      <input type="range" min="-130" max="60" step="0.25" value="-35">
+    </div>
+    <div class="cutrow" data-axis="1" data-low="Right" data-high="Left">
+      <div class="top"><label><input type="checkbox"> Across the width (Y)</label><span class="val"></span><button></button></div>
+      <input type="range" min="-75" max="75" step="0.25" value="0">
+    </div>
+    <div class="cutrow" data-axis="2" data-low="Below" data-high="Above">
+      <div class="top"><label><input type="checkbox"> Height (Z)</label><span class="val"></span><button></button></div>
+      <input type="range" min="0" max="140" step="0.25" value="40">
+    </div>
+    <div class="row2"><button id="cutReset">Reset</button></div>
+  </div>
 </div>
 <div id="status"></div>
 <div id="help">Drag: rotate · Right-drag: pan · Wheel: zoom · Inches; X forward (red), Y left (green), Z up (blue)</div>
@@ -271,7 +302,41 @@ fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
 }).catch(() => {});
 
-$('layersHead').onclick = () => { const c = $('layers').classList.toggle('closed'); $('layersTog').textContent = c ? 'show' : 'hide'; };
+// Split view: one cutting plane per axis. A ticked axis hides everything on one side of its
+// slider position (kart frame, inches); the button switches the side that stays.
+// ?cutx=-35&cuty=0&cutz=40 opens the page with cuts set. The lower side stays by default;
+// an "h" after the number (cutz=40h) keeps the higher side instead.
+const query = new URLSearchParams(location.search);
+const CUTS = [...document.querySelectorAll('.cutrow')].map(row => {
+  const c = { axis: +row.dataset.axis, low: row.dataset.low, high: row.dataset.high, box: row.querySelector('input[type=checkbox]'),
+    slider: row.querySelector('input[type=range]'), val: row.querySelector('.val'), side: row.querySelector('button'), keepHigh: false, plane: new THREE.Plane() };
+  c.start = +c.slider.value;
+  const q = (query.get('cut' + 'xyz'[c.axis]) || '').match(/^(-?\d+(?:\.\d+)?)(h?)$/);
+  if (q) { c.slider.value = q[1]; c.keepHigh = q[2] === 'h'; c.box.checked = true; }
+  c.box.onchange = updateCuts;
+  c.slider.oninput = () => { c.box.checked = true; updateCuts(); };
+  c.side.onclick = () => { c.keepHigh = !c.keepHigh; c.box.checked = true; updateCuts(); };
+  c.side.title = 'The side of the cut that stays visible. Click to switch.';
+  return c;
+});
+function updateCuts() {
+  const planes = [], cuts = {};
+  for (const c of CUTS) {
+    const v = +c.slider.value, n = new THREE.Vector3().setComponent(c.axis, c.keepHigh ? 1 : -1);
+    c.plane.set(n, c.keepHigh ? -v : v);
+    c.val.textContent = v.toFixed(2) + ' in';
+    c.side.textContent = c.keepHigh ? c.high : c.low;
+    c.side.classList.toggle('on', c.box.checked);
+    if (c.box.checked) { planes.push(c.plane); cuts['xyz'[c.axis]] = { at: v, keeps: c.keepHigh ? 'higher' : 'lower' }; }
+  }
+  renderer.clippingPlanes = planes;
+  window.__cuts = cuts;
+}
+$('cutReset').onclick = () => { for (const c of CUTS) { c.box.checked = false; c.keepHigh = false; c.slider.value = c.start; } updateCuts(); };
+$('cutHead').onclick = () => { const c = $('cut').classList.toggle('closed'); $('cutTog').textContent = c ? 'show' : 'hide'; };
+updateCuts();
+
+$('layersHead').onclick =() => { const c = $('layers').classList.toggle('closed'); $('layersTog').textContent = c ? 'show' : 'hide'; };
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 $('density').value = density;
 $('density').onchange = (e) => setDensity(e.target.value);
