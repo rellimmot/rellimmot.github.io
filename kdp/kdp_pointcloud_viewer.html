@@ -73,6 +73,11 @@
     #layers #status { position: static; background: none; padding: 0 0 8px; margin-bottom: 4px; border-bottom: 1px solid #333; color: #999; }
     #help { display: none; }
   }
+  #loading { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(280px, 70vw); background: rgba(0,0,0,.66); border: 1px solid #333; border-radius: 6px; padding: 12px 14px; z-index: 3; text-align: center; pointer-events: none; }
+  #loading .bar { height: 6px; margin-top: 9px; background: #2a2a2a; border-radius: 3px; overflow: hidden; }
+  #loading .bar i { display: block; height: 100%; width: 0; background: #e8c84a; border-radius: 3px; transition: width .2s; }
+  #loading.wait .bar i { width: 30%; transition: none; animation: slide 1.2s linear infinite; }
+  @keyframes slide { from { margin-left: -30%; } to { margin-left: 100%; } }
   #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
   #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
   canvas { display: block; }
@@ -139,6 +144,7 @@
     <div class="row2"><button id="cutReset">Reset</button></div>
   </div>
 </div>
+<div id="loading" class="wait"><div id="loadingText">Loading the model…</div><div class="bar"><i id="loadingBar"></i></div></div>
 <div id="status"></div>
 <div id="help">Drag: rotate · Right-drag: pan · Wheel: zoom · Inches; X forward (red), Y left (green), Z up (blue)</div>
 <script type="module">
@@ -425,13 +431,15 @@ function toggle(id, on) {
   if (s.object) { s.object.visible = on; refresh(); return; }
   if (!on || s.loading) { refresh(); return; }
   s.loading = true; s.stEl.classList.remove('err'); s.stEl.textContent = '0 %';
+  s.got = 0;
   const src = pick(s.def), tok = s.token;
   s.loadingKey = src.key;
+  s.size = (src.mb || 0) * 1048576; showLoading();
   const fail = (err) => {
     if (tok !== s.token) return;
     s.loading = false; s.box.checked = false; s.stEl.classList.add('err'); s.stEl.textContent = 'failed'; s.row.title = (err && err.message) || 'Could not load this file.';
     if (s.auto) { s.auto = false; s.manual = true; s.row.classList.remove('auto'); planAuto(); }   // not tried again by itself
-    refresh();
+    refresh(); showLoading();
   };
   const ready = (obj) => {
     if (tok !== s.token) { obj.traverse(o => { if (o.geometry) o.geometry.dispose(); }); return; }   // density changed meanwhile
@@ -441,7 +449,7 @@ function toggle(id, on) {
     s.points = f ? 0 : n; s.faces = f; s.pared = 0;
     s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : fmtCount(n);
     applyPare(s);
-    refresh();
+    refresh(); showLoading();
     if (s.auto) { quietUntil = performance.now() + 3000; planAuto(); }   // loading makes the picture stutter: not counted; then the next one
   };
   new PLYLoader().load(src.file, (geo) => {
@@ -458,7 +466,7 @@ function toggle(id, on) {
       s.material = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
       applyTint(s); ready(new THREE.Points(geo, s.material));
     }
-  }, (e) => { if (tok !== s.token) return; if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
+  }, (e) => { if (tok !== s.token) return; s.got = e.loaded || 0; if (e.lengthComputable && e.total) s.size = e.total; showLoading(); if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
 }
 
 // Automatic detail. The combined cloud stays as it is. Where the view is zoomed in, the clouds that
@@ -588,6 +596,20 @@ $('extra').onchange = (e) => {
 };
 controls.addEventListener('change', planAuto);
 
+// Loading bar in the middle of the picture while the first view is being fetched, so the page
+// does not look empty on a slow connection. It goes when that is done and does not come back.
+let firstLoad = true, listDone = false;
+function showLoading() {
+  if (!firstLoad) return;
+  let got = 0, all = 0, n = 0;
+  for (const id in state) { const s = state[id]; if (!s.loading || s.auto) continue; n++; got += s.got || 0; all += Math.max(s.size || 0, s.got || 0); }
+  if (!n) { if (listDone) { firstLoad = false; $('loading').hidden = true; } return; }
+  const part = all ? Math.min(1, got / all) : 0;
+  $('loading').classList.toggle('wait', !got);                // nothing counted yet: a moving bar
+  $('loadingBar').style.width = got ? Math.round(100 * part) + '%' : '';
+  $('loadingText').textContent = !got ? 'Loading the model…' : (part >= 0.995 ? 'Preparing the model…' : 'Loading the model… ' + Math.round(100 * part) + ' %');
+}
+
 for (const def of LAYERS) addRow(def);
 
 // ?show=a,b,c picks the layers to open with. Without it the page opens with the combined cloud,
@@ -598,7 +620,7 @@ for (const id of want) if (state[id]) toggle(id, true);
 const openWith = (id) => { if (!asked && state[id] && !state[id].box.checked) toggle(id, true); };
 
 fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
-  if (!j || !Array.isArray(j.layers)) { openWith('textured'); return; }
+  if (!j || !Array.isArray(j.layers)) { openWith('textured'); listDone = true; showLoading(); return; }
   const c = j.combined;   // one cloud averaged from the dense clouds: listed first, with its own paring slider
   if (c && c.id && Array.isArray(c.variants) && !state[c.id]) { addRow({ group: c.group || 'Combined', sub: c.sub }, $('firstList')); addRow(c, $('firstList')); }
   if (j.group) addRow({ group: j.group, sub: j.sub });
@@ -606,8 +628,9 @@ fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
   openWith(c && state[c.id] ? c.id : 'textured');
   if (c) setupAuto(j.detail, c.id);
+  listDone = true; showLoading();
   layout();
-}).catch(() => { openWith('textured'); });
+}).catch(() => { openWith('textured'); listDone = true; showLoading(); });
 
 // Split view: one cutting plane per axis. A ticked axis hides everything on one side of its
 // slider position (kart frame, inches); the button switches the side that stays.
