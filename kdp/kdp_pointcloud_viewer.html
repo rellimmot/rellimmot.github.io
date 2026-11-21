@@ -72,6 +72,10 @@
   <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
   <label><input id="tint" type="checkbox"> Colour by layer</label>
   <label><input id="axes" type="checkbox" checked> Axes and floor grid</label>
+  <span class="sep">|</span>
+  <label title="Adds estimated points where a surface has holes, for the dense clouds of scan 2. They are predictions from the shape around a hole, not measurements.">Predicted fill
+    <input id="fill" type="range" min="0" max="11" step="1" value="0"><span id="fillVal">off</span></label>
+  <label title="Shows the predicted points in one colour, so they stand out from the measured points."><input id="fillFlag" type="checkbox"> Mark predicted</label>
 </div>
 <div id="layers">
   <h3 id="layersHead"><span>Layers</span><span id="layersTog">hide</span></h3>
@@ -170,6 +174,48 @@ function pick(def) {
   for (const v of def.variants) if (!best || Math.abs(RANK[v.key] - RANK[density]) < Math.abs(RANK[best.key] - RANK[density])) best = v;
   return best;
 }
+// Predicted fill: extra points sampled on a surface fitted through a dense cloud. They are kept in
+// their own files, sorted by distance to the nearest measured point, so the slider only changes
+// how many of them are drawn. They are estimates, never measurements.
+const GAPS = [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6];   // widest gap that gets filled, inches
+const FILL_MARK = 0xff4df0;
+let gap = 0, markFill = false;
+function pickFill(def) {
+  if (!Array.isArray(def.fill) || !def.fill.length) return null;
+  let best = null;
+  for (const v of def.fill) if (!best || Math.abs(RANK[v.key] - RANK[density]) < Math.abs(RANK[best.key] - RANK[density])) best = v;
+  return best;
+}
+function fillCount(f) { let n = 0; for (const st of f.steps) if (st[0] <= gap) n = st[1]; return n; }
+function styleFill(s) {
+  const m = s.fillLook; if (!m) return;
+  m.size = pointSize; m.vertexColors = !(markFill || tintOn); m.color.set(markFill ? FILL_MARK : (tintOn ? s.tint : 0xffffff)); m.needsUpdate = true;
+}
+function dropFill(s) {
+  s.fillToken = (s.fillToken || 0) + 1; s.fillLoading = false; s.fillShown = 0;
+  if (s.fillObj) { scene.remove(s.fillObj); s.fillObj.geometry.dispose(); s.fillObj = null; s.fillLook = null; }
+}
+function updateFill() {
+  for (const id in state) {
+    const s = state[id], f = pickFill(s.def);
+    if (!f) continue;
+    if (s.fillObj && s.fillKey !== f.key) dropFill(s);            // the density changed
+    const on = gap > 0 && s.box.checked && s.object && s.object.visible;
+    if (!on) { if (s.fillObj) s.fillObj.visible = false; s.fillShown = 0; continue; }
+    if (s.fillObj) { const n = fillCount(f); s.fillObj.geometry.setDrawRange(0, n); s.fillObj.visible = n > 0; s.fillShown = n; continue; }
+    if (s.fillLoading || s.fillFailed === f.file) continue;
+    s.fillLoading = true;
+    const tok = s.fillToken = (s.fillToken || 0) + 1;
+    new PLYLoader().load(f.file, (geo) => {
+      if (tok !== s.fillToken) { geo.dispose(); return; }
+      s.fillLoading = false; s.fillKey = f.key;
+      s.fillLook = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
+      s.fillObj = new THREE.Points(geo, s.fillLook);
+      styleFill(s); scene.add(s.fillObj); refresh();
+    }, undefined, () => { if (tok === s.fillToken) { s.fillLoading = false; s.fillFailed = f.file; } });
+  }
+}
+
 function checkFile(s) {
   // Grey out anything whose file is not there (yet), so a click cannot end in an error.
   const src = pick(s.def), tok = s.token;
@@ -225,14 +271,16 @@ function setDensity(d) {
 }
 
 function refresh() {
-  let pts = 0, faces = 0, n = 0;
-  for (const id in state) { const s = state[id]; if (s.object && s.object.visible && s.box.checked) { pts += s.points || 0; faces += s.faces || 0; n++; } }
+  updateFill();
+  let pts = 0, faces = 0, n = 0, pred = 0;
+  for (const id in state) { const s = state[id]; if (s.object && s.object.visible && s.box.checked) { pts += s.points || 0; faces += s.faces || 0; pred += s.fillShown || 0; n++; } }
   const parts = [];
   if (pts) parts.push(pts.toLocaleString() + ' points');
+  if (pred) parts.push('+ ' + pred.toLocaleString() + ' predicted');
   if (faces) parts.push(faces.toLocaleString() + ' faces');
   statusEl.textContent = n ? parts.join(' · ') + ' · ' + n + (n === 1 ? ' layer' : ' layers') : 'No layer shown. Tick one in the list.';
   const shown = {}; for (const id in state) if (state[id].object && state[id].box.checked) shown[id] = { points: state[id].points || 0, faces: state[id].faces || 0 };
-  window.__kart = { shown, points: pts, faces };
+  window.__kart = { shown, points: pts, faces, predicted: pred };
 }
 
 function buildPath(geo) {
@@ -256,6 +304,7 @@ function buildPath(geo) {
 function applyTint(s) {
   if (!s.material) return;
   s.material.vertexColors = !tintOn; s.material.color.set(tintOn ? s.tint : 0xffffff); s.material.needsUpdate = true;
+  styleFill(s);
 }
 
 function toggle(id, on) {
@@ -344,9 +393,16 @@ $('layersHead').onclick =() => { const c = $('layers').classList.toggle('closed'
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 $('density').value = density;
 $('density').onchange = (e) => setDensity(e.target.value);
-$('size').oninput = (e) => { pointSize = +e.target.value; for (const id in state) if (state[id].material) state[id].material.size = pointSize; };
+$('size').oninput = (e) => { pointSize = +e.target.value; for (const id in state) { if (state[id].material) state[id].material.size = pointSize; if (state[id].fillLook) state[id].fillLook.size = pointSize; } };
 $('tint').onchange = (e) => { tintOn = e.target.checked; for (const id in state) applyTint(state[id]); };
 $('axes').onchange = (e) => { helpers.visible = e.target.checked; };
+function setGap(i) { gap = GAPS[i]; $('fill').value = i; $('fillVal').textContent = gap ? 'gaps up to ' + gap + ' in' : 'off'; refresh(); }
+$('fill').oninput = (e) => setGap(+e.target.value);
+$('fillFlag').onchange = (e) => { markFill = e.target.checked; for (const id in state) styleFill(state[id]); };
+{ // ?fill=1 opens with gaps up to 1 in filled; ?fill=1m also marks the predicted points
+  const q = (new URLSearchParams(location.search).get('fill') || '').match(/^(\d+(?:\.\d+)?)(m?)$/);
+  if (q) { let best = 0; GAPS.forEach((g, i) => { if (Math.abs(g - q[1]) < Math.abs(GAPS[best] - q[1])) best = i; }); markFill = q[2] === 'm'; $('fillFlag').checked = markFill; setGap(best); }
+}
 // The toolbar wraps to more rows on a narrow screen, so the panels are placed from its real
 // height; on a phone the split view sits at the bottom, above the help and status lines.
 const narrow = () => innerWidth <= 640;
