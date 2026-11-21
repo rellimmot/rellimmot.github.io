@@ -46,10 +46,27 @@
   #cut .cutrow button { padding: 2px 7px; min-width: 62px; }
   #cut .cutrow input[type=range] { width: 100%; margin: 3px 0 0; }
   #cut .row2 { display: flex; gap: 6px; margin-top: 8px; }
+  #tabs { display: none; }
+  #opts { display: contents; }
+  /* Phone: view buttons, then two tabs. A tab opens its panel below, one at a time. The settings
+     and the point count sit inside the Layers panel there, and the hint line is left out. */
   @media (max-width: 640px) {
-    #cut { top: auto; left: 8px; right: 8px; width: auto; }
-    #help { left: 8px; }
-    #layers { max-width: calc(100% - 34px); }
+    #bar .sep { display: none; }
+    #bar > button { flex: 1; padding: 6px 2px; }
+    #tabs { display: flex; flex-basis: 100%; gap: 6px; }
+    #tabs button { flex: 1; padding: 7px 4px; }
+    #layers, #cut { left: 8px; right: 8px; width: auto; max-width: none; overflow-y: auto; box-sizing: border-box; background: rgba(0,0,0,.8); }
+    #layers.closed, #cut.closed { display: none; }
+    #layers h3, #cut h3 { display: none; }
+    #layers label, #cut .cutrow { padding: 4px 0; }
+    #layers #opts { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 2px 0 6px; }
+    #layers #opts .sep { display: none; }
+    #layers #opts label { cursor: default; gap: 8px; }
+    #layers #opts label:has(input[type=range]) { flex: 1 1 150px; }
+    #layers #opts label:has(#fill) { flex-basis: 100%; }
+    #layers #opts input[type=range] { flex: 1; min-width: 0; }
+    #layers #status { position: static; background: none; padding: 0 0 8px; margin-bottom: 4px; border-bottom: 1px solid #333; color: #999; }
+    #help { display: none; }
   }
   #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
   #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
@@ -71,7 +88,9 @@
   <button data-view="rear">Rear</button>
   <button data-view="top">Top</button>
   <button data-view="below">Below</button>
+  <div id="tabs"><button data-tab="layers">Layers</button><button data-tab="cut">Split view</button></div>
   <span class="sep">|</span>
+  <div id="opts">
   <label title="How many points the clouds are loaded with. Applies to every cloud that comes in more than one density.">Density
     <select id="density"><option value="light">Light</option><option value="medium">Medium</option><option value="full" selected>Full</option></select></label>
   <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
@@ -81,6 +100,7 @@
   <label title="Adds estimated points where a surface has holes, for the dense clouds of scan 2. They are predictions from the shape around a hole, not measurements.">Predicted fill
     <input id="fill" type="range" min="0" max="11" step="1" value="0"><span id="fillVal">off</span></label>
   <label title="Shows the predicted points in one colour, so they stand out from the measured points."><input id="fillFlag" type="checkbox"> Mark predicted</label>
+  </div>
 </div>
 <div id="layers">
   <h3 id="layersHead"><span>Layers</span><span id="layersTog">hide</span></h3>
@@ -467,22 +487,29 @@ $('fillFlag').onchange = (e) => { markFill = e.target.checked; for (const id in 
   else setGap(2);   // gaps up to half an inch are filled unless the address says otherwise (?fill=0 is off)
 }
 // The toolbar wraps to more rows on a narrow screen, so the panels are placed from its real
-// height; on a phone the split view sits at the bottom, above the help and status lines.
+// height; on a phone they open from the two tabs under the view buttons.
 const narrow = () => innerWidth <= 640;
 if (matchMedia('(pointer: coarse)').matches) $('help').textContent = 'One finger: rotate · Two fingers: pan and zoom · Inches; X forward (red), Y left (green), Z up (blue)';
 function layout() {
-  const top = Math.round($('bar').getBoundingClientRect().bottom) + 6, lay = $('layers'), cut = $('cut'), help = $('help');
-  lay.style.top = top + 'px';
-  if (narrow()) {
-    help.style.bottom = Math.round(statusEl.getBoundingClientRect().height + 14) + 'px';
-    cut.style.top = 'auto';
-    cut.style.bottom = Math.round(innerHeight - help.getBoundingClientRect().top + 6) + 'px';
-    lay.style.maxHeight = Math.max(80, Math.round(cut.getBoundingClientRect().top - top - 6)) + 'px';
-  } else {
-    help.style.bottom = ''; cut.style.bottom = ''; cut.style.top = top + 'px'; lay.style.maxHeight = '';
-  }
+  const lay = $('layers'), cut = $('cut'), opts = $('opts'), body = lay.querySelector('.body');
+  // on a phone the settings and the point count live inside the Layers panel
+  if (narrow() && opts.parentNode !== body) { body.prepend(opts, statusEl); }
+  if (!narrow() && opts.parentNode === body) { $('bar').append(opts); document.body.insertBefore(statusEl, $('help')); }
+  const top = Math.round($('bar').getBoundingClientRect().bottom) + 6;
+  lay.style.top = cut.style.top = top + 'px';
+  lay.style.maxHeight = cut.style.maxHeight = narrow() ? Math.max(120, innerHeight - top - 10) + 'px' : '';
 }
-if (narrow()) { $('layers').classList.add('closed'); $('layersTog').textContent = 'show'; $('cut').classList.add('closed'); $('cutTog').textContent = 'show'; }
+// Phone: the two tabs under the view buttons. A tab opens its panel; tapping it again closes it.
+let openTab = null;
+function showTab(name) {
+  openTab = openTab === name ? null : name;
+  $('layers').classList.toggle('closed', openTab !== 'layers'); $('layersTog').textContent = openTab === 'layers' ? 'hide' : 'show';
+  $('cut').classList.toggle('closed', openTab !== 'cut'); $('cutTog').textContent = openTab === 'cut' ? 'hide' : 'show';
+  for (const b of document.querySelectorAll('#tabs button')) b.classList.toggle('on', b.dataset.tab === openTab);
+  layout();
+}
+for (const b of document.querySelectorAll('#tabs button')) b.onclick = () => showTab(b.dataset.tab);
+if (narrow()) showTab(null);
 layout();
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
