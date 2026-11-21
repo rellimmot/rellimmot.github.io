@@ -402,6 +402,7 @@ $('fillFlag').onchange = (e) => { markFill = e.target.checked; for (const id in 
 { // ?fill=1 opens with gaps up to 1 in filled; ?fill=1m also marks the predicted points
   const q = (new URLSearchParams(location.search).get('fill') || '').match(/^(\d+(?:\.\d+)?)(m?)$/);
   if (q) { let best = 0; GAPS.forEach((g, i) => { if (Math.abs(g - q[1]) < Math.abs(GAPS[best] - q[1])) best = i; }); markFill = q[2] === 'm'; $('fillFlag').checked = markFill; setGap(best); }
+  else setGap(2);   // gaps up to half an inch are filled unless the address says otherwise (?fill=0 is off)
 }
 // The toolbar wraps to more rows on a narrow screen, so the panels are placed from its real
 // height; on a phone the split view sits at the bottom, above the help and status lines.
