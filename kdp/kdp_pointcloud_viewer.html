@@ -259,10 +259,10 @@ function updateFill() {
     if (s.fillLoading || s.fillFailed === f.file) continue;
     s.fillLoading = true;
     const tok = s.fillToken = (s.fillToken || 0) + 1;
-    new PLYLoader().load(f.file, (geo) => {
+    loadPly(f.file, (geo) => {
       if (tok !== s.fillToken) { geo.dispose(); return; }
       s.fillLoading = false; s.fillKey = f.key;
-      s.fillLook = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
+      s.fillLook = cloudLook(geo);
       s.fillObj = new THREE.Points(geo, s.fillLook);
       styleFill(s); scene.add(s.fillObj); refresh();
     }, undefined, () => { if (tok === s.fillToken) { s.fillLoading = false; s.fillFailed = f.file; } });
@@ -299,9 +299,99 @@ function markCovered(s) {
   if (!Array.isArray(s.def.covers)) return;
   const on = s.box.checked, names = [];
   for (const id of s.def.covers) { const c = state[id]; if (!c) continue; c.row.classList.toggle('inside', on); names.push(c.def.label); }
-  s.hint.textContent = cells && autoOn ? 'Holds ' + names.join(', ') + '. Zoom in and their full detail loads by itself.'
+  s.hint.textContent = cells && autoOn ? 'Holds ' + names.join(', ') + '. Move the view and their full detail loads by itself.'
     : 'Already holds ' + names.join(', ') + '. No need to tick those as well.';
   s.hint.hidden = !on || !names.length;
+}
+
+// Point files are kept by the page itself once fetched (a browser's own cache does not hold on to
+// files this large), so a second visit reads them from the device. Each time, the server is only
+// asked whether the file has changed; if not, nothing is downloaded.
+const AS_TEXT = false;
+const KEPT = 'kart-clouds';
+async function getBytes(file, onProgress) {
+  const url = AS_TEXT ? file + '.txt' : file;
+  let store = null, kept = null;
+  try { store = await caches.open(KEPT); kept = await store.match(url); } catch (e) { store = null; kept = null; }
+  const ask = {};
+  if (kept) {
+    const t = kept.headers.get('x-kept') || '';
+    if (t[0] === 'E') ask['If-None-Match'] = t.slice(1); else if (t[0] === 'M') ask['If-Modified-Since'] = t.slice(1); else kept = null;
+  }
+  let r;
+  try { r = await fetch(url, kept ? { headers: ask } : {}); }
+  catch (e) { if (kept) return kept.arrayBuffer(); throw e; }          // no connection: the stored copy
+  if (kept && r.status === 304) return kept.arrayBuffer();              // unchanged: the stored copy
+  if (!r.ok) throw new Error('Could not load ' + file);
+  let out;
+  if (AS_TEXT) {
+    const bin = atob(await r.text()); out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  } else if (!r.body) out = new Uint8Array(await r.arrayBuffer());
+  else {
+    const total = r.headers.get('content-encoding') ? 0 : (+r.headers.get('content-length') || 0);
+    const reader = r.body.getReader(), parts = [];
+    let got = 0; out = total ? new Uint8Array(total) : null;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (out && got + value.length <= out.length) out.set(value, got);
+      else { if (out) { parts.push(out.subarray(0, got)); out = null; } parts.push(value); }
+      got += value.length;
+      if (onProgress) onProgress({ loaded: got, total, lengthComputable: total > 0 });
+    }
+    if (!out) { out = new Uint8Array(got); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; } }
+    else if (got < out.length) out = out.slice(0, got);
+  }
+  const tag = r.headers.get('etag') ? 'E' + r.headers.get('etag') : (r.headers.get('last-modified') ? 'M' + r.headers.get('last-modified') : '');
+  if (store && tag) { try { store.put(url, new Response(out, { headers: { 'x-kept': tag } })).catch(() => {}); } catch (e) {} }
+  return out.buffer;
+}
+// A cloud file is x y z as floats and red green blue as bytes for every point. It is read straight
+// into the two arrays the graphics card needs (colours stay bytes), and those are dropped from
+// memory once the card has them: a point then costs 15 bytes instead of about 50.
+const PLAIN = 'property float x|property float y|property float z|property uchar red|property uchar green|property uchar blue';
+function freeArray() { this.array = null; }
+function parseCloud(buf, whole) {
+  const u = new Uint8Array(buf);
+  let head = ''; for (let i = 0; i < Math.min(u.length, 1024); i++) head += String.fromCharCode(u[i]);
+  const end = head.indexOf('end_header\n'), lines = end > 0 ? head.slice(0, end).split('\n').map(l => l.trim()) : [];
+  const els = lines.filter(l => l.startsWith('element ')), n = els.length === 1 && els[0].startsWith('element vertex ') ? +els[0].slice(15) : -1;
+  const start = end + 11;
+  if (whole || !(n >= 0) || !lines.includes('format binary_little_endian 1.0') || lines.filter(l => l.startsWith('property ')).join('|') !== PLAIN || start + n * 15 > u.length) {
+    const g = new PLYLoader().parse(buf);
+    if (g.attributes.normal) g.deleteAttribute('normal');
+    return g;
+  }
+  const pos = new Float32Array(n * 3), col = new Uint8Array(n * 3), dv = new DataView(buf, start);
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+  for (let i = 0, o = 0, j = 0; i < n; i++, o += 15, j += 3) {
+    const x = dv.getFloat32(o, true), y = dv.getFloat32(o + 4, true), z = dv.getFloat32(o + 8, true);
+    pos[j] = x; pos[j + 1] = y; pos[j + 2] = z;
+    col[j] = u[start + o + 12]; col[j + 1] = u[start + o + 13]; col[j + 2] = u[start + o + 14];
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).onUpload(freeArray));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3, true).onUpload(freeArray));
+  if (n) {
+    geo.boundingBox = new THREE.Box3(new THREE.Vector3(x0, y0, z0), new THREE.Vector3(x1, y1, z1));
+    geo.boundingSphere = geo.boundingBox.getBoundingSphere(new THREE.Sphere());
+  }
+  geo.userData.bytes = true;
+  return geo;
+}
+function loadPly(file, onLoad, onProgress, onError, whole) {
+  getBytes(file, onProgress).then(buf => parseCloud(buf, whole)).then(onLoad, (e) => { if (onError) onError(e); });
+}
+// Colours kept as bytes are in the screen's own scale; the drawing works in linear light.
+function bytesIn(sh) {
+  sh.vertexShader = sh.vertexShader.replace('#include <color_vertex>', '#include <color_vertex>\n#ifdef USE_COLOR\n\tvColor.rgb = mix(vColor.rgb / 12.92, pow((vColor.rgb + 0.055) / 1.055, vec3(2.4)), step(0.04045, vColor.rgb));\n#endif');
+}
+function cloudLook(geo) {
+  const m = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
+  if (geo.userData.bytes) m.onBeforeCompile = bytesIn;
+  return m;
 }
 
 function checkFile(s) {
@@ -451,10 +541,9 @@ function toggle(id, on) {
     s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : fmtCount(n);
     applyPare(s);
     refresh(); showLoading();
-    if (s.auto) { quietUntil = performance.now() + 3000; planAuto(); }   // loading makes the picture stutter: not counted; then the next one
+    if (s.auto) { quietUntil = performance.now() + 1500; planAuto(); }   // loading makes the picture stutter: not counted; then the next ones
   };
-  new PLYLoader().load(src.file, (geo) => {
-    if (geo.attributes.normal) geo.deleteAttribute('normal');
+  loadPly(src.file, (geo) => {
     if (s.def.texture) {   // photo mesh: per-face UVs and one atlas image
       s.stEl.textContent = 'photo…';
       new THREE.TextureLoader().load(s.def.texture, (tex) => {
@@ -464,28 +553,39 @@ function toggle(id, on) {
       }, undefined, () => fail(new Error('The photo texture did not load.')));
     } else if (s.def.path) { ready(buildPath(geo)); }
     else {
-      s.material = new THREE.PointsMaterial({ size: pointSize, sizeAttenuation: false, vertexColors: true });
+      s.material = cloudLook(geo);
       applyTint(s); ready(new THREE.Points(geo, s.material));
     }
-  }, (e) => { if (tok !== s.token) return; s.got = e.loaded || 0; if (e.lengthComputable && e.total) s.size = e.total; showLoading(); if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
+  }, (e) => { if (tok !== s.token) return; s.got = e.loaded || 0; if (e.lengthComputable && e.total) s.size = e.total; showLoading(); if (s.size) s.stEl.textContent = Math.min(99, Math.round(100 * s.got / s.size)) + ' %'; else s.stEl.textContent = (s.got / 1048576).toFixed(0) + ' MB'; }, fail, !!(s.def.texture || s.def.path));
 }
+// If the graphics card drops the page's data (a phone does that to a tab left in the background),
+// the clouds are read again from the device.
+renderer.domElement.addEventListener('webglcontextrestored', () => {
+  for (const id in state) {
+    const s = state[id]; if (!s.object || !s.object.isPoints) continue;
+    const on = s.box.checked; unload(s); if (on) toggle(id, true);
+  }
+});
 
 // Automatic detail. The page opens with the combined cloud alone. Once the view has been moved,
-// the clouds that have points in the part looked at are loaded on top of it at full density, the
-// most relevant first, one after the other, and switched off again when the view moves away. The
+// every cloud that has points in the part looked at is loaded on top of it at full density, the
+// most relevant first, a few at a time, and switched off again when the view moves away. The
 // layer list carries a coarse map of every cloud (cells of a few inches with the number of points
 // in each); that is all the page needs to know what is where.
 // The aim is as many points as the device can draw smoothly, not as few as possible: clouds keep
 // being added while the frame rate holds. If it stays under the floor, the least relevant extra
-// cloud goes, then the density of the last one, and it is tried again later if the rate recovers.
+// clouds go (as many as the shortfall calls for), then the density of the last one, and it is
+// tried again when the rate recovers or the view is moved again.
 // The combined cloud is never changed by this.
 const coarse = matchMedia('(pointer: coarse)').matches;
 const memory = navigator.deviceMemory || (coarse ? 4 : 8);   // GB as the browser tells it (rounded, 8 at most); a guess where it does not
 const AUTO = {
-  near: 80,                  // extra clouds come when the view shows less than this many inches around its middle
-  far: 100,                  // and go when it shows more than this
-  room: (coarse ? 2.5e6 : 4e6) * memory,   // points of extra clouds the device's memory is trusted with
+  near: 150,                 // extra clouds come when the view shows less than this many inches around its middle
+  far: 190,                  // and go when it shows more than this
+  room: (coarse ? 6e6 : 10e6) * memory,    // points of extra clouds the device's memory is trusted with (15 bytes each)
   low: 24, high: 32,         // frames a second: under low something is taken away, over high it is given back
+  some: 200, few: 60,        // points a cloud needs in the part looked at to come, and to stay
+  atOnce: 3,                 // clouds fetched at the same time
 };
 const KEYS = ['light', 'medium', 'full'];
 const asks = new URLSearchParams(location.search);
@@ -494,7 +594,7 @@ let extraMode = KEYS.includes(asks.get('detail')) ? asks.get('detail') : 'auto';
 // every device starts with the full density; the frame rate decides from there
 let extraKey = extraMode !== 'auto' ? extraMode : 'full';
 let extraMost = Infinity, extraLock = false, raised = false, cells = null, mainId = null, autoTimer = 0, quietUntil = 0;
-let rate = 0, rateSum = 0, rateN = 0, rateLast = performance.now(), lowRuns = 0, highRuns = 0, waiting = false;
+let rate = 0, rateSum = 0, rateN = 0, rateLast = performance.now(), lowRuns = 0, highRuns = 0, waiting = false, extraPoints = 0;
 
 function setupAuto(d, id) {
   if (!d || !d.cell || !d.layers || !state[id]) return;
@@ -540,11 +640,11 @@ function runAuto() {
   if (!cells) return;
   const live = autoOn && moved && state[mainId].box.checked, score = {};
   let best = 0, wide = Infinity;
-  const at = live ? lookedAt() : null;
+  const at = live ? (lookedAt() || controls.target) : null;   // nothing on the line of sight: what the view turns about
   if (at) {
     // inches from the middle of the picture to its nearer edge, at the distance of what is looked at
     wide = camera.position.distanceTo(at) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.min(1, camera.aspect);
-    const reach = Math.max(wide, 12) * 1.1, r2 = reach * reach;
+    const reach = Math.max(wide, 12) * 1.5, r2 = reach * reach;
     for (const id in cells.per) {
       const c = cells.per[id]; let n = 0;
       for (let i = 0; i < c.length; i += 4) { const dx = c[i] - at.x, dy = c[i + 1] - at.y, dz = c[i + 2] - at.z; if (dx * dx + dy * dy + dz * dz <= r2) n += c[i + 3]; }
@@ -552,30 +652,32 @@ function runAuto() {
     }
   }
   const ids = Object.keys(cells.per).filter(id => !state[id].manual).sort((a, b) => (score[b] || 0) - (score[a] || 0));
-  let next = null, busy = false, load = 0;
+  const next = [];
+  let busy = 0, load = 0;
   ids.forEach((id, rank) => {
     const s = state[id], n = score[id] || 0;
     const fits = rank < extraMost && (load === 0 || load + heft(id) <= AUTO.room);   // the most relevant one always fits
-    const come = wide <= AUTO.near && fits && n >= Math.max(600, 0.2 * best);
-    const stay = s.auto && wide <= AUTO.far && fits && n >= Math.max(300, 0.08 * best);
-    if (come || stay) { load += heft(id); if (!s.auto && !next) next = id; if (s.auto) { s.used = performance.now(); if (s.loading) busy = true; } }
+    const come = wide <= AUTO.near && fits && n >= AUTO.some;
+    const stay = s.auto && wide <= AUTO.far && fits && n >= AUTO.few;
+    if (come || stay) { load += heft(id); if (!s.auto) next.push(id); else { s.used = performance.now(); if (s.loading) busy++; } }
     else if (s.auto) { s.auto = false; s.row.classList.remove('auto'); s.used = performance.now(); toggle(id, false); }
   });
-  // One download at a time, and the next cloud only once the frame rate with the ones already
-  // there has been seen and leaves room: the limit is found from below, not by overshooting.
-  const shown = ids.filter(id => state[id].auto && state[id].object && state[id].object.visible).length;
-  const settled = performance.now() >= quietUntil + 1200;
+  // A few are fetched at the same time, and more are started as long as the frame rate with the
+  // ones already shown leaves room. If that turns out to be too many, pace() takes some back.
+  const on = ids.filter(id => state[id].auto && state[id].object && state[id].object.visible);
+  extraPoints = on.reduce((n, id) => n + (state[id].points || 0), 0);
   waiting = false;
-  if (next && !busy && extraMode === 'auto' && rate && (shown ? (!settled || rate < AUTO.low + 3) : rate < AUTO.low)) waiting = true;
-  else if (next && !busy) {
-    const s = state[next];
-    s.auto = true; s.used = performance.now(); s.row.classList.add('auto'); autoKey[next] = extraKey;
-    s.box.checked = true; retune(next); toggle(next, true);
+  if (next.length && extraMode === 'auto' && rate && rate < (on.length ? AUTO.low + 3 : AUTO.low)) waiting = true;
+  else for (const id of next.slice(0, Math.max(0, AUTO.atOnce - busy))) {
+    const s = state[id];
+    s.auto = true; s.used = performance.now(); s.row.classList.add('auto'); autoKey[id] = extraKey;
+    s.box.checked = true; retune(id); toggle(id, true);
   }
-  // switched-off extra clouds stay in memory while there is room, the longest unused go first
+  // switched-off extra clouds stay in memory while there is plenty of room, the longest unused go
+  // first (they come back quickly: their files are kept on the device)
   const idle = ids.filter(id => state[id].object && !state[id].object.visible && !state[id].box.checked).sort((a, b) => (state[a].used || 0) - (state[b].used || 0));
   let held = load + idle.reduce((n, id) => n + (state[id].points || 0), 0);
-  for (const id of idle) { if (held <= AUTO.room) break; held -= state[id].points || 0; unload(state[id]); }
+  for (const id of idle) { if (held <= AUTO.room * 0.6) break; held -= state[id].points || 0; unload(state[id]); }
   refresh();
 }
 function setExtra(key) {
@@ -600,11 +702,15 @@ function pace() {
   if (lowRuns >= 2) {
     lowRuns = 0;
     if (raised) extraLock = true;                    // it was given back once and that was too much: stay there
-    if (extras > 1) { extraMost = extras - 1; planAuto(); }          // the least relevant extra cloud goes
+    if (extras > 1) {                                                // the least relevant extra clouds go:
+      const all = (state[mainId].points || 0) + extraPoints;         // as many as the shortfall in frame rate calls for
+      const drop = Math.ceil(all * (1 - rate / (AUTO.low + 2)) / Math.max(1, extraPoints / extras));
+      extraMost = extras - Math.max(1, Math.min(extras - 1, drop)); planAuto();
+    }
     else if (i > 0) setExtra(KEYS[i - 1]);                           // the last one gets lighter
     else { extraMost = 0; planAuto(); }
     quietUntil = now + 3000;
-  } else if (highRuns >= 6 && !extraLock && (i < KEYS.length - 1 || extraMost < 99)) {
+  } else if (highRuns >= 3 && !extraLock && (i < KEYS.length - 1 || extraMost < 99)) {
     highRuns = 0; raised = true;                     // room again: give back in the opposite order
     if (i < KEYS.length - 1) setExtra(KEYS[i + 1]); else { extraMost++; planAuto(); }
   }
@@ -621,7 +727,7 @@ $('extra').onchange = (e) => {
   if (extraMode !== 'auto') setExtra(extraMode);
 };
 controls.addEventListener('change', planAuto);
-controls.addEventListener('start', () => { moved = true; });
+controls.addEventListener('start', () => { moved = true; extraLock = false; raised = false; });   // a new place to look at: the limit may be tried again
 
 // Loading bar in the middle of the picture while the first view is being fetched, so the page
 // does not look empty on a slow connection. It goes when that is done and does not come back.
