@@ -767,7 +767,7 @@
    "scan2un3",
    "voxel"
   ],
-  "pare": 0.5,
+  "pare": 2,
   "variants": [
    {
     "key": "light",

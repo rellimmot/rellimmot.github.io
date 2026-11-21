@@ -73,7 +73,7 @@
   <button data-view="below">Below</button>
   <span class="sep">|</span>
   <label title="How many points the clouds are loaded with. Applies to every cloud that comes in more than one density.">Density
-    <select id="density"><option value="light">Light</option><option value="medium" selected>Medium</option><option value="full">Full</option></select></label>
+    <select id="density"><option value="light">Light</option><option value="medium">Medium</option><option value="full" selected>Full</option></select></label>
   <label>Point size <input id="size" type="range" min="1" max="6" step="0.5" value="2"></label>
   <label><input id="tint" type="checkbox"> Colour by layer</label>
   <label><input id="axes" type="checkbox" checked> Axes and floor grid</label>
@@ -171,7 +171,7 @@ setView('iso');
 const state = {};   // id -> { def, object, material, points, faces, loading, row }
 let pointSize = 2, tintOn = false, tintNo = 0;
 const RANK = { light: 0, medium: 1, full: 2 };
-let density = RANK[new URLSearchParams(location.search).get('density')] !== undefined ? new URLSearchParams(location.search).get('density') : 'medium';
+let density = RANK[new URLSearchParams(location.search).get('density')] !== undefined ? new URLSearchParams(location.search).get('density') : 'full';
 // The file of a layer at the chosen density (the closest one it has).
 function pick(def) {
   if (!def.variants) return def;
@@ -399,19 +399,23 @@ function toggle(id, on) {
 
 for (const def of LAYERS) addRow(def);
 
-// ?show=a,b,c picks the layers to open with; the photo mesh is the default.
-const want = (new URLSearchParams(location.search).get('show') || 'textured').split(',').map(s => s.trim()).filter(Boolean);
+// ?show=a,b,c picks the layers to open with. Without it the page opens with the combined cloud,
+// or with the photo mesh if the layer list has no combined cloud.
+const asked = new URLSearchParams(location.search).get('show');
+const want = (asked || '').split(',').map(s => s.trim()).filter(Boolean);
 for (const id of want) if (state[id]) toggle(id, true);
+const openWith = (id) => { if (!asked && state[id] && !state[id].box.checked) toggle(id, true); };
 
 fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
-  if (!j || !Array.isArray(j.layers)) return;
+  if (!j || !Array.isArray(j.layers)) { openWith('textured'); return; }
   const c = j.combined;   // one cloud averaged from the dense clouds: listed first, with its own paring slider
   if (c && c.id && Array.isArray(c.variants) && !state[c.id]) { addRow({ group: c.group || 'Combined', sub: c.sub }, $('firstList')); addRow(c, $('firstList')); }
   if (j.group) addRow({ group: j.group, sub: j.sub });
   for (const d of j.layers) { if (d && d.id && (d.file || d.variants) && !state[d.id]) addRow(d); }
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
+  openWith(c && state[c.id] ? c.id : 'textured');
   layout();
-}).catch(() => {});
+}).catch(() => { openWith('textured'); });
 
 // Split view: one cutting plane per axis. A ticked axis hides everything on one side of its
 // slider position (kart frame, inches); the button switches the side that stays.
