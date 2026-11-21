@@ -27,6 +27,11 @@
   #layers .st.err { color: #e07a76; }
   #layers .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
   #layers .row2 { display: flex; gap: 6px; margin-top: 8px; }
+  #layers label.inside .nm { opacity: .55; }
+  #layers .hint { color: #999; font-size: 11px; margin: 0 0 3px 22px; }
+  #layers label.pare { margin: 0 0 2px 22px; padding: 0; color: #999; font-size: 11px; cursor: default; }
+  #layers label.pare input { flex: 1; min-width: 0; margin: 0; }
+  #layers label.pare span { min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   #legend { margin: 2px 0 2px 22px; }
   #legend .ramp { height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgb(40,80,255), rgb(0,210,255), rgb(40,220,80), rgb(255,220,0), rgb(255,50,30)); }
   #legend .ends { display: flex; justify-content: space-between; color: #999; font-size: 11px; }
@@ -79,7 +84,7 @@
 </div>
 <div id="layers">
   <h3 id="layersHead"><span>Layers</span><span id="layersTog">hide</span></h3>
-  <div class="body" id="layerList"></div>
+  <div class="body"><div id="firstList"></div><div id="layerList"></div></div>
 </div>
 <div id="cut">
   <h3 id="cutHead"><span>Split view</span><span id="cutTog">hide</span></h3>
@@ -216,6 +221,40 @@ function updateFill() {
   }
 }
 
+// Noise paring: the combined cloud is stored sorted from the best supported point to the most
+// isolated one, and its entry in the layer list says how many points stay at each paring radius
+// (a point is pared at a radius if it, or the small clump it sits in, has nothing else within that
+// distance). So the slider only changes how many points are drawn. 0 = off.
+const pareAsked = (() => { const q = new URLSearchParams(location.search).get('pare'); return q !== null && /^\d+(\.\d+)?$/.test(q) ? +q : null; })();
+let pare = 0;
+const pareUi = [];
+function pareRadii(def) { const v = (def.variants || []).find(x => Array.isArray(x.steps) && x.steps.length); return v ? v.steps.map(st => st[0]).sort((a, b) => b - a) : []; }
+function nearestRadius(radii, r) { let best = radii[0]; for (const x of radii) if (Math.abs(x - r) < Math.abs(best - r)) best = x; return best; }
+function fmtCount(n) { return n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : (n / 1000).toFixed(0) + 'k'; }
+function applyPare(s) {
+  const v = (s.def.variants || []).find(x => x.key === s.loadedKey);
+  if (!v || !Array.isArray(v.steps) || !s.object || !s.object.isPoints) return;
+  const all = s.object.geometry.attributes.position.count;
+  let n = all;
+  if (pare > 0) for (const st of v.steps) if (st[0] === pare) n = Math.min(all, st[1]);
+  s.object.geometry.setDrawRange(0, n);
+  s.points = n; s.pared = all - n; s.stEl.textContent = fmtCount(n);
+}
+function setPare(r) {
+  pare = r;
+  for (const u of pareUi) { u.slider.value = r ? u.radii.indexOf(r) + 1 : 0; u.val.textContent = r ? r + ' in' : 'off'; }
+  for (const id in state) applyPare(state[id]);
+  refresh();
+}
+// The clouds a combined cloud was made from are marked while it is on: they add nothing on top of it.
+function markCovered(s) {
+  if (!Array.isArray(s.def.covers)) return;
+  const on = s.box.checked, names = [];
+  for (const id of s.def.covers) { const c = state[id]; if (!c) continue; c.row.classList.toggle('inside', on); names.push(c.def.label); }
+  s.hint.textContent = 'Already holds ' + names.join(', ') + '. No need to tick those as well.';
+  s.hint.hidden = !on || !names.length;
+}
+
 function checkFile(s) {
   // Grey out anything whose file is not there (yet), so a click cannot end in an error.
   const src = pick(s.def), tok = s.token;
@@ -228,9 +267,8 @@ function checkFile(s) {
 
 function fmtMb(mb) { return mb == null ? '' : (mb < 1 ? Math.round(mb * 1000) + ' KB' : (mb >= 10 ? Math.round(mb) : mb.toFixed(1)) + ' MB'); }
 
-function addRow(def) {
-  const list = $('layerList');
-  if (def.group) {
+function addRow(def, list = $('layerList')) {
+  if (def.group && !def.id) {
     const g = document.createElement('div'); g.className = 'grp'; g.textContent = def.group; list.appendChild(g);
     if (def.sub) { const s = document.createElement('div'); s.className = 'sub'; s.textContent = def.sub; list.appendChild(s); }
     return;
@@ -250,6 +288,20 @@ function addRow(def) {
     lg.innerHTML = '<div class="ramp"></div><div class="ends"><span>start of the walk</span><span>end</span></div>';
     list.appendChild(lg); st.legend = lg;
   }
+  if (Array.isArray(def.covers)) { st.hint = document.createElement('div'); st.hint.className = 'hint'; st.hint.hidden = true; list.appendChild(st.hint); }
+  const radii = pareRadii(def);
+  if (radii.length) {
+    const p = document.createElement('label'); p.className = 'pare';
+    p.title = 'Leaves out stray points: a point, or a small clump of points, that has nothing else within this distance. Further right pares more. The points are only hidden, not removed.';
+    p.innerHTML = 'Noise paring <input type="range" min="0" step="1"><span></span>';
+    const u = { radii, slider: p.querySelector('input'), val: p.querySelector('span') };
+    u.slider.max = radii.length;
+    u.slider.oninput = () => setPare(+u.slider.value ? radii[+u.slider.value - 1] : 0);
+    list.appendChild(p); pareUi.push(u);
+    // opens with the radius from the address (?pare=0.3; ?pare=0 is off), else with the layer's own
+    const start = pareAsked !== null ? pareAsked : (typeof def.pare === 'number' ? def.pare : 0);
+    setPare(start > 0 ? nearestRadius(radii, start) : 0);
+  }
   checkFile(st);
 }
 
@@ -263,7 +315,7 @@ function setDensity(d) {
     const wasOn = s.box.checked;
     s.token++; s.loading = false;                    // anything still loading for the old density is dropped
     if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); }); s.object = null; }
-    s.points = 0; s.faces = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
+    s.points = 0; s.faces = 0; s.pared = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
     checkFile(s);
     if (wasOn) toggle(id, true);
   }
@@ -272,15 +324,16 @@ function setDensity(d) {
 
 function refresh() {
   updateFill();
-  let pts = 0, faces = 0, n = 0, pred = 0;
-  for (const id in state) { const s = state[id]; if (s.object && s.object.visible && s.box.checked) { pts += s.points || 0; faces += s.faces || 0; pred += s.fillShown || 0; n++; } }
+  let pts = 0, faces = 0, n = 0, pred = 0, cut = 0;
+  for (const id in state) { const s = state[id]; if (s.object && s.object.visible && s.box.checked) { pts += s.points || 0; faces += s.faces || 0; pred += s.fillShown || 0; cut += s.pared || 0; n++; } }
   const parts = [];
   if (pts) parts.push(pts.toLocaleString() + ' points');
+  if (cut) parts.push(cut.toLocaleString() + ' pared as noise');
   if (pred) parts.push('+ ' + pred.toLocaleString() + ' predicted');
   if (faces) parts.push(faces.toLocaleString() + ' faces');
   statusEl.textContent = n ? parts.join(' · ') + ' · ' + n + (n === 1 ? ' layer' : ' layers') : 'No layer shown. Tick one in the list.';
   const shown = {}; for (const id in state) if (state[id].object && state[id].box.checked) shown[id] = { points: state[id].points || 0, faces: state[id].faces || 0 };
-  window.__kart = { shown, points: pts, faces, predicted: pred };
+  window.__kart = { shown, points: pts, faces, predicted: pred, pared: cut, pare };
 }
 
 function buildPath(geo) {
@@ -311,6 +364,7 @@ function toggle(id, on) {
   const s = state[id]; if (!s) return;
   s.box.checked = on;
   if (s.legend) s.legend.hidden = !on;
+  markCovered(s);
   if (s.object) { s.object.visible = on; refresh(); return; }
   if (!on || s.loading) { refresh(); return; }
   s.loading = true; s.stEl.classList.remove('err'); s.stEl.textContent = '0 %';
@@ -321,8 +375,9 @@ function toggle(id, on) {
     s.loading = false; s.object = obj; s.loadedKey = src.key; obj.visible = s.box.checked; scene.add(obj);
     let n = 0, f = 0;
     obj.traverse(o => { if (o.isPoints) n += o.geometry.attributes.position.count; if (o.isMesh) { n += o.geometry.attributes.position.count; f += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
-    s.points = f ? 0 : n; s.faces = f;
-    s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : (n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : (n / 1000).toFixed(0) + 'k');
+    s.points = f ? 0 : n; s.faces = f; s.pared = 0;
+    s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : fmtCount(n);
+    applyPare(s);
     refresh();
   };
   new PLYLoader().load(src.file, (geo) => {
@@ -350,9 +405,12 @@ for (const id of want) if (state[id]) toggle(id, true);
 
 fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
   if (!j || !Array.isArray(j.layers)) return;
+  const c = j.combined;   // one cloud averaged from the dense clouds: listed first, with its own paring slider
+  if (c && c.id && Array.isArray(c.variants) && !state[c.id]) { addRow({ group: c.group || 'Combined', sub: c.sub }, $('firstList')); addRow(c, $('firstList')); }
   if (j.group) addRow({ group: j.group, sub: j.sub });
   for (const d of j.layers) { if (d && d.id && (d.file || d.variants) && !state[d.id]) addRow(d); }
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
+  layout();
 }).catch(() => {});
 
 // Split view: one cutting plane per axis. A ticked axis hides everything on one side of its
