@@ -41,7 +41,11 @@
   #cut .cutrow button { padding: 2px 7px; min-width: 62px; }
   #cut .cutrow input[type=range] { width: 100%; margin: 3px 0 0; }
   #cut .row2 { display: flex; gap: 6px; margin-top: 8px; }
-  @media (max-width: 640px) { #cut { top: auto; bottom: 70px; left: 8px; right: 8px; width: auto; } }
+  @media (max-width: 640px) {
+    #cut { top: auto; left: 8px; right: 8px; width: auto; }
+    #help { left: 8px; }
+    #layers { max-width: calc(100% - 34px); }
+  }
   #status { position: fixed; bottom: 8px; left: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; }
   #help { position: fixed; bottom: 8px; right: 8px; background: rgba(0,0,0,.6); padding: 4px 8px; border-radius: 4px; z-index: 2; max-width: calc(100% - 16px); }
   canvas { display: block; }
@@ -333,7 +337,7 @@ function updateCuts() {
   window.__cuts = cuts;
 }
 $('cutReset').onclick = () => { for (const c of CUTS) { c.box.checked = false; c.keepHigh = false; c.slider.value = c.start; } updateCuts(); };
-$('cutHead').onclick = () => { const c = $('cut').classList.toggle('closed'); $('cutTog').textContent = c ? 'show' : 'hide'; };
+$('cutHead').onclick = () => { const c = $('cut').classList.toggle('closed'); $('cutTog').textContent = c ? 'show' : 'hide'; layout(); };
 updateCuts();
 
 $('layersHead').onclick =() => { const c = $('layers').classList.toggle('closed'); $('layersTog').textContent = c ? 'show' : 'hide'; };
@@ -343,12 +347,32 @@ $('density').onchange = (e) => setDensity(e.target.value);
 $('size').oninput = (e) => { pointSize = +e.target.value; for (const id in state) if (state[id].material) state[id].material.size = pointSize; };
 $('tint').onchange = (e) => { tintOn = e.target.checked; for (const id in state) applyTint(state[id]); };
 $('axes').onchange = (e) => { helpers.visible = e.target.checked; };
+// The toolbar wraps to more rows on a narrow screen, so the panels are placed from its real
+// height; on a phone the split view sits at the bottom, above the help and status lines.
+const narrow = () => innerWidth <= 640;
+if (matchMedia('(pointer: coarse)').matches) $('help').textContent = 'One finger: rotate · Two fingers: pan and zoom · Inches; X forward (red), Y left (green), Z up (blue)';
+function layout() {
+  const top = Math.round($('bar').getBoundingClientRect().bottom) + 6, lay = $('layers'), cut = $('cut'), help = $('help');
+  lay.style.top = top + 'px';
+  if (narrow()) {
+    help.style.bottom = Math.round(statusEl.getBoundingClientRect().height + 14) + 'px';
+    cut.style.top = 'auto';
+    cut.style.bottom = Math.round(innerHeight - help.getBoundingClientRect().top + 6) + 'px';
+    lay.style.maxHeight = Math.max(80, Math.round(cut.getBoundingClientRect().top - top - 6)) + 'px';
+  } else {
+    help.style.bottom = ''; cut.style.bottom = ''; cut.style.top = top + 'px'; lay.style.maxHeight = '';
+  }
+}
+if (narrow()) { $('layers').classList.add('closed'); $('layersTog').textContent = 'show'; $('cut').classList.add('closed'); $('cutTog').textContent = 'show'; }
+layout();
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  layout();
 });
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 refresh();
+layout();
 </script>
 </body>
 </html>
