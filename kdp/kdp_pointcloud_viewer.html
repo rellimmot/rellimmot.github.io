@@ -32,6 +32,11 @@
   #layers label.pare { margin: 0 0 2px 22px; padding: 0; color: #999; font-size: 11px; cursor: default; }
   #layers label.pare input { flex: 1; min-width: 0; margin: 0; }
   #layers label.pare span { min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  #layers label.auto .nm::after { content: ' · auto'; color: #8fd18f; font-size: 11px; }
+  #layers #autoRow { margin: 4px 0 0 22px; }
+  #layers #advRow { margin-top: 10px; color: #999; }
+  #advBox { margin: 2px 0 0 22px; color: #999; font-size: 11px; }
+  #advBox label { cursor: default; }
   #legend { margin: 2px 0 2px 22px; }
   #legend .ramp { height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgb(40,80,255), rgb(0,210,255), rgb(40,220,80), rgb(255,220,0), rgb(255,50,30)); }
   #legend .ends { display: flex; justify-content: space-between; color: #999; font-size: 11px; }
@@ -104,7 +109,16 @@
 </div>
 <div id="layers">
   <h3 id="layersHead"><span>Layers</span><span id="layersTog">hide</span></h3>
-  <div class="body"><div id="firstList"></div><div id="layerList"></div></div>
+  <div class="body"><div id="firstList"></div>
+    <label id="autoRow" hidden title="Loads the detailed scans for the part you zoom in on, one after the other, and switches them off again when you move away. If the picture gets slow, they are loaded with fewer points."><input id="auto" type="checkbox" checked><span class="nm">Automatic detail</span></label>
+    <div id="layerList"></div>
+    <label id="advRow" hidden><input id="adv" type="checkbox"><span class="nm">Advanced</span></label>
+    <div id="advBox" hidden>
+      <label title="How many points the scans that automatic detail adds are loaded with. Automatic follows the frame rate.">Extra detail
+        <select id="extra"><option value="auto">Automatic</option><option value="full">Full</option><option value="medium">Medium</option><option value="light">Light</option></select></label>
+      <div id="advInfo"></div>
+    </div>
+  </div>
 </div>
 <div id="cut">
   <h3 id="cutHead"><span>Split view</span><span id="cutTog">hide</span></h3>
@@ -187,16 +201,23 @@ function setView(name) {
   controls.update();
 }
 setView('iso');
+// ?cam=x,y,z,tx,ty,tz opens with the camera at x y z looking at tx ty tz (kart frame, inches)
+{
+  const v = (new URLSearchParams(location.search).get('cam') || '').split(',').map(Number);
+  if (v.length === 6 && v.every(Number.isFinite)) { camera.position.set(v[0], v[1], v[2]); controls.target.set(v[3], v[4], v[5]); controls.update(); }
+}
 
 const state = {};   // id -> { def, object, material, points, faces, loading, row }
 let pointSize = 2, tintOn = false, tintNo = 0;
 const RANK = { light: 0, medium: 1, full: 2 };
 let density = RANK[new URLSearchParams(location.search).get('density')] !== undefined ? new URLSearchParams(location.search).get('density') : 'full';
+const autoKey = {};   // layer id -> density of a layer that automatic detail has loaded (instead of the chosen one)
 // The file of a layer at the chosen density (the closest one it has).
 function pick(def) {
   if (!def.variants) return def;
+  const want = RANK[autoKey[def.id] || density];
   let best = null;
-  for (const v of def.variants) if (!best || Math.abs(RANK[v.key] - RANK[density]) < Math.abs(RANK[best.key] - RANK[density])) best = v;
+  for (const v of def.variants) if (!best || Math.abs(RANK[v.key] - want) < Math.abs(RANK[best.key] - want)) best = v;
   return best;
 }
 // Predicted fill: extra points sampled on a surface fitted through a dense cloud. They are kept in
@@ -225,7 +246,7 @@ function updateFill() {
     const s = state[id], f = pickFill(s.def);
     if (!f) continue;
     if (s.fillObj && s.fillKey !== f.key) dropFill(s);            // the density changed
-    const on = gap > 0 && s.box.checked && s.object && s.object.visible;
+    const on = gap > 0 && s.box.checked && s.object && s.object.visible && !s.auto;
     if (!on) { if (s.fillObj) s.fillObj.visible = false; s.fillShown = 0; continue; }
     if (s.fillObj) { const n = fillCount(f); s.fillObj.geometry.setDrawRange(0, n); s.fillObj.visible = n > 0; s.fillShown = n; continue; }
     if (s.fillLoading || s.fillFailed === f.file) continue;
@@ -271,7 +292,8 @@ function markCovered(s) {
   if (!Array.isArray(s.def.covers)) return;
   const on = s.box.checked, names = [];
   for (const id of s.def.covers) { const c = state[id]; if (!c) continue; c.row.classList.toggle('inside', on); names.push(c.def.label); }
-  s.hint.textContent = 'Already holds ' + names.join(', ') + '. No need to tick those as well.';
+  s.hint.textContent = cells && autoOn ? 'Holds ' + names.join(', ') + '. Zoom in and their full detail loads by itself.'
+    : 'Already holds ' + names.join(', ') + '. No need to tick those as well.';
   s.hint.hidden = !on || !names.length;
 }
 
@@ -301,7 +323,13 @@ function addRow(def, list = $('layerList')) {
   st.szEl.textContent = fmtMb(pick(def).mb);
   row.querySelector('.sw').style.background = def.path ? 'linear-gradient(90deg, rgb(40,80,255), rgb(40,220,80), rgb(255,50,30))' : (def.texture ? '#777' : '#' + st.tint.toString(16).padStart(6, '0'));
   st.row = row; st.box = row.querySelector('input'); st.stEl = row.querySelector('.st');
-  st.box.onchange = () => toggle(def.id, st.box.checked);
+  st.box.onchange = () => {
+    // a layer ticked or unticked by hand is left alone by automatic detail from then on
+    st.manual = true; st.auto = false; row.classList.remove('auto');
+    if (autoKey[def.id]) { delete autoKey[def.id]; retune(def.id); }
+    toggle(def.id, st.box.checked);
+    planAuto();
+  };
   list.appendChild(row);
   if (def.path) {
     const lg = document.createElement('div'); lg.id = 'legend'; lg.hidden = true;
@@ -325,20 +353,28 @@ function addRow(def, list = $('layerList')) {
   checkFile(st);
 }
 
+// Takes a layer out of memory (it loads again when it is next switched on).
+function unload(s) {
+  s.token++; s.loading = false;                      // anything still loading is dropped
+  if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); }); s.object = null; }
+  dropFill(s);
+  s.points = 0; s.faces = 0; s.pared = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
+}
+// Loads a layer again if the density it should have is not the one it has.
+function retune(id) {
+  const s = state[id];
+  if (!s.def.variants) return;
+  const key = pick(s.def).key;
+  s.szEl.textContent = fmtMb(pick(s.def).mb);
+  if ((s.loadedKey === key && s.object) || (s.loading && s.loadingKey === key)) return;
+  const wasOn = s.box.checked;
+  unload(s);
+  checkFile(s);
+  if (wasOn) toggle(id, true);
+}
 function setDensity(d) {
   density = d;
-  for (const id in state) {
-    const s = state[id];
-    if (!s.def.variants) continue;
-    s.szEl.textContent = fmtMb(pick(s.def).mb);
-    if (s.loadedKey === pick(s.def).key && s.object) continue;
-    const wasOn = s.box.checked;
-    s.token++; s.loading = false;                    // anything still loading for the old density is dropped
-    if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); }); s.object = null; }
-    s.points = 0; s.faces = 0; s.pared = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
-    checkFile(s);
-    if (wasOn) toggle(id, true);
-  }
+  for (const id in state) retune(id);
   refresh();
 }
 
@@ -351,9 +387,10 @@ function refresh() {
   if (cut) parts.push(cut.toLocaleString() + ' pared as noise');
   if (pred) parts.push('+ ' + pred.toLocaleString() + ' predicted');
   if (faces) parts.push(faces.toLocaleString() + ' faces');
-  statusEl.textContent = n ? parts.join(' · ') + ' · ' + n + (n === 1 ? ' layer' : ' layers') : 'No layer shown. Tick one in the list.';
+  const byAuto = Object.keys(state).filter(id => state[id].auto && state[id].object && state[id].object.visible);
+  statusEl.textContent = n ? parts.join(' · ') + ' · ' + n + (n === 1 ? ' layer' : ' layers') + (byAuto.length ? ' (' + byAuto.length + ' automatic)' : '') : 'No layer shown. Tick one in the list.';
   const shown = {}; for (const id in state) if (state[id].object && state[id].box.checked) shown[id] = { points: state[id].points || 0, faces: state[id].faces || 0 };
-  window.__kart = { shown, points: pts, faces, predicted: pred, pared: cut, pare };
+  window.__kart = { shown, points: pts, faces, predicted: pred, pared: cut, pare, auto: { on: autoOn && !!cells, layers: byAuto, density: extraKey, most: extraMost, rate: Math.round(rate) } };
 }
 
 function buildPath(geo) {
@@ -389,7 +426,13 @@ function toggle(id, on) {
   if (!on || s.loading) { refresh(); return; }
   s.loading = true; s.stEl.classList.remove('err'); s.stEl.textContent = '0 %';
   const src = pick(s.def), tok = s.token;
-  const fail = (err) => { if (tok !== s.token) return; s.loading = false; s.box.checked = false; s.stEl.classList.add('err'); s.stEl.textContent = 'failed'; s.row.title = (err && err.message) || 'Could not load this file.'; refresh(); };
+  s.loadingKey = src.key;
+  const fail = (err) => {
+    if (tok !== s.token) return;
+    s.loading = false; s.box.checked = false; s.stEl.classList.add('err'); s.stEl.textContent = 'failed'; s.row.title = (err && err.message) || 'Could not load this file.';
+    if (s.auto) { s.auto = false; s.manual = true; s.row.classList.remove('auto'); planAuto(); }   // not tried again by itself
+    refresh();
+  };
   const ready = (obj) => {
     if (tok !== s.token) { obj.traverse(o => { if (o.geometry) o.geometry.dispose(); }); return; }   // density changed meanwhile
     s.loading = false; s.object = obj; s.loadedKey = src.key; obj.visible = s.box.checked; scene.add(obj);
@@ -399,6 +442,7 @@ function toggle(id, on) {
     s.stEl.textContent = f ? (f / 1000).toFixed(0) + 'k f' : fmtCount(n);
     applyPare(s);
     refresh();
+    if (s.auto) { quietUntil = performance.now() + 3000; planAuto(); }   // loading makes the picture stutter: not counted; then the next one
   };
   new PLYLoader().load(src.file, (geo) => {
     if (geo.attributes.normal) geo.deleteAttribute('normal');
@@ -417,6 +461,133 @@ function toggle(id, on) {
   }, (e) => { if (tok !== s.token) return; if (e.lengthComputable && e.total) s.stEl.textContent = Math.min(99, Math.round(100 * e.loaded / e.total)) + ' %'; else s.stEl.textContent = ((e.loaded || 0) / 1048576).toFixed(0) + ' MB'; }, fail);
 }
 
+// Automatic detail. The combined cloud stays as it is. Where the view is zoomed in, the clouds that
+// have points there are loaded on top of it, one after the other, and switched off again when the
+// view moves away. The layer list carries a coarse map of every cloud (cells of a few inches with
+// the number of points in each); that is all the page needs to know what is where. The frame rate
+// is watched too: if it stays low while extra clouds are shown, they are loaded with fewer points.
+// The combined cloud is never changed by this.
+const coarse = matchMedia('(pointer: coarse)').matches;
+const AUTO = {
+  near: 32,                  // extra clouds come when the view shows less than this many inches around its middle
+  far: 42,                   // and go when it shows more than this
+  most: coarse ? 2 : 3,      // extra clouds shown together
+  keep: coarse ? 3e6 : 9e6,  // points of switched-off extra clouds kept in memory for coming back
+  low: 15, high: 50,         // frames a second: below low the extra clouds get lighter, above high heavier
+};
+const KEYS = ['light', 'medium', 'full'];
+const asks = new URLSearchParams(location.search);
+let autoOn = asks.get('auto') !== '0';
+let extraMode = KEYS.includes(asks.get('detail')) ? asks.get('detail') : 'auto';
+// a phone starts with medium unless it reports plenty of memory; the frame rate decides from there
+let extraKey = extraMode !== 'auto' ? extraMode : (coarse && !(navigator.deviceMemory >= 8) ? 'medium' : 'full');
+let extraMost = AUTO.most, extraLock = false, raised = false, cells = null, mainId = null, autoTimer = 0, quietUntil = 0;
+let rate = 0, rateSum = 0, rateN = 0, rateLast = performance.now(), lowRuns = 0, highRuns = 0;
+
+function setupAuto(d, id) {
+  if (!d || !d.cell || !d.layers || !state[id]) return;
+  const any = new Map(), per = {};
+  for (const k in d.layers) {
+    if (!state[k] || k === id || !state[k].def.variants) continue;
+    const a = String(d.layers[k]).split(' ').map(Number), c = new Float32Array(a.length);
+    for (let i = 0; i + 3 < a.length; i += 4) {
+      c[i] = (a[i] + 0.5) * d.cell; c[i + 1] = (a[i + 1] + 0.5) * d.cell; c[i + 2] = (a[i + 2] + 0.5) * d.cell; c[i + 3] = a[i + 3];
+      const key = a[i] + ',' + a[i + 1] + ',' + a[i + 2];
+      any.set(key, (any.get(key) || 0) + a[i + 3]);
+    }
+    per[k] = c;
+  }
+  if (!Object.keys(per).length) return;
+  cells = { size: d.cell, per, any }; mainId = id;
+  $('autoRow').hidden = false; $('advRow').hidden = false;
+  $('auto').checked = autoOn; $('extra').value = extraMode;
+  markCovered(state[id]);
+  planAuto();
+}
+// The first part of the model on the line of sight through the middle of the picture.
+const sight = new THREE.Vector3(), spot = new THREE.Vector3();
+function lookedAt() {
+  camera.getWorldDirection(sight);
+  for (let t = 0; t < 900; t += cells.size / 2) {
+    spot.copy(camera.position).addScaledVector(sight, t);
+    const key = Math.floor(spot.x / cells.size) + ',' + Math.floor(spot.y / cells.size) + ',' + Math.floor(spot.z / cells.size);
+    if ((cells.any.get(key) || 0) >= 40) return spot;
+  }
+  return null;
+}
+function planAuto() { clearTimeout(autoTimer); autoTimer = setTimeout(runAuto, 350); }   // once the view has come to rest
+function runAuto() {
+  if (!cells) return;
+  const live = autoOn && state[mainId].box.checked, score = {};
+  let best = 0, wide = Infinity;
+  const at = live ? lookedAt() : null;
+  if (at) {
+    // inches from the middle of the picture to its nearer edge, at the distance of what is looked at
+    wide = camera.position.distanceTo(at) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.min(1, camera.aspect);
+    const reach = Math.max(wide, 12) * 1.1, r2 = reach * reach;
+    for (const id in cells.per) {
+      const c = cells.per[id]; let n = 0;
+      for (let i = 0; i < c.length; i += 4) { const dx = c[i] - at.x, dy = c[i + 1] - at.y, dz = c[i + 2] - at.z; if (dx * dx + dy * dy + dz * dz <= r2) n += c[i + 3]; }
+      score[id] = n; if (n > best) best = n;
+    }
+  }
+  const ids = Object.keys(cells.per).filter(id => !state[id].manual).sort((a, b) => (score[b] || 0) - (score[a] || 0));
+  let next = null, busy = false;
+  ids.forEach((id, rank) => {
+    const s = state[id], n = score[id] || 0;
+    const come = wide <= AUTO.near && rank < extraMost && n >= Math.max(600, 0.25 * best);
+    const stay = s.auto && wide <= AUTO.far && rank <= extraMost && extraMost > 0 && n >= Math.max(300, 0.1 * best);
+    if (come || stay) { if (!s.auto && !next) next = id; if (s.auto) { s.used = performance.now(); if (s.loading) busy = true; } }
+    else if (s.auto) { s.auto = false; s.row.classList.remove('auto'); s.used = performance.now(); toggle(id, false); }
+  });
+  if (next && !busy) {       // one download at a time
+    const s = state[next];
+    s.auto = true; s.used = performance.now(); s.row.classList.add('auto'); autoKey[next] = extraKey;
+    s.box.checked = true; retune(next); toggle(next, true);
+  }
+  // switched-off extra clouds stay in memory up to a limit, the longest unused go first
+  const idle = ids.filter(id => state[id].object && !state[id].object.visible && !state[id].box.checked).sort((a, b) => (state[a].used || 0) - (state[b].used || 0));
+  let held = idle.reduce((n, id) => n + (state[id].points || 0), 0);
+  for (const id of idle) { if (held <= AUTO.keep) break; held -= state[id].points || 0; unload(state[id]); }
+  refresh();
+}
+function setExtra(key) {
+  extraKey = key;
+  for (const id in state) if (state[id].auto) { autoKey[id] = key; retune(id); }
+  quietUntil = performance.now() + 4000;
+  refresh();
+}
+// Called for every picture drawn; about once a second it looks at the frame rate.
+function pace() {
+  const now = performance.now(), dt = now - rateLast; rateLast = now;
+  if (dt < 2500) { rateSum += dt; rateN++; }         // a longer gap is a hidden tab, not a slow picture
+  if (rateSum < 1000) return;
+  rate = rateN * 1000 / rateSum; rateSum = 0; rateN = 0;
+  if (!$('advBox').hidden) $('advInfo').textContent = Math.round(rate) + ' frames a second · extra clouds at ' + extraKey + ' density, at most ' + extraMost + ' together';
+  const extras = Object.keys(state).filter(id => state[id].auto && state[id].object && state[id].object.visible).length;
+  if (!cells || extraMode !== 'auto' || !extras || now < quietUntil) { lowRuns = highRuns = 0; return; }
+  lowRuns = rate < AUTO.low ? lowRuns + 1 : 0;
+  highRuns = rate >= AUTO.high ? highRuns + 1 : 0;
+  const i = KEYS.indexOf(extraKey);
+  if (lowRuns >= 2) {
+    lowRuns = 0;
+    if (raised) extraLock = true;                    // it was tried heavier and that was too much: stay down
+    if (i > 0) setExtra(KEYS[i - 1]); else if (extraMost > 0) { extraMost--; planAuto(); }
+  } else if (highRuns >= 6 && !extraLock && i < KEYS.length - 1) { highRuns = 0; raised = true; setExtra(KEYS[i + 1]); }
+}
+$('auto').onchange = (e) => {
+  autoOn = e.target.checked;
+  if (autoOn) for (const id in state) if (!state[id].box.checked) state[id].manual = false;   // a fresh start
+  if (mainId) markCovered(state[mainId]);
+  planAuto();
+};
+$('adv').onchange = (e) => { $('advBox').hidden = !e.target.checked; layout(); };
+$('extra').onchange = (e) => {
+  extraMode = e.target.value; extraMost = AUTO.most; extraLock = false; raised = false;
+  if (extraMode !== 'auto') setExtra(extraMode);
+};
+controls.addEventListener('change', planAuto);
+
 for (const def of LAYERS) addRow(def);
 
 // ?show=a,b,c picks the layers to open with. Without it the page opens with the combined cloud,
@@ -434,6 +605,7 @@ fetch(MORE, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => {
   for (const d of j.layers) { if (d && d.id && (d.file || d.variants) && !state[d.id]) addRow(d); }
   for (const id of want) if (state[id] && !state[id].box.checked) toggle(id, true);
   openWith(c && state[c.id] ? c.id : 'textured');
+  if (c) setupAuto(j.detail, c.id);
   layout();
 }).catch(() => { openWith('textured'); });
 
@@ -489,7 +661,7 @@ $('fillFlag').onchange = (e) => { markFill = e.target.checked; for (const id in 
 // The toolbar wraps to more rows on a narrow screen, so the panels are placed from its real
 // height; on a phone they open from the two tabs under the view buttons.
 const narrow = () => innerWidth <= 640;
-if (matchMedia('(pointer: coarse)').matches) $('help').textContent = 'One finger: rotate · Two fingers: pan and zoom · Inches; X forward (red), Y left (green), Z up (blue)';
+if (coarse) $('help').textContent = 'One finger: rotate · Two fingers: pan and zoom · Inches; X forward (red), Y left (green), Z up (blue)';
 function layout() {
   const lay = $('layers'), cut = $('cut'), opts = $('opts'), body = lay.querySelector('.body');
   // on a phone the settings and the point count live inside the Layers panel
@@ -516,7 +688,7 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
   layout();
 });
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); pace(); });
 refresh();
 layout();
 </script>
