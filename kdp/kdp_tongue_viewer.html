@@ -168,8 +168,8 @@
         <span class="num" id="bodyOpacityVal">96%</span>
       </div>
       <div id="viewKart"></div>
-      <div class="ctl ov" id="ov_cloud"><label>Scan: point cloud</label><button type="button" class="load">Load point cloud (9 MB)</button></div>
-      <div class="ctl ov" id="ov_mesh"><label>Scan: photo mesh</label><button type="button" class="load">Load photo mesh (15 MB)</button></div>
+      <div class="ctl ov" id="ov_cloud"><label>Scan: point cloud</label><button type="button" class="load">Load point cloud (11 MB)</button></div>
+      <div class="ctl ov" id="ov_mesh"><label>Scan: photo mesh</label><button type="button" class="load">Load photo mesh (68 MB)</button></div>
       <div class="seg" id="cams">
         <button type="button" data-cam="iso">3/4</button>
         <button type="button" data-cam="side">Side</button>
@@ -2683,18 +2683,23 @@
   const bop = $("bodyOpacity"); bop.addEventListener("input", () => { bodyOpacity = bop.value / 100; $("bodyOpacityVal").textContent = bop.value + "%"; applyBody(); });
   const op = $("headOpacity"); op.addEventListener("input", () => { headOpacity = op.value / 100; $("headOpacityVal").textContent = op.value + "%"; applyHead(); });
 
-  // ---- the real kart's scan as an overlay: the point cloud and the photo mesh of the walk-around of 2026-11-15, the same files as the kart scan page beside this one.
-  // Not loaded until asked (9 and 15 MB): a button loads one, shows a load bar, then turns into its opacity slider. Both files are in the kart frame (inches,
-  // origin on the floor under the middle of the cart frame's front face) except the mesh, which is in the reconstruction's own units and comes in through TO_KART;
-  // the model frame is the kart frame moved 6 in back and 63.5 in down. The overlay follows the cart frame sliders.
-  const TO_KART = new THREE.Matrix4().set(26.448866, 0.51306803, -0.250351353, -43.8972887, 0.300778971, -2.66296169, 26.3189398, 6.85119062, 0.485228414, -26.3156573, -2.66817487, 60.5748317, 0, 0, 0, 1);
+  // ---- the real kart's scan as an overlay, the same files as the kart scan page beside this one (since 2026-11-22): the optimized dense cloud of scan 2
+  // (all its dense clouds averaged, medium density) and the photo mesh of scans 1 and 2 together (half detail).
+  // Not loaded until asked (11 and 68 MB): a button loads one, shows a load bar, then turns into its opacity slider. Both files are in the kart frame (inches,
+  // origin on the floor under the middle of the cart frame's front face); the model frame is the kart frame moved 6 in back and 63.5 in down.
+  // The overlay follows the cart frame sliders. The cloud's points are sorted from best supported to most isolated: like the kart scan page, only the points
+  // kept at a noise paring of PARE in are drawn (the count per radius is in the scan page's layer list).
   const scanGroup = new THREE.Group(); root.add(scanGroup);
   const placeScan = () => { const s = window.__kartShift || [0, 0, 0]; scanGroup.position.set(-6 + s[0], s[1], -63.5 + s[2]); };
   window.__onKartBuilt = placeScan; placeScan();
   const SCAN = {
-    ov_cloud: { file: "kdp_pointcloud.ply", name: "point cloud" },
-    ov_mesh: { file: "kdp_mesh.ply", texture: "kdp_mesh.jpg", name: "photo mesh" },
+    ov_cloud: { file: "kdp_scan2_opt.ply", name: "point cloud", pare: 2 },
+    ov_mesh: { file: "kdp_scan2_mesh.ply", texture: "kdp_scan2_mesh.jpg", name: "photo mesh" },
   };
+  const pareCount = (file, r, done) => fetch("kdp_scan2_layers.json", { cache: "no-store" }).then(x => x.ok ? x.json() : null).then(j => {
+    const v = j && j.combined && (j.combined.variants || []).find(x => x.file === file), st = v && (v.steps || []).find(x => x[0] === r);
+    done(st ? st[1] : Infinity);
+  }).catch(() => done(Infinity));
   const SCAN_START = 50;   // opacity a scan shows at once it has loaded (%)
   const scanSetOpacity = (obj, o) => { const m = obj.material; m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; obj.visible = o > 0.001; };
   window.__scan = {};
@@ -2716,11 +2721,16 @@
       };
       const loadPly = (name, retry) => new THREE.PLYLoader().load(name, geo => {
         if (geo.attributes.normal) geo.deleteAttribute("normal");
-        if (!c.texture) { ready(new THREE.Points(geo, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true }))); return; }
+        if (!c.texture) {
+          const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true }));
+          if (!c.pare) { ready(pts); return; }
+          pareCount(c.file, c.pare, n => { geo.setDrawRange(0, Math.min(n, geo.attributes.position.count)); ready(pts); });
+          return;
+        }
         msg.textContent = "Loading the photo texture..."; bar.firstChild.style.width = "100%";
         new THREE.TextureLoader().load(c.texture, tex => {   // the mesh shows only once its texture is in
           tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8;
-          const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })); m.applyMatrix4(TO_KART); ready(m);
+          ready(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })));
         }, undefined, fail);
       }, e => progress(e, c.texture ? "Mesh: " : ""), retry ? () => loadPly(c.file + ".wasm", false) : fail);   // the private copy of this page serves the scan under a binary type its host accepts
       loadPly(c.file, true);
