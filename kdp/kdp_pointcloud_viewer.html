@@ -165,6 +165,11 @@ const LAYERS = [
   { id: 'scan2sparse', label: 'Sparse points', file: 'kdp_scan2_sparse.ply', mb: 10.6 },
   { id: 'scan2path', label: 'Camera path', file: 'kdp_scan2_campath.ply', path: true, mb: 0.03 },
   { id: 'scan2mesh', label: 'Photo mesh, scans 1 + 2', file: 'kdp_scan2_mesh.ply', texture: 'kdp_scan2_mesh.jpg', kart: true, mb: 68 },
+  // Scan quality: green = well resolved, yellow = fair, red = needs another video sweep (holes, few points, few or narrow views, noise).
+  { id: 'scan2heat', label: 'Scan quality (red: film again)', variants: [
+    { key: 'light', file: 'kdp_scan2_heat_light.ply', mb: 1.9 },
+    { key: 'medium', file: 'kdp_scan2_heat.ply', mb: 10.8 },
+    { key: 'full', file: 'kdp_scan2_heat_full.ply', mb: 49.9 } ] },
 ];
 // Dense clouds of scan 2 are listed in a small file, so new ones show up without a page change.
 const MORE = 'kdp_scan2_layers.json';
