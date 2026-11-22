@@ -571,72 +571,106 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/PLYLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
 <script>
+// ---------- kart zone: chassis members found by the zone-by-zone pass (viewer only) ----------
+// See kart_zone_rear.js for how a zone file works. Kart frame K: inches, X forward from the cart frame's front face, Y left, Z up from the floor.
+// The builder, 2026-11-20 23:04: "I'm still seeing some things that are wrong" (ledger token D2). tools/kart_scan/zone_pass.py measured every point of the
+// eleven dense clouds of scan 2 against the drawn model (2026-11-22) and grouped the points farther than 2.5 in; a line was fitted through each group.
+// The members below are the groups that fit a straight member well (S: the place, +-1; the size from the group's spread, E). What each one is, is not
+// identified (G): they are drawn as plain steel members. No side is mirrored: each member is drawn only where the clouds show it.
+// Group numbers are those of the first run (viewer/ZONE_PASS_first_run.txt).
+(function () {
+  const CH = {
+    // [from K, to K, size across, colour]: 'dark' = dark steel, 'light' = light grey steel
+    members: [
+      { name: 'low cross tube under the subwoofer bay (group 20)', a: [-69.6, 12.4, 10.4], b: [-66.2, -13.7, 9.9], d: 2.0, col: 'dark' },
+      { name: 'low rail on the right under the running board (group 38)', a: [-67.6, -22.8, 11.6], b: [-55.0, -22.3, 11.5], d: 1.8, col: 'dark' },
+      { name: 'member along the middle under the front (group 4; X and Z scanned, its Y an estimate: the group is wide)', a: [-39.4, -6.2, 14.0], b: [-6.0, 0.2, 17.2], d: 2.0, col: 'dark' },
+      { name: 'sloping member at the rear right (group 15)', a: [-81.7, -14.9, 30.1], b: [-64.3, -15.6, 20.1], d: 1.5, col: 'light' },
+    ],
+    // a plate across the rear end above the step (group 34: X -100.3 to -98.9, Y -7.4 to 3.0, Z 20.5 to 25.1, 0.15 thick in the cloud)
+    plate: { X: -99.6, Y: [-7.4, 3.0], Z: [20.5, 25.1], t: 0.25 },
+  };
+  (window.__kartZones = window.__kartZones || []).push({ name: 'chassis', build(A) {
+    const { X, Z, box, pipe } = A, M = A.mats, K = p => [X(p[0]), p[1], Z(p[2])], out = [];
+    for (const m of CH.members) { const a = K(m.a), b = K(m.b); pipe(a, b, m.d, m.col === 'light' ? M.alu : M.wheel); out.push({ name: m.name, a, b, d: m.d }); }
+    { const P = CH.plate, [y0, y1] = P.Y, [z0, z1] = P.Z; box([X(P.X), (y0 + y1) / 2, Z((z0 + z1) / 2)], [P.t, y1 - y0, z1 - z0], M.wheel); out.push({ name: 'plate across the rear end (group 34)' }); }
+    A.info.chassis = { members: out };   // model frame; for tools/check_kart.js
+  } });
+})();
 // ---------- kart zone: the pedal box area, under the planned motor deck at the front left (viewer only) ----------
 // See kart_zone_rear.js for how a zone file works. Kart frame K: inches, X forward from the cart frame's front face, Y left, Z up from the floor.
 // The builder, 2026-11-21: under the motor deck there is "2x4 framing ... the steel workings of the original side-by-side cart chassis ... the apparatus for the
 // steering and for the braking and for the original pedals that we're not using anymore"; it was an empty space in the viewer.
-// Sources: the full dense clouds of scan 2 (inside 01 to 03, under 01 to 03; cuts by tools/kart_scan/cut_pedal_box.py) and the video of 2026-11-19 at 836, 860 and
-// 908 s. Marks: S = scanned (+-0.5), V = seen in the video (size by eye against scanned parts), E = estimated, G = guess.
-// Heights are given as the cloud reads them; the low deck reads 36.6 there. They are drawn from the drawn low deck (the builder's tape level), so the parts sit
-// right in the floor opening whatever the frame sliders say. A part that stands on the chassis rails takes its foot from the chassis (Z, the ride slider).
+// Sources: list 14k of image recognition (docs/research/kart-images/VIEWER_HANDOFF.md, 15 parts with trust codes; it rules), my own cuts of the full dense clouds
+// (tools/kart_scan/cut_pedal_box.py) and the video of 2026-11-19 at 836, 860 and 908 s. Marks: L = list 14k with its trust code, S = my own cut (+-0.5),
+// V = seen in the video (size by eye), E = estimated, G = guess.
+// Heights are given as the cloud reads them; the low deck reads 36.6 there. They are drawn from the drawn low deck, so the parts sit right in the floor opening
+// whatever the frame sliders say. A part that stands on the chassis rails takes its foot from the chassis (Z, the ride slider).
+// The steering column, its two-layer base, the boards at the floor and the opening itself are in sim2_frog.js (KART_CONTROLS, KART.tub_floors).
 (function () {
   const PB = {
     deck: 36.6,
-    // the black folded-steel pedal box of the original cart; the steering column's foot goes into its top (S: X -27.5 to -20.5, Y 4 to 12.5, Z 33.5 to 40.5, black)
-    box: { X: [-27.5, -20.5], Y: [4, 12.5], Z: [35.3, 40.5], cheek_to: 31.5, t: 0.16 },
-    // two pedal arms hanging down from it (S for the pads' places; shapes V): the left one black, toward the rear; the right one with a rusty pad
-    pedals: [{ pivot: [-25, 5.2, 34.6], pad: [-27.3, 4.2, 28.0], w: 3.2, l: 2.2, rust: false }, { pivot: [-23, 10.0, 34.6], pad: [-21.3, 10.0, 29.6], w: 3.0, l: 2.0, rust: true }],
+    // the old pedal plate (L, trust C: a dark plate at X -28 to -20, Z 30 to 37): a sloped plate with two side cheeks; its width S (Y 3.5 to 12.5 where it is black)
+    plate: { a: [-20, 37], b: [-27.5, 30.5], Y: [3.5, 12.5], t: 0.25 },
+    // two pedal arms hanging from it (S for the pads' places; shapes V): the left one black, toward the rear; the right one with a rusty pad
+    pedals: [{ pivot: [-25, 5.2, 33.2], pad: [-27.3, 4.2, 28.0], w: 3.2, l: 2.2, rust: false }, { pivot: [-22.6, 10.0, 34.6], pad: [-21.3, 10.0, 29.6], w: 3.0, l: 2.0, rust: true }],
     // the toothed sector of the old parking brake beside the left pedal (V: a black toothed plate; size E)
     sector: { c: [-24.6, 6.5, 31.6], l: 3.2, h: 4.2, teeth: 7 },
-    // an upright under the box, down to the chassis' lower rail (S: Y 4 to 5.5, Z 19.5 to 27 and on up to the box)
-    leg: { X: -26.3, Y: 4.75, foot: 19.5, s: 1.5 },
-    // a black upright bar left of the box (S: Y 14.5 to 16, Z 28 to 42; what it is: not identified), with a wood block at its foot (S)
+    // an upright under the plate, down to the chassis' lower rail (S: Y 4 to 5.5, Z 19.5 to 27 and on up; the rail's top 18.6: L)
+    leg: { X: -26.3, Y: 4.75, foot: 18.6, s: 1.5 },
+    // a black upright bar left of the plate (S: Y 14.5 to 16, Z 28 to 42; what it is: not identified), with a wood block at its foot (S)
     bar: { X: [-23.6, -22.1], Y: [14.5, 16], Z: [28, 42] }, bar_block: { X: [-24.5, -21], Y: [16, 20], Z: [28.5, 30.5] },
-    // the brake lever's lower arm: the hand lever is the old brake pedal made longer. It runs from the box up and forward to a bend at Z 48.5, where the straight
-    // lever (KART_CONTROLS.lever, token E10) starts (S: X -11.6 at Z 44.5, -9.8 at Z 47.5; above the bend the lever leans 9 degrees as before)
-    lever_arm: { a: [-20.5, 9.6, 34.2], b: [-9.1, 9.4, 48.5], s: 1.5, t: 0.19 },
-    // the brake master cylinder on a bracket above the front left shock (V at 908 s: a cast cylinder lying along the kart, two ports with black hoses on top;
-    // S: grey parts at X -14 to -6, Z 33 to 35; its place across the kart E, over the spring at Y 15.5)
-    master: { X: [-13.3, -7.3], Y: 15.5, Z: 34.2, d: 1.6, ports: [-12.0, -9.6] },
-    // the wood under the low deck (S in the top cut at Z 20 to 36; each a 2x4 on edge, E): along the kart at Y 19.7 and at Y 1.5, across at X -28.5, -16.7 and -4.7
-    joists: { along: [[19.7, -34, -5], [1.5, -36, 0]], across: [[-28.5, 1.5, 19.7], [-16.7, 13, 24], [-4.7, 2, 24]] },
-    // the wood on the low deck beside the opening (S in the top cut at Z 36 to 46.5): a board on edge along the kart at Y 17.5, a cross piece at the front
-    frame: { side: [17.5, -26, -8], cross: [-5.25, 14, 20], h: 3.5 },
-    // an aluminium flat bar that runs level under the deck from the left side toward the middle (S: from X -16, Y 20 to X -8, Y 16; a brace with holes)
-    strap: { a: [-16, 20], b: [-8, 16], Z: 33, w: 1.5, t: 0.25 },
+    // the brake lever's lower arm: below a bend at Z 48.5 the lever leans 33 degrees and meets the floor boards at X -14.6, Z 40 (S: X -11.6 at Z 44.5, -9.8 at
+    // Z 47.5; list 14k has it as a "diagonal brace" from X -6, Z 68 to X -14, Z 40). Under the floor its line reaches the old pedal plate at X -18.5, Z 34: E,
+    // the hand lever is taken to be fixed to the old brake pedal
+    // (set 1.11, 2026-11-21: the bend is at X -10.0, Y 9.4, Z 48.3; the lower leg is followed down to Z 43 and meets the board across the floor opening near X -13.6,
+    // Z 39.7. Its line does not reach the old pedal plate, so it is drawn to the board only)
+    lever_arm: { a: [-13.6, 10.0, 39.7], b: [-10.0, 10.0, 48.3], s: 1.2, t: 0.19 },   // centre line at y 10.0, 1.2 wide (the record: the member spans y 9.4 to 10.6)
+    // the brake master cylinder on a bracket above the front left spring (V at 908 s: a cast cylinder lying along the kart, two ports with black hoses on top;
+    // S: a light cylinder at X -11.5 to -9, Z 30.5 to 31.7 in the picture of list 14k; the spring's centre X -7.1, Y 14: L)
+    master: { X: [-13, -8.5], Y: 14, Z: 31.1, d: 1.4, ports: [-12.0, -10.0] },
+    // the steel cross member under the floor (L, trust B for its rear face at X -16.8, Z 28 to 30, read at Y 0 to 18; its shape C)
+    cross: { X: [-16.8, -15.3], Y: [0, 18], Z: [28, 30] },
+    // the wood under the low deck (S in my top cut at Z 20 to 36; each a 2x4 on edge, E): along the kart at Y 19.7 and at Y 1.5, across at X -28.5 and -4.7
+    joists: { along: [[19.7, -34, -5], [1.5, -36, 0]], across: [[-28.5, 1.5, 19.7], [-4.7, 2, 24]] },
+    // the wood box at the front left (L: X -5.6 to -1, Y 14.1 to 19.5, top 46.4, an open frame; its underside E)
+    box: { X: [-5.6, -1], Y: [14.1, 19.5], Z: [41, 46.4], t: 0.75 },
+    // the flat steel bracket under the floor (L, trust C: from X -16.5, Y 21 to X -7, Y 15, at Z 34 to 37, light grey, with holes)
+    strap: { a: [-16.5, 21], b: [-7, 15], Z: 35.5, w: 1.5, t: 0.25 },
   };
   (window.__kartZones = window.__kartZones || []).push({ name: 'pedal_box', build(A) {
-    const T = A.THREE, { X, Z, box, pipe, beam, kmesh } = A, M = A.mats, P = PB, L = { w: 3.5, t: 1.5 };
+    const { X, Z, box, pipe, beam } = A, M = A.mats, P = PB, L = { w: 3.5, t: 1.5 };
     const zr = z => A.frame.deck + (z - P.deck);                       // a height as the cloud reads it -> drawn, from the drawn low deck
     const span = (a, b) => [(a + b) / 2, Math.abs(b - a)], bx = (xs, ys, zs, mat) => { const [cx, lx] = span(X(xs[0]), X(xs[1])), [cy, ly] = span(ys[0], ys[1]), [cz, lz] = span(zr(zs[0]), zr(zs[1])); return box([cx, cy, cz], [lx, ly, lz], mat); };
-    // the pedal box: a body and two cheeks that hang below it
-    const B = P.box; bx(B.X, B.Y, B.Z, M.black);
-    for (const y of [B.Y[0] + B.t / 2, B.Y[1] - B.t / 2]) bx([B.X[0] + 0.4, B.X[1] - 0.4], [y - B.t / 2, y + B.t / 2], [B.cheek_to, B.Z[0]], M.black);
+    // the old pedal plate: the sloped plate and a cheek at each side
+    const T = P.plate, [py, pw] = span(T.Y[0], T.Y[1]);
+    beam([X(T.a[0]), py, zr(T.a[1])], [X(T.b[0]), py, zr(T.b[1])], pw, M.black, T.t);
+    for (const y of T.Y) bx([T.b[0], T.a[0]], [y - 0.08, y + 0.08], [T.b[1], T.a[1] - 0.5], M.black);
     // the pedals: an arm from its pivot to the pad, the pad square to the kart's length
     for (const p of P.pedals) { const a = [X(p.pivot[0]), p.pivot[1], zr(p.pivot[2])], b = [X(p.pad[0]), p.pad[1], zr(p.pad[2])];
       beam(a, b, 0.45, M.black, 1.0); const m = box(b, [0.35, p.w, p.l], p.rust ? M.rust : M.black); m.rotation.y = Math.atan2(b[0] - a[0], a[2] - b[2]) * 0.6; }
     // the toothed sector: a plate with teeth along its lower edge
     { const S = P.sector, c = [X(S.c[0]), S.c[1], zr(S.c[2])]; box(c, [S.l, 0.18, S.h - 0.5], M.black);
       for (let i = 0; i < S.teeth; i++) box([c[0] - S.l / 2 + (i + 0.5) * S.l / S.teeth, c[1], c[2] - S.h / 2 + 0.05], [S.l / S.teeth * 0.5, 0.18, 0.5], M.black); }
-    // the upright under the box, the black bar and its block
-    { const G = P.leg; beam([X(G.X), G.Y, Z(G.foot)], [X(G.X), G.Y, zr(P.box.cheek_to)], G.s, M.alu, G.s); }
-    bx(P.bar.X, P.bar.Y, P.bar.Z, M.black); bx(P.bar_block.X, P.bar_block.Y, P.bar_block.Z, M.lumber);
+    // the upright under the plate, the black bar and its block, the steel cross member
+    { const G = P.leg; beam([X(G.X), G.Y, Z(G.foot)], [X(G.X), G.Y, zr(T.b[1])], G.s, M.alu, G.s); }
+    bx(P.bar.X, P.bar.Y, P.bar.Z, M.black); bx(P.bar_block.X, P.bar_block.Y, P.bar_block.Z, M.lumber); bx(P.cross.X, P.cross.Y, P.cross.Z, M.alu);
     // the brake lever's lower arm (a steel angle, drawn as its two legs)
     { const V = P.lever_arm, a = [X(V.a[0]), V.a[1], zr(V.a[2])], b = [X(V.b[0]), V.b[1], zr(V.b[2])];
       beam(a, b, V.t, M.rust, V.s); beam([a[0], a[1] - V.s / 2, a[2]], [b[0], b[1] - V.s / 2, b[2]], V.s, M.rust, V.t); }
     // the master cylinder: body, flange, two ports, two hoses
     { const C = P.master, z = zr(C.Z), x0 = X(C.X[0]), x1 = X(C.X[1]);
-      pipe([x0, C.Y, z], [x1, C.Y, z], C.d, M.steel); box([x1 + 0.15, C.Y, z], [0.3, 2.8, 2.8], M.alu); pipe([x0 - 0.9, C.Y, z], [x0, C.Y, z], C.d * 0.6, M.steel);
+      pipe([x0, C.Y, z], [x1, C.Y, z], C.d, M.steel); box([x1 + 0.15, C.Y, z], [0.3, 2.6, 2.6], M.alu); pipe([x0 - 0.9, C.Y, z], [x0, C.Y, z], C.d * 0.6, M.steel);
       for (const px of C.ports) { const x = X(px); pipe([x, C.Y, z + C.d / 2 - 0.1], [x, C.Y, z + C.d / 2 + 0.8], 0.7, M.steel);
         pipe([x, C.Y, z + C.d / 2 + 0.8], [x, C.Y - 1.2, z + C.d / 2 + 2.0], 0.45, M.foam); pipe([x, C.Y - 1.2, z + C.d / 2 + 2.0], [x - 3.5, C.Y - 3.0, z + C.d / 2 + 1.6], 0.45, M.foam); } }
-    // the wood under the low deck and on it
+    // the wood under the low deck, the open wood box at the front left, the flat bracket
     const zj = A.frame.deck - 1.5 - L.w / 2, J = P.joists;             // under the drawn deck board
     for (const [y, xa, xb] of J.along) { const [cx, lx] = span(X(xa), X(xb)); box([cx, y, zj], [lx, L.t, L.w], M.lumber); }
     for (const [x, ya, yb] of J.across) { const [cy, ly] = span(ya, yb); box([X(x), cy, zj], [L.t, ly, L.w], M.lumber); }
-    { const F = P.frame, [cx, lx] = span(X(F.side[1]), X(F.side[2])), [cy, ly] = span(F.cross[1], F.cross[2]);
-      box([cx, F.side[0], A.frame.deck + F.h / 2], [lx, L.t, F.h], M.lumber); box([X(F.cross[0]), cy, A.frame.deck + F.h / 2], [L.t, ly, F.h], M.lumber); }
+    { const W = P.box, t = W.t; for (const y of [W.Y[0] + t / 2, W.Y[1] - t / 2]) bx(W.X, [y - t / 2, y + t / 2], W.Z, M.lumber);
+      for (const x of [W.X[0] + t / 2, W.X[1] - t / 2]) bx([x - t / 2, x + t / 2], [W.Y[0] + t, W.Y[1] - t], W.Z, M.lumber); }
     { const S = P.strap, z = zr(S.Z); beam([X(S.a[0]), S.a[1], z], [X(S.b[0]), S.b[1], z], S.w, M.alu, S.t); }
-    A.info.pedal_box = { box: { x: [X(B.X[0]), X(B.X[1])], y: B.Y, z: [zr(B.cheek_to), zr(B.Z[1])] }, pedals: P.pedals.length, pads_z: P.pedals.map(p => zr(p.pad[2])), lever_bend: [X(P.lever_arm.b[0]), P.lever_arm.b[1], zr(P.lever_arm.b[2])],
+    A.info.pedal_box = { plate: { x: [X(T.b[0]), X(T.a[0])], y: T.Y, z: [zr(T.b[1]), zr(T.a[1])] }, pedals: P.pedals.length, pads_z: P.pedals.map(p => zr(p.pad[2])), lever_bend: [X(P.lever_arm.b[0]), P.lever_arm.b[1], zr(P.lever_arm.b[2])],
       master: [X((P.master.X[0] + P.master.X[1]) / 2), P.master.Y, zr(P.master.Z)], joists: J.along.length + J.across.length, deck: A.frame.deck };   // model frame; for tools/check_kart.js
   } });
 })();
@@ -649,14 +683,19 @@
   const REAR = {
     // The compressor's shelf: plywood with a green-painted edge, across the kart between the rear shocks. Top S (18.0), its width S (Y -12.5 to 13.5),
     // its rear edge S (X -89); how far it reaches forward and what carries it: G
-    shelf: { X: [-89, -76], Y: [-12.5, 13.5], top: 18.0, t: 0.75 },
+    // 2026-11-21, list 14j of image recognition (full dense clouds): shelf top 19.6 (the 18.0 was its turned-down lip), X -87.8 to -72.6, right edge Y -13, left about +9
+    shelf: { X: [-87.8, -72.6], Y: [-13, 9], top: 19.6, t: 0.75, lip: 1.6 },
     // two boards laid flat on the shelf, across the kart; the tank's feet stand on them. The rear one S (X -88.6, Y -7 to 9, top about 20 with the feet's pads); the front one G
-    boards: { X: [[-88.6, -85.1], [-84.5, -81]], Y: [-7, 9], t: 1.5 },
+    boards: { X: [], Y: [-7, 9], t: 0 },   // none: what read as boards was the shelf with its lip (list 14j)
     // McGraw 3 gallon compressor (V): a blue-grey tank lying across the kart, a black cover with a loop handle on top, an orange label on the cover's sloped rear face,
     // a red switch, and four brass couplers in a row at the cover's left end, pointing left. Place: the tank's label reads Z 24 (S), the couplers X -88.5 to -86,
     // Z 28 (S), the cover's label X -84.5, Z 28 to 30.5 (S). Sizes E (+-1): the tank 8.2 across and 15.5 long. Before 2026-11-21 it was drawn on the step box behind it
-    comp: { c: [-85, -1], tank_d: 8.2, tank_l: 15.5, pad: 0.5, cover: { x: [-3, 3], y: [-5.5, 5.5], h: 4.0, slope: [1.6, 1.4] }, handle: { h: 3.2, w: 5.4, t: 0.9 },
-      couplers: { n: 4, x0: -3.3, pitch: 0.8, d: 0.62, l: 2.0, collar_d: 0.9, z: 1.0 } },
+    // 2026-11-21, the full dense underside clouds: the tank's end reads as a circle from X -86 to -78 (Z 20 to 28), so its axis is at X -82 (it was drawn at -85). The couplers
+    // keep their scanned place (X -88.5 to -86): they stand out to the rear of the cover. The cover is drawn 3.2 high so that it stays under the deck timber above it
+    // List 14j: the tank's rear face at X -84.3, its top at Z 26.2, about 6.6 across, axis near X -81.0, Z 22.9, from Y -10.5 to +5.5; its label on the rear face at
+    // Z 22.5 to 24.5; the fittings above at X -88 to -83.6, Z 27.5 to 30.5
+    comp: { c: [-81.0, -2.5], tank_d: 6.6, tank_l: 16, pad: 0.2, cover: { x: [-3.3, 3.0], y: [-5.5, 5.5], h: 3.6, slope: [1.4, 1.4] }, handle: { h: 3.6, w: 5.4, t: 0.9 },
+      couplers: { n: 4, x0: -6.4, pitch: 1.0, d: 0.62, l: 2.0, collar_d: 0.9, z: 3.1 } },
   };
   let mats = null;
   (window.__kartZones = window.__kartZones || []).push({ name: 'rear', build(A) {
@@ -666,11 +705,12 @@
       red: A.addMat(new T.MeshStandardMaterial({ color: 0xc02020, roughness: 0.5, metalness: 0, side: T.DoubleSide })) };
     const span = (a, b) => [(a + b) / 2, Math.abs(b - a)], S = R.shelf, [sx, sl] = span(X(S.X[0]), X(S.X[1])), [sy, sw] = span(S.Y[0], S.Y[1]), zt = Z(S.top);
     box([sx, sy, zt - S.t / 2], [sl, sw, S.t], M.ply);                                                    // the shelf
-    box([X(S.X[0]) - 0.03, sy, zt - S.t / 2], [0.06, sw, S.t], mats.green);                               // its green edge, toward the rear
+    box([X(S.X[0]) - 0.03, sy, zt - S.lip / 2], [0.3, sw, S.lip], mats.green);                            // its green lip, turned down at the rear edge
     const B = R.boards, [by, bw] = span(B.Y[0], B.Y[1]);
     for (const bx of B.X) { const [cx, cl] = span(X(bx[0]), X(bx[1])); box([cx, by, zt + B.t / 2], [cl, bw, B.t], M.lumber); }
     const cp = R.comp, cx = X(cp.c[0]), cy = cp.c[1], tr = cp.tank_d / 2, zc = zt + B.t + cp.pad + tr, hl = cp.tank_l / 2 - tr * 0.4;
     kmesh(new T.CylinderGeometry(tr, tr, 2 * hl, 32), M.tank, [cx, cy, zc]);                              // the tank, across the kart
+    box([cx - tr + 0.12, cy + 1.0, zc + 0.5], [0.3, 5.4, 2.0], mats.label);                               // the maker's label on its rear face (list 14j: Z 22.5 to 24.5)
     for (const s of [1, -1]) { const e = kmesh(new T.SphereGeometry(tr, 28, 12, 0, 2 * Math.PI, 0, Math.PI / 2), M.tank, [cx, cy + s * hl, zc]); e.scale.set(1, 0.4, 1); if (s < 0) e.rotation.x = Math.PI;   // its domed ends
       for (const dx of [-2.2, 2.2]) { box([cx + dx, cy + s * 4.5, zc - tr - cp.pad / 2], [2.0, 1.3, cp.pad], mats.green); box([cx + dx, cy + s * 4.5, zc - tr + 0.5], [1.4, 1.0, 1.0], M.tank); } }   // feet on green foam pads
     // the black cover: a box with a sloped upper rear face (profile in x and z, pushed out along y)
@@ -702,7 +742,7 @@
 // as the video shows it left of the middle). Before 2026-11-21 the subwoofer was drawn as a block 23 by 32 by 13.3.
 (function () {
   const SUB = { w: 15.315, body_w: 15.0, h: 24.016, feet: 0.571, d: 19.811, amp: [11.18, 16.69], amp_from_top: 3.4,   // amp_from_top: the panel's near edge from the box's top end (G)
-    face_x: -48.5, right_y: -9.0, bottom_z: 17.8, grille_t: 0.6, pole: [7.5, 9.906] };   // pole: the pole socket on the top end, from a side and from the front (D)
+    face_x: -48.2, right_y: -9.0, bottom_z: 17.8, grille_t: 0.6, pole: [7.5, 9.906] };   // pole: the pole socket on the top end, from a side and from the front (D)
   let mats = null;
   (window.__kartZones = window.__kartZones || []).push({ name: 'sub', build(A) {
     const T = A.THREE, { X, Z, box, pipe } = A, M = A.mats, S = SUB;
@@ -744,13 +784,20 @@
     lip_corner_fwd: 6,        // T: the lip corner is 6 in ahead of the front vertical bar of the cart frame
     // cart frame: the welded pipe cage ("cage" in the slider keys)
     frame_len: 95,            // T: length of the bottom bar
-    frame_h: 47,              // T: bottom pipe to top pipe (taken centre to centre: G, the other reading differs by 1 in)
-    frame_ground: 35.5,       // T: ground to the bottom pipe (taken to its centre: G)
-    frame_w: 50,              // 3D: width over the outside of the pipes. The clear width between the two front wood posts reads 39 1/4 (P)
+    // Set 1.11.1 (2026-11-21, the lead 23:10): the bottom bar's centre is at 36.1; the builder's 35.5 is read as the pipe's underside (image recognition's reading of the scan,
+    // not his word). The top bar stays at 82.5 and the upper support bar at 70.0, so the three numbers below changed: 46.4 (was 47), 36.1 (was 35.5), 33.9 (was 34.5)
+    frame_h: 46.4,            // bottom pipe centre to top pipe centre
+    frame_ground: 36.1,       // ground to the bottom pipe's centre (T 35.5 to its underside)
+    // Set 1.12 (2026-11-22, the lead's ruling): 47.55 over the outside of the pipes, so the side bars' centre lines are at y +-23.15 (46.3 apart). It was 50 (the first front
+    // photo model); scan 2 reads the bars 46.3 apart from the front to the rear. Each side moved 1.2 inward, with what hangs on it. The frame in the scan stands about 0.7
+    // to the right at the front (top bars at y +22.3 and -23.7 at X -11); the model's frame is symmetric
+    frame_w: 47.55,           // width over the outside of the pipes (set 1.12)
     pipe_d: 1.25,             // T: the outer cage (top bar, bottom bar, upper support bar), outside diameter
     upright_at: [0, 31.5, 63.5, 95],   // S (the 95 total is T): uprights, from the rear end; bays 31.5 / 32 / 31.5
     upright_d: [1, 1, 0.75, 1],        // T: uprights 1 in, the second from the front 3/4 in
-    support_h: 33,            // T ("about"): upper support bar above the bottom bar, full length
+    // Dimension set 1.11 (2026-11-21, scan 2): the upper support bar's centre is at Z 70.0 (underside 69.2, top 71.0), so 34.5 above the bottom bar's centre at 35.5. The
+    // builder's 33 fits the clear gap between the two bars. It was 33 (centre 68.5). The bottom bar (35.5), the top bar (82.5) and the mouth line (63.5) do not move
+    support_h: 33.9,          // sets 1.11 and 1.11.1: upper support bar's centre above the bottom bar's centre, full length
     support_d: 1.25,          // T
     diag_rear_d: 1.0,         // T for the diameter, S for the end points: the centre diagonal, from the foot of the upright at 31.5 up to the upright at 63.5, where it meets the upper support bar
     diag_front_d: 0.75,       // T for the diameter, S and photos for the end points: the front diagonal, from the foot of the front upright up to the same point
@@ -760,6 +807,7 @@
     // (a bend radius of about 4, estimated by eye from the front photo) and ran the bottom bars' last bay into that bend; both are withdrawn.
     // the front of the tub, as the builder described it from his two tape photos (2026-11-13)
     front_cross_d: 1.25,      // T: a cross pipe on the front face at the height of the upper support bar; it meets the centre upright
+    front_cross_dz: 0.3,      // set 1.11: its centre at Z 70.3, level with the side bars (it was taken 4 higher from a photo)
     // 3D (+-1), set 1.9: the dancer cage (see buildCartFrame); heights above the top bar's centre. od: outside diameters per tube, 3D (+-0.1), set 1.9.1, over any foam wrap;
     // a [left, right] pair where the two sides measure differently. rear_cross: [height, od, foam-wrapped]
     dancer_cage: { fwd: 2.5, inboard: 1.3, step_behind_front: 14.1, top: 44.7, low: 29.8, mid: 17.7,
@@ -767,7 +815,7 @@
       rear_cross: [[44.7, 1.30, false], [31.5, 0.97, false], [20.6, 1.56, true]] },
     centre_upright_d: 1.25,   // T for the diameter and for its top (it runs on up to the top bar). 3D (within 2): it stands on the front bottom bar at the mouth centre
     post_wood: { clear: 38.5, w: 3.5 },   // T: two 4x4 wood posts (3.5 square), inside and to the rear of the cart frame's front bars, 38.5 clear between their inside faces, cut off at the top bar. They are drawn against the back of the cross pipe (G; the photo estimates put their centres 2 to 4 behind the front face)
-    cross_2x4: { w: 3.5, t: 1.5 },        // T: a 2x4 laid flat between the two posts, directly behind the cross pipe and centred on its height
+    cross_2x4: { w: 3.5, t: 1.6, dz: -0.8 },   // set 1.11 (trust A): it reads Z 68.4 to 70.0, so its centre is 0.8 below the support bar's;        // T: a 2x4 laid flat between the two posts, directly behind the cross pipe and centred on its height
     // The floors of the tub, as distance behind the front face. Sources: the first dense inside cloud of scan 2 (dense_inside_01, 2026-11-20, X 0 to -72) for the front and the
     // middle, the sparse cloud of scan 2 for the rear bay. S = scanned: +-0.3 for a level in the front, +-0.5 elsewhere; +-1 along and across the frame. E = estimated.
     // tile_top: the top of the foam tiles above the bottom bar's centre, with the bar as it reads in the cloud (36.9), so the floor follows the frame sliders.
@@ -790,11 +838,19 @@
     // hole: [from, to, y from, y to], where the low deck itself is open (dense clouds, 2026-11-21: no wood at 36 to 37 from X -28 to -12 at y 6 to 17; the old pedal box,
     // the pedals and the brake lever's lower arm are there: kart_zone_pedal_box.js). Under the blocks and the raised deck behind 26 it is not seen: drawn closed
     tub_floors: [
-      { back: [64.5, 95], tile_top: -0.6, tiles: [[64.5, 88.5, -99, 0.5, 'blue'], [64.5, 88.5, 0.5, 99, 'blue'], [88.5, 95, -99, 0.5, 'pink'], [88.5, 95, 0.5, 99, 'pink']] },
-      { back: [37.5, 62.5], tile_top: -0.9, tiles: [[37.5, 54, -12, 0.5, 'red'], [37.5, 54, 0.5, 12, 'pink'], [44, 54, -99, -12, 'red'], [54, 62.5, -99, 0.5, 'blue'], [54, 62.5, 0.5, 99, 'blue'],
-        [37.5, 54, 12, 99, 'pink', 2.1], [37.5, 44, -99, -12, 'red', 2.1]] },
-      { back: [8, 37.5], below_2x4: 33, tile_top: 2.1, nose: { back: 1, y_max: 3 }, raised: [[1, 37.5, -99, 3], [26, 37.5, 3, 99]], boards: [[18, 29, 16, 23, 0.9]], hole: [12.5, 26, 3, 14],
-        tiles: [[1, 11, -21, 0.5, 'olive'], [11, 33, -21, 0.5, 'olive'], [33, 37.5, -21, 0.5, 'olive'], [1, 11, 0.5, 3, 'olive'], [11, 26, 0.5, 3, 'olive'], [26, 37.5, 0.5, 15, 'pink']] }],
+      { back: [64.5, 95], tile_top: -0.6,   // list 14l (2026-11-21): the rear bay's tile top is 47.0 below the top bar, which is the bottom bar's centre
+ tiles: [[64.5, 88.5, -99, 0.5, 'blue'], [64.5, 88.5, 0.5, 99, 'blue'], [88.5, 95, -99, 0.5, 'pink'], [88.5, 95, 0.5, 99, 'pink']] },
+      { back: [37.5, 62.5], tile_top: -0.1, tiles: [[37.5, 54, -12, 0.5, 'red'], [37.5, 54, 0.5, 12, 'pink'], [44, 54, -99, -12, 'red'], [54, 62.5, -99, 0.5, 'blue'], [54, 62.5, 0.5, 99, 'blue'],
+        [37.5, 54, 12, 99, 'pink', 2.9], [37.5, 44, -99, -12, 'red', 2.9]] },
+      // 2026-11-21, lists 14i to 14k of image recognition: wood deck top 38.2 +-0.3 (two readings), tile top 39.0 +-0.2: drawn 38.3 and 38.9 with tiles 0.6 thick, all inside
+      // those limits and with no gap. The opening with no board is X -27 to -17, y 3 to 16; board A (X -16.5 to -2, y 8.5 to 13.5, top 38.1), board B (X -27 to -17,
+      // y 16.5 to 21, top 37.5) and a board across the opening's front (X -18.5 to -12.5, y 6.5 to 9, top 39.7). boards: [from, to, y from, y to, thickness, above the deck]
+      // Set 1.11 (2026-11-21): the levels are heights above the garage floor now, given here above the bottom bar's centre at 35.5: tile top 39.0 (trust A), so 3.5; the wood deck
+      // reads 38.2 +-0.3 and is drawn at 38.5 under tiles 0.5 thick (the builder's word for the tiles); the middle 36.0, so 0.5; the low surfaces at the front left read 36.6
+      // (low_top 1.1; list 14k). The builder's tape of 33 below the flat 2x4 was to the wood deck with a leaning tape (list 14i: it is 31.0), so it no longer sets a level
+      // (set 1.11.1: the bottom bar's centre is at 36.1, so every level here is 0.6 less than in set 1.11: 2.9, 0.5, -0.1, -0.6)
+      { back: [8, 37.5], low_top: 0.5, tile_top: 2.9, nose: { back: 1, y_max: 3 }, raised: [[1, 37.5, -99, 3], [27, 37.5, 3, 99]], boards: [[2, 16.5, 8.5, 13.5, 1.5], [17, 27, 16.5, 21, 0.9], [12.5, 18.5, 6.5, 9, 1.6, 1.5]], hole: [17, 27, 3, 16],
+        tiles: [[1, 11, -21, 0.5, 'olive'], [11, 33, -21, 0.5, 'olive'], [33, 37.5, -21, 0.5, 'olive'], [1, 11, 0.5, 3, 'olive'], [11, 27, 0.5, 3, 'olive'], [27, 37.5, 0.5, 15, 'pink']] }],
     tile: { size: 24, t: 0.5, joint_y: 0.5, tooth: 2, depth: 0.4, flare: 0.12, colors: { blue: 0x173a86, red: 0x9c1430, pink: 0xb02a56, olive: 0x7d7318 } },
     // the chassis (aluminium UTV frame, wheels, suspension, generator platform, running boards): see KART_CHASSIS below
   };
@@ -815,29 +871,39 @@
     rim: { w: 7, dish: 2.2, slots: 12, slot_r: [3.2, 4.6], lugs: 4, lug_r: 2.1, hub_r: 1.5 },   // P (192303, 192334, 192515): black steel wheel, a ring of 12 slots, 4 lug nuts, the face set in. Width G (12x7 is the usual size), dish E (+-0.5), radii E (+-0.3)
     // the side truss (one each side, aluminium, in line with the tyres). Heights are for the default ride
     truss_out: 0.5,           // 3D +-0.3: outer face of the truss 0.5 inboard of the tyre centre line (truss face Y 23.4, tyre centre 23.9)
-    top_chord: { X: [-100.5, 3], Z: [29.0, 31.0], w: 1.5 },   // 3D +-0.5 for Z (rail centre 30.0 = the ride default), X -100.5 (+-1) at the rear; the front end 3 is E (+-3: behind the tarp; the photos show the front cross member at the nose); w E
+    // 2026-11-21, the full dense underside clouds of scan 2 (tools/kart_scan/cmp_chassis.py): the upper rail is the seat base of the original cart. It runs from the rear end
+    // (X -95.5 +-1; the list of image recognition has -95.3) only to X -43 on the right and about -45.5 on the left: S. Ahead of that the floor is low (the lower rail and the
+    // running board), and the front has its own frame (front_frame). Before, the rail was drawn from -100.5 to +3
+    top_chord: { X: [-95.5, -43.5], Z: [29.0, 31.0], w: 1.5 },   // 3D +-0.5 for Z (rail centre 30.0 = the ride default), X -100.5 (+-1) at the rear; the front end 3 is E (+-3: behind the tarp; the photos show the front cross member at the nose); w E
     bottom_chord: { X: [-76, -20.75], Z: [15.5, 17.0], inset: 2.25 },   // E (+-1): hidden behind the running board; the board and the platform rest on it
     step: { X: [-76, -20.75], Z: [14.75, 18.25], depth: 3, ribs: 7 },   // 3D +-0.3 (Z, outer face Y 23.5), X +-1, depth 3D +-1: the ribbed aluminium running board on each side. Ribs P (192338), count E
     web: [                    // 3D +-0.5 (left side ortho view of the cloud): [X, Z] -> [X, Z], 1.5 in tube
       [[-79, 30], [-71, 17.5]],                // rear diagonal
       [[-63.75, 17.5], [-63.75, 30]],          // vertical
       [[-48.75, 17.5], [-48.75, 30]],          // vertical (the cloud shows it to Z 26.5; above that it is hidden: G)
-      [[-21.5, 17.5], [-15, 31]],              // front diagonal, up to the front cross member
+      [[-21.5, 17.5], [-15.6, 33.4]],          // front diagonal, up to the front frame (S: the clouds show it from X -22, Z 19 to X -16, Z 35 and on to the wood)
     ],
     gusset: [[-63, 17.5], [-63, 25.5], [-57.5, 17.5]],   // 3D +-0.5: triangular plate behind the rear vertical
     front_cross: { X: -15, Z: [32.4, 34.4] },            // 3D +-1: the box at the top of the front diagonals (cloud: X -16 to -14, Z 32 to 35)
-    rear_cross_X: -100.5,     // P (192421): rear cross member at the top chord. X: the top chord's rear end
-    rear_tower_X: -80.5,      // G: the cross member near the rear shocks' tops. The video of 2026-11-19 shows an aluminium tube across the kart behind the compressor's cover (seen from
-                              // the rear), so it is drawn just ahead of the cover; it was drawn over the rear axle (X -88), where the cover and its handle are. To be read from the dense underside cloud
+    rear_cross_X: -94.75,     // P (192421): rear cross member at the top chord. X: the top chord's rear end (S: an end plate at X -96 to -95 in the dense clouds)
+    // the front frame (the original cart's cowl structure) at the top of the front diagonals: S for its level (grey box sections at Z 33 to 35.5 from X -14 to 0, read in the
+    // cut at y 6 to 17) and its length; how wide it is and where its cross members lie: E (drawn inside the front wheels' steering room)
+    front_frame: { X: [-16, 1], Z: [32.4, 34.4], y: 16.5, w: 1.5, cross_X: [-8, 0.25] },   // Z: list 14k, surfaces at 32.4 to 34.0
+    rear_tower_X: -77.5,      // G: the cross member near the rear shocks' tops. The video of 2026-11-19 shows an aluminium tube across the kart behind the compressor's cover (seen from
+                              // the rear), so it is drawn just ahead of the cover (the cover's front is at X -79 since the tank moved to X -82); it was drawn over the rear axle (X -88), where the cover and its handle are. To be read from the dense underside cloud
     // wood
     platform: { X: [-44.5, -20.5], top: 18.5, t: 1.5, half_w: 22.7, boards: 2 },   // 3D +-0.5: the generator platform (two boards laid across, the tape in 205921 reads about 22.5 along them: P).
                               // the builder's 19 is the clear width between the frame members at the floor (205935 shows that opening), not the board. the builder's 19.5 top (T, "16 void") reads 18.5 in the cloud
-    rear_shelf: { X: [-101.5, -94], top: 18.6, half_w: 12.5, legs_y: [12, 3], leg_bottom: 13 },   // 3D +-1: wood box at the rear between the wheels (a step; the compressor stands on its own shelf ahead of it: kart_zone_rear.js)
-    block: { h: 3.5, w: 3.5, at: [0.03, 0.14, 0.27, 0.45, 0.8, 0.95] },   // P (192334): 4x4 timbers across the top chords, a plank on each side above them under the bottom pipe. Positions as fractions of the cart frame length: S for the rear four, G for the front two
+    // list 14p (2026-11-22, trust B for the top and the rear face): the wood step behind the rear end, top 17.7, rear face X -101.2, right edge y -12.1, left near +11
+    // (drawn centred, 11.6 each side). It was 18.6 and 12.5 from the first cloud. A dark beam under it at Z 11 to 12 (trust C): not drawn
+    rear_shelf: { X: [-101.2, -94], top: 17.7, half_w: 11.6, legs_y: [11, 3], leg_bottom: 13 },   // 3D +-1: wood box at the rear between the wheels (a step; the compressor stands on its own shelf ahead of it: kart_zone_rear.js)
+    block: { h: 3.5, w: 3.5, at: [0.0, 0.118, 0.25, 0.45, 0.8, 0.95] },   // 2026-11-21: the rear three from the dense clouds (wood blocks on the right upper rail at X -97 to -94, -85.5 to -82 and -73 to -70)   // P (192334): 4x4 timbers across the top chords, a plank on each side above them under the bottom pipe. Positions as fractions of the cart frame length: S for the rear four, G for the front two
     // suspension (seen in 192401, 192421, 210057, 210425; geometry E +-1.5 unless G)
-    shock: { front: { lo: [0, 17.5, 9], hi: [-1, 15.5, 30] }, rear: { lo: [0, 16.5, 12], hi: [0, 17.5, 29] }, coil_od: 3, turns: 7 },   // [dX from the axle, |Y|, Z]: coil-overs, tops lean inward. Coil count E
-    arm: { inner_y: 8.5, lower_dz: -3.5, upper_dz: 3.5, spread: 4.5 },   // G: front double A-arms, inner pivots and their fore/aft spread
-    rack: { dx: -4, z: 13.5, half: 9 },   // G: steering rack behind the front axle (192401, 210057), tie rods to the knuckles
+    shock: { front: { lo: [1.9, 15.6, 15.5], hi: [1.9, 14.8, 32] },   /* front, 2026-11-21: list 14k and my cut (springs near X -7.1, y +14 and X -8.1, y -15.5, Z 21 to 31, nearly plumb) */ rear: { lo: [-2.25, 14.7, 12], hi: [-2.25, 14.5, 29.5] },   /* rear: list 14p, shocks at X -90.9, y -15.4 and X -89.6, y +13.8, Z 15 to 28.8: their mean, both sides alike (the axle stays at X -88.0; the list's hub is near -88.5) */ coil_od: 3, turns: 7 },   // [dX from the axle, |Y|, Z]: coil-overs, tops lean inward. Coil count E
+    // list 14n (2026-11-21, trust B for the heights): three members a side, each sloping up toward the centre. Upper arm: inner end Z 17.9, outer 15.1. Middle member: 13.6
+    // and 10.2. Lower arm: 10.4 and 8.0. levels: [inner end above the axle's centre, drop to the outer end]
+    arm: { inner_y: 9.0, lower_dz: -1.6, upper_dz: 5.9, spread: 4.5, levels: [[5.9, 2.8], [1.6, 3.4], [-1.6, 2.4]] },   // 2026-11-21, my cut at X -14 to -3: the arms read at Z 13 to 15 and 18 to 21 (they were drawn 4 lower): S +-1   // G: front double A-arms, inner pivots and their fore/aft spread
+    rack: { dx: -3.0, z: 18.3, half: 9 },   /* list 14n (trust B): axis at X -12.0, Z 18.3 at the boot; my own reading of Z 21 along X -9.8 was the housing's top */   // 2026-11-21, my cut: the housing reads at Z 21 to 23 right of centre, the rack and tie rods lie along X -10.3: S +-1 (it was drawn at Z 13.5, 4 behind the axle)   // G: steering rack behind the front axle (192401, 210057), tie rods to the knuckles
     diff: { dy: 3, size: [8, 9, 8] },     // G: rear differential on the solid rear axle (no motor drawn)
     tie_apart: 13,            // T: the pullers' rope tie-down points, plate to plate
     tie_Z: 20,                // E: their height above the ground
@@ -858,15 +924,15 @@
     // rear 4x4 posts, one in each rear corner, against the front of the rear uprights, from the bottom bar to the top bar like the front posts. 3D +-0.75
     rear_posts: { back: 1.0, clear: 37.7 },              // back: rear face ahead of the rear end x0; clear: between the inside faces
     // two 2x4s on edge, stacked, across the rear between the rear posts, their rear faces flush with the posts'; top just under the top bar. 3D +-0.75
-    rear_boards: { top_below_top: 1.1, n: 2 },
+    rear_boards: { top_below_top: 0.1, n: 2 },   // list 14l: Z 76 to 83.6 with the top bar reading 83.7 there (a 2x8 on edge fits; drawn as before, two boards)
     // the square blocks at the back: an open rectangle of 2x4s (on edge in the side view, 3.5 deep across), one each side, projecting behind the rear face. 3D +-1
     // (the front end board, against the rear upright, is G: the cloud ends at the upright there)
-    rear_frames: { y: 21.3, back: 9.7, front: 0.5, bottom: 13.1, top: 24.9 },   // y: centre from the centre line; back / front: rear and front ends behind x0; bottom / top: above the bottom bar centre
+    rear_frames: { y: 21.3, back: 9.7, front: 0.5, bottom: 13.9, top: 25.7 },   /* set 1.11: +1.4, the first cloud's "bottom bar at 36.9" was 1.4 above the bar's centre */   // y: centre from the centre line; back / front: rear and front ends behind x0; bottom / top: above the bottom bar centre
     // outrigger outside each side bar in the rear bay: a 2x4 laid flat (the sill) carrying three short 2x4 studs. Left side 3D +-1; the right side is hidden by pool
     // noodles in the cloud (a tenth of the points) and is drawn as the mirror image: E
-    outrigger: { out: 6.0, sill_top: 1.4, from: 5.75, to: 31.35, studs: [7.5, 18.9, 29.6], stud_top: 11.0 },   // out: outer face beyond the side bar centre; sill_top / stud_top above the bottom bar centre; from / to / studs ahead of x0
+    outrigger: { out: 6.0, sill_top: 2.2, from: 5.75, to: 31.35, studs: [7.5, 18.9, 29.6], stud_top: 11.8 },   /* set 1.11: +1.4, as rear_frames */   // out: outer face beyond the side bar centre; sill_top / stud_top above the bottom bar centre; from / to / studs ahead of x0
     // two 1x6 boards standing on edge just inside the side bars, from above the upper support bar to above the top bar, just ahead of the dancer cage's rear posts. 3D +-1
-    upper_boards: { from: 3.2, to: 8.7, y: 21.8, t: 1.0, bottom: 1.6, top: 0.6 },   // from / to ahead of the upright at 31.5; y: centre; bottom above the support bar, top above the top bar
+    upper_boards: { from: 3.2, to: 8.7, y: 21.8, t: 1.0, bottom: 1.3, top: 0.6 },   // from / to ahead of the upright at 31.5; y: centre; bottom above the support bar, top above the top bar
     // (they end under the platform: top 0.6; the first cloud gave 0.9, +-1)
     // The platform on the top bars, in the rear half of the dancer cage (scan 2, S +-0.5): two planks laid across the kart on the top bars, from just ahead of the cage's rear
     // posts, 15.4 along the frame in all; their ends reach the outside of the top bars. Each plank reads about 7 wide: a 1x8 (7.25 by 0.75, E; the cloud gives 0.75 to 1.0 for the
@@ -874,20 +940,27 @@
     // 3D +-1; bracket E (+-1.5)
     // Parts list of 2026-11-21 (dense inside clouds): one plywood sheet, top 83.6 (A), X -59.2 to -44.7 (B). Its width is C there (seen on the right half); the sparse cloud
     // has points across the whole width, so it is drawn from side to side. Drawn 0.5 thick on the top bars (top 83.7); it was drawn as two planks before
-    platform: { from: 4.0, n: 1, w: 14.5, gap: 0, t: 0.5, over: 0.6 },   // from: rear edge ahead of the upright at 31.5; over: each end beyond the top bar's centre
+    platform: { from: 4.0, n: 1, w: 14.5, gap: 0, t: 0.7, over: 0.6 },   // t: list 14l, one flat sheet, top 84.2, underside 83.5   // from: rear edge ahead of the upright at 31.5; over: each end beyond the top bar's centre
     // The deck under it, where the driver sits (token E9; scan 2, S +-0.5 for the level, +-1 for the ends): boards laid flat across the kart between the side bars, side by side,
     // from just behind the upright at 31.5 to 33.7 ahead of it. The builder (2026-11-18): it is "more like a set of 2x4s" than one plywood board. How many boards and how wide: G
     // (the cloud shows bands across the kart). Their underside is 1.3 above the support bar's centre: they lie on the pipe gate's top cross pipe. Under the platform the cloud
     // shows only their underside
     // 2026-11-21: the dense inside clouds show this deck only from X -47 to -31 (16 along the frame), across the whole width; the sparse cloud shows bands across the kart
     // there, about 3.4 wide: five boards. Before, it was drawn back to the upright at 31.5 (nine boards): the dark line seen there is the pipe gate's cross pipe
-    drivers_deck: { from: 15.9, to: 32.9, n: 5, gap: 0.05, under: 1.3, clear: 2.2 },   // from / to ahead of the upright at 31.5; clear: each end inside the side bar's centre
+    // (list 14j: X -45.0 to -29.8, butted; four 2x4s of 3.5 fit, five only at 3.0 each: four are drawn)
+    drivers_deck: { from: 18.2, to: 33.4, n: 4, gap: 0.2, under: 1.0, clear: 2.2 },   // from / to ahead of the upright at 31.5; clear: each end inside the side bar's centre
     // a 4x4 along the inside of each upper support bar in the rear bay, from the rear post to the upright at 31.5 (scan 2: a 3.5 in square in two cross-sections, S +-0.75; its ends
     // along the frame are G)
-    rear_rails: { in: 3.0, bottom: 0.5 },
+    // list 14l: rail tops 11.1 below the top bar (left 72.6, right 73.5), inner faces y +19.4 and -19.5. A board across the bay's front (the "front ledge": top 73.3, its rear
+    // edge at X -62.6): drawn as a 2x4 laid flat between the rails, top 10.0 below the top bar. A curved tube round the rear at the top bar's height, 8 behind the rear face
+    // at the centre line (rearmost X -103.3), its ends at the rear corners; its size E
+    // (set 1.12: the side bars moved inward; the rails now touch the support bar's inner face: inner faces at y 19.03, the scan's 19.4 and 19.5 are 0.4 off, inside +-0.5)
+    rear_rails: { in: 2.375, top_below_top: 11.1 }, front_ledge: { rear: 0.6, top_below_top: 10.0 }, rear_hoop: { out: 8.1, d: 1.0, n: 16 },
     // a wood rail inside the right upper support bar in the front bay (parts list of 2026-11-21, B): a 2x4 on edge, X -16.2 to -5.3, inner face y -22.4, Z 66.3 to 70.0, with a
     // strip on top to 70.6. The left side is not in the list (the planned motor deck is there): not drawn
-    front_rail: { back: [5.3, 16.2], in: 1.25, bottom: -3.4, strip: 0.6, sides: [-1] },   // back: behind the front face; in: centre inside the side bar's centre; bottom above the support bar's centre   // in: centre inside the side bar's centre; bottom above the support bar's centre
+    // (set 1.12: with the side bars at y -23.15 the rail's scanned inner face, y -22.4, puts its centre line under the bar's centre line: it stands under the support bar,
+    // its top against the bar's underside. The "strip on top to 70.6" was the bar itself and is not drawn)
+    front_rail: { back: [5.3, 16.2], in: 0, bottom: -4.125, strip: 0, sides: [-1] },   // back: behind the front face; in: centre inside the side bar's centre; bottom above the support bar's centre   // in: centre inside the side bar's centre; bottom above the support bar's centre
     bracket: { from: 4.2, to: 6.8, y0: 1.0, y1: 4.5, below_top: 7.1 },
     // two plywood shelves outside the side bars in the front bay, lying on the upper support bars, behind the head (VIEWER_HANDOFF F7 put their top at 74.6 to 75.8 from
     // the front photo; the dense cloud reads 71). 3D +-1; the plywood thickness G. Not joined to the boards inside the frame at the steering column's top
@@ -895,18 +968,32 @@
     side_shelves: { on: false, from: 18.3, to: 0.6, inner: 0.4, outer: 9.4, top: 1.3, t: 0.75 },   // from / to behind the front face; inner / outer beyond the side bar centre; top above the support bar centre
     // steel: a pipe gate across the kart at the upright 31.5 from the rear (two posts, a top cross pipe at the upper support bar, a bottom cross pipe) and one pipe
     // along the centre line from the rear face to the gate at the same height. Positions 3D +-1 (the bottom cross pipe +-1.5); diameter G (about 1)
-    gate: { d: 1.0, y: 11.0, top_above_support: 0.6 },
-    centre_pipe: { d: 1.0, y: 0 },
+    gate: { d: 1.0, y: 11.0, top_above_support: 0.3 },   // set 1.11: the support bar's centre is drawn at 70.0 now (the first cloud read 69.7): heights above it are 0.3 less
+    centre_pipe: { d: 1.0, y: 0.6, below_top: 11.9 },
+    // (the zone pass, groups 29 and 42: a black tube across the rear bay at the centre rail's rear end, X -92.2, y -15.2 to +15.6, at the centre rail's height: S)
+    rear_crosshead: { x: -92.3, half: 15.4, d: 1.0 },
+    // (the zone pass, group 19, and list 14m: a vertical member at the rear face of the front posts, X -3.5, y 3.4, rusty; seen from Z 40.4 to 58.9, drawn from the
+    // wood deck up to the flat 2x4's underside: G above 59)
+    front_upright: { x: -3.5, y: 3.4, s: 1.5, top_K: 68.4 },
+    // a grey post at the middle of the rear face, up to 11.5 above the top bar (my cut of the clouds: X -95.3, y 0.6, grey, seen from Z 70 to 94; S +-0.5). Below 70 it is
+    // not seen: drawn from the bottom bar, G
+    // list 14p (2026-11-22): confirmed at X -95.4, y +0.8, seen from Z 73 to 93.2 and nothing below 73. Read at the rear, where the top bar reads 83.7 (the frame stood nose
+    // down): so it is drawn from 10.7 below the top bar to 9.5 above it. Light grey to white; the cloud reads it wider (2.4 by 3.6) because something white hangs on it
+    rear_centre_post: { y: 0.8, d: 1.5, from_below_top: 10.7, top: 9.5 },   // list 14l: a black tube, X -92.4 to -62.0, y +0.6, 11.9 below the top bar
     // two grey steel pipes standing just inside the rear 4x4 posts and rising above the top bar. Diameter and position 3D (+-0.3 and +-1), measured from the top bar up;
     // the tops +-2 (the cloud thins out there); below the top bar they are hidden behind the posts and boards, so they are drawn from the top bar up only (the lower end: G)
-    rear_tall_pipes: [{ side: 1, d: 1.3, fwd: 4.5, in: 0.9, top: 19.4 }, { side: -1, d: 1.6, fwd: 6.3, in: 0.8, top: 35.4 }],   // fwd: centre ahead of x0; in: centre inside the posts' inside face; top above the top bar centre
+    // list 14l: both poles about 2 across, at X -89.8, y +18.1 and X -89.5, y -18.3, from the floor to above Z 95 (their tops as before)
+    // (2026-11-22, the zone pass, group 24: the left pole goes on up to Z 118.5, read at the rear: 34.8 above the level top bar; it was drawn to 19.4)
+    rear_tall_pipes: [{ side: 1, d: 2.0, fwd: 5.4, in: 0.75, top: 34.8 }, { side: -1, d: 2.0, fwd: 5.7, in: 0.55, top: 35.4 }],   // fwd: centre ahead of x0; in: centre inside the posts' inside face; top above the top bar centre
   };
   // ---- the driver's controls, the wood that carries them and the motor deck: dimension set 1.10 (2026-11-18, tokens E1 to E14), inches, kart frame K (X forward from the cart
   // frame's front face, Y left, Z up from the floor). 3D = measured on the dense cloud (+-1), T = the builder's tape or word, P = scaled from photos, G = guess (the builder
   // asked for best estimates). buildInterior maps X from the front face and Z from the bottom bar, so everything follows the cart frame sliders.
   const KART_CONTROLS = {
     // E3 (3D +-1): the steering column's axis through two points; it leans 3 degrees, top forward
-    column: { a: [-22.3, 9.7, 50], b: [-21.4, 9.7, 67], shaft_d: 0.75,
+    // 2026-11-21, list 14k (dense clouds, trust B): the axis is near X -23.7, Y 9.8 at Z 56 and reaches the wheel's fitted centre (X -22.0, Y 10.2, Z 72.1); it leans 6
+    // degrees, top forward. Before: X -22.3 at Z 50 and -21.4 at Z 67, Y 9.7 (the first cloud, +-1)
+    column: { a: [-23.2, 9.9, 51.5], b: [-22.8, 9.9, 63.5], shaft_d: 0.75,   /* set 1.11, row E3: X -23.2 at Z 51.5, X -22.8 at Z 63.5, Y 9.9 (the six inside clouds) */
       bracket: { top: 40, size: 5, t: 0.25 },                     // E5 (P): black folded steel bracket around the column foot, on the floor
       tube: { Z: [40, 47.6], d: 1.5 },                            // E4 (P for the size): black column tube
       clamp: { Z: 45.2, d: 2.6, h: 1.0 },                         // E6 (T): galvanised pipe clamp ring, screwed to the front 2x4 (its height along the column: G)
@@ -916,24 +1003,41 @@
     // Parts list of 2026-11-21 (dense cloud, circle fit, scatter 0.19: A): rim centre X -22.0, Y 10.2, Z 72.1, outer diameter 11.3, the rim's centre line 10.6, tilt 4.8 degrees.
     // Drawn on the column's axis at that height (X -21.1, Y 9.7: 1.0 from the fitted centre, inside the column's own +-1) and square to the column (3 degrees). Colours from the
     // video of 2026-11-19 (441 s): the rim blue on its two sides and black between, three silver spokes, a silver hub, a red spinner knob on the rim's right side
-    wheel: { Z: 72.1, od: 11.3, rim: 0.7, hub: 2.6, spokes: 3, spoke_w: 1.0, knob_d: 1.6, knob_at: 265 },   // knob_at: degrees round the rim from straight ahead, toward the left (V)
+    wheel: { c: [-22.0, 10.2], Z: 72.1, od: 11.3,   /* c: set 1.11, row E8, the fitted centre (0.6 from the column's axis there) */ rim: 0.7, hub: 2.6, spokes: 3, spoke_w: 1.0, knob_d: 1.6, knob_at: 265 },   // knob_at: degrees round the rim from straight ahead, toward the left (V)
     // E10: the brake lever, a rusty steel angle about 1.5 by 1.5 (P) on a line through two points (3D +-1); it leans 10 degrees, top forward, as it stood on 2026-11-15.
     // It goes down through the floor; its pivot under the floor and its travel are not measured (bottom: G). Top G; the top 6 are black with white tape wrapped round (P; the
     // split between black and tape: G). guide: two short 2x4 pieces around it at the floor (seen; sizes and places G)
-    lever: { a: [-9.9, 9.2, 44], b: [-7.1, 9.9, 60], s: 1.5, t: 0.19, bottom: 48.5, black_from: 70, grip_from: 71.5, top: 76, guide: { len: 13, gap: 0.2 } },   // bottom: since 2026-11-21 the bend, where the lower arm from the pedal box meets it (kart_zone_pedal_box.js; dense clouds); guide: the two boards read 12 to 14 long
+    // Set 1.11, row E10: one member with a bend at X -10.0, Y 9.4, Z 48.3 and two legs; the six inside clouds follow it at Y 9.4 to 10.6 from Z 43 to about Z 86. Here: the
+    // upper leg from the bend (a) through X -8.2, Y 10.1 at Z 62.5 (b, my fit) to the top at 86 (its black part and its grip: G). The lower leg is in kart_zone_pedal_box.js
+    lever: { a: [-10.0, 10.0, 48.3], b: [-8.2, 10.0, 62.5], s: 1.2, t: 0.19,   /* centre line at y 10.0, 1.2 wide: the member spans y 9.4 to 10.6 (the record), 0.7 from the motor deck's edge */ bottom: 48.3, black_from: 80, grip_from: 81.5, top: 86, guide: { len: 0, gap: 0.2 } },   // len 0: the boards at the lever's foot are board A and the board across the opening of list 14k (KART.tub_floors)   // bottom: since 2026-11-21 the bend, where the lower arm from the pedal box meets it (kart_zone_pedal_box.js; dense clouds); guide: the two boards read 12 to 14 long
     // the brake fluid reservoir: white plastic with a black cap, about 3 by 4 by 4, low in the gap behind the front bar on the left, near the lever's foot. Place G
     reservoir: { c: [-6, 6, 38], size: [3, 4, 4], cap_d: 1.6, cap_h: 0.6 },
     // E11 to E13: the wood blocks behind the column. Lower blocks 3D; the front 2x4 pair's top is 9.5 above the wood deck (T), and the taller rear boards are drawn cut
     // down to it (the builder's plan, 2026-11-18). The lower blocks are drawn standing on the drawn front deck. The set gives the front faces at X -22.5 and -22.6, where the
     // cloud's points are the column tube itself (they reach from -24.5 to -22): the faces are drawn 0.8 to 1.0 further back (inside the +-1), against the back of the tube,
     // with the 2x4 pair its true 3.0 thick, because the column's clamp is screwed to the front 2x4
-    blocks: { lower: { X: [-30.3, -23.5], Y: [3, 17], top: 43.2 }, front: { X: [-26.4, -23.4], Y: [4, 15] }, rear: { X: [-29.3, -26.4], Y: [4.5, 15.5] }, top: 46.7 },
+    // 2026-11-21, list 14k (trust B), on the lead's word "draw the column and its base exactly from 14k": the base as it stands today, two layers of stacked wood behind
+    // the column. Lower: X -30.0 to -25.9, Y 5.8 to 11.6 with a strip to 3.6, top 45.0. Upper: X -29.2 to -24.3, Y 4.8 to 11.4, top 49.6. This replaces the drawing of the
+    // builder's plan of 2026-11-18 (one flat top at 46.7, the taller boards cut down): that plan is not carried out yet
+    // The lead, 2026-11-21 17:30: the builder's words of 2026-11-18 stand ("Actually it's ~9.5 in", "I will trim down the taller boards to meet the height of the board that abuts
+    // the steering column"). So the base keeps its scanned footprint and its lower layer (top 45.0), and its upper layer has one flat top at 9.5 above the wood deck: T. The
+    // scan's 49.6 is today's untrimmed board and is not drawn. deck_ref: the wood deck as the cloud reads it (38.3); the two tops and the motor deck are drawn from the drawn
+    // wood deck by their height above it, so they keep those 6.7 and 9.5 whatever the frame's height in the drawing is
+    // list 14p (2026-11-22): the 2x4 pair (front) ends at y 10.8, the taller board (rear, drawn trimmed to the flat top) at 12.4 to 12.8, the lower blocks reach 15.0 with a
+    // ledge at 43.3 left of the lower layer. So the motor deck (edge y 11.3) does not lie on the 2x4 pair; it lies 1.3 on the trimmed rear board
+    blocks: { lower: { X: [-30.0, -25.9], Y: [3.6, 11.6], top: 45.0 }, ledge: { X: [-30.0, -25.9], Y: [11.6, 15.0], top: 43.3 }, front: { X: [-26.75, -24.3], Y: [4.8, 10.8] }, rear: { X: [-29.2, -26.75], Y: [4.8, 12.6] }, top: 47.7 }, deck_ref: 38.2,   /* set 1.11: E12's top 47.7 (the wood deck 38.2 + the builder's 9.5; the clouds read 47.6 to 47.8 there, trust A) */
     // E9, the level the driver sits on: drawn since scan 2 as a set of boards (KART_INTERIOR.drivers_deck). The builder (2026-11-18): not one plywood board but more like a set of 2x4s
     // E14: the motor deck, planned, not built. Height T (its underside lies on the front 2x4 pair, 3/4 thick). The outline is a reading (+-0.5) of the rectangle the builder
     // drew on a top view of this viewer on 2026-11-18: on the left of the steering column and the brake lever only, 26.3 long. Its rear right part lies
     // on the column blocks. props: cuts of 4x4 (3.5 square) that stand on the front deck under it (the builder's plan; which corners and how many: G). Each prop is
     // [X end, Y end] of the deck's outline: [1, 0] is the front corner next to the column
-    motor_deck: { X: [-30.5, -4.2], Y: [11.3, 22.3], under: 46.7, t: 0.75, props: [[1, 1], [1, 0], [0, 1]] },
+    // 2026-11-21 (the lead, with Calc's check): the underside is 9.5 above the wood deck (38.3 + 9.5 = 47.8), on the base's flat top; the 46.7 came from the old deck level of
+    // 37.2. The deck's edge (y 11.3) only touches the base (y 11.4), so its rear right corner gets a prop of its own: the fourth prop is an estimate, like the other three
+    motor_deck: { X: [-30.5, -4.2], Y: [11.3, 22.3], under: 47.7, t: 0.75, props: [[1, 1], [1, 0], [0, 1]],
+      // Calc's way A (2026-11-22, calc/drive/MOTOR_DECK_VS_COLUMN_2026-11-21.md 59e), an estimate; the builder chooses the real support: no fourth 4x4 prop. A short block,
+      // 4.4 tall, on the lower blocks (top 43.3) under the deck's rear right corner: left of the trimmed rear board (12.6) and right of TENTACLE right's bracket slots
+      // (X -28.8 and -27.2, y 14.6 to 16.2): a 2x4 on edge, 1.5 across
+      corner_block: { X: [-30.0, -26.5], Y: [12.8, 14.3], foot: 43.3 } },
     // E15: the two 2x4s along the steering column (the builder, 2026-11-18): laid flat, one on the left and one on the right of the column and the brake lever, which they
     // guide. They are fixed to the underside of the flat 2x4 between the two front wood posts and run back to the driver's deck: drawn to 6 behind the steering
     // wheel's rim, where they end in the air. They abut the column (the builder: "they abut the ... steering column"): each board's inner edge touches the column sleeve
@@ -1420,21 +1524,21 @@
     pipe([x0, Y - yc, zs], [x0, Y + yc, zs], K.support_d);                                        // rear face: an upper bar under the top bar, as on the sides, and no X brace (the builder's word, 2026-11-13; its height and diameter are taken from the side bar: G)
     // the front of the tub: cross pipe and centre upright on the front face, the two wood posts behind them, the flat 2x4 between the posts
     const pw = K.post_wood, c24 = K.cross_2x4, xb = x1 - K.front_cross_d / 2 - pw.w / 2;   // xb: posts and 2x4 sit against the back of the cross pipe
-    pipe([x1, Y - yc, zs], [x1, Y + yc, zs], K.front_cross_d);                                     // front cross pipe, level with the upper support bars
+    pipe([x1, Y - yc, zs + K.front_cross_dz], [x1, Y + yc, zs + K.front_cross_dz], K.front_cross_d);                                     // front cross pipe, level with the upper support bars
     pipe([x1, Y, z0], [x1, Y, z1], K.centre_upright_d);                                            // centre upright, front bottom bar to top bar
     for (const s of [1, -1]) box([xb, Y + s * (pw.clear + pw.w) / 2, (z0 + z1) / 2], [pw.w, pw.w, z1 - z0], woodMat);   // the two wood posts, up to the top bar
-    box([xb, Y, zs], [c24.w, pw.clear, c24.t], woodMat);                                           // the 2x4, flat, between the posts
+    box([xb, Y, zs + c24.dz], [c24.w, pw.clear, c24.t], woodMat);                                           // the 2x4, flat, between the posts
     // the tub's floors: per zone a wood deck, and foam puzzle tiles on it (numbers and marks: KART.tub_floors)
-    const TL = K.tile, fw = 2 * yc - d - 0.5, deckTop = zs - K.tub_floors.find(f => f.below_2x4 !== undefined).below_2x4, floorInfo = [], fy = v => Y + Math.max(-fw / 2, Math.min(fw / 2, v));
+    const TL = K.tile, fw = 2 * yc - d - 0.5, deckTop = z0 + K.tub_floors.find(f => f.low_top !== undefined).low_top, floorInfo = [], fy = v => Y + Math.max(-fw / 2, Math.min(fw / 2, v));
     for (const fl of K.tub_floors) {
-      const tt = z0 + fl.tile_top, sunk = fl.below_2x4 === undefined, top = sunk ? tt - TL.t : deckTop, dt = sunk ? 0.75 : 1.5;   // top of the zone's wood deck and its thickness
+      const tt = z0 + fl.tile_top, sunk = fl.low_top === undefined, top = sunk ? tt - TL.t : deckTop, dt = sunk ? 0.75 : 1.5;   // top of the zone's wood deck and its thickness
       const xa = x1 - fl.back[1] * kx, xe = x1 - fl.back[0] * kx;
       if (fl.hole) { const h = fl.hole, xh0 = x1 - h[1] * kx, xh1 = x1 - h[0] * kx, yh0 = Y + h[2], yh1 = Y + h[3], yl = Y - fw / 2, yr = Y + fw / 2;   // the deck in four pieces round the hole
         for (const [u0, u1, v0, v1] of [[xa, xh0, yl, yr], [xh1, xe, yl, yr], [xh0, xh1, yl, yh0], [xh0, xh1, yh1, yr]]) if (u1 - u0 > 0.01 && v1 - v0 > 0.01) box([(u0 + u1) / 2, (v0 + v1) / 2, top - dt / 2], [u1 - u0, v1 - v0, dt], woodMat); }
       else box([(xa + xe) / 2, Y, top - dt / 2], [xe - xa, fw, dt], woodMat);
       if (fl.nose) { const xt = x1 - fl.nose.back * kx, ya = Y - fw / 2, yb = Y + fl.nose.y_max; box([(xe + xt) / 2, (ya + yb) / 2, top - dt / 2], [xt - xe, yb - ya, dt], woodMat); }
       for (const q of (fl.raised || [])) { const xq = [x1 - q[1] * kx, x1 - q[0] * kx], yq = [fy(q[2]), fy(q[3])], hq = tt - TL.t - top; box([(xq[0] + xq[1]) / 2, (yq[0] + yq[1]) / 2, top + hq / 2], [xq[1] - xq[0], yq[1] - yq[0], hq], woodMat); }   // the raised wood deck
-      for (const q of (fl.boards || [])) box([x1 - (q[0] + q[1]) / 2 * kx, Y + (q[2] + q[3]) / 2, top + q[4] / 2], [(q[1] - q[0]) * kx, q[3] - q[2], q[4]], lumberMat);   // boards lying on the deck
+      for (const q of (fl.boards || [])) box([x1 - (q[0] + q[1]) / 2 * kx, Y + (q[2] + q[3]) / 2, top + (q[5] || 0) + q[4] / 2], [(q[1] - q[0]) * kx, q[3] - q[2], q[4]], lumberMat);   // boards lying on the deck
       const cells = fl.tiles.map(q => ({ col: q[4], x: [x1 - q[1] * kx, x1 - q[0] * kx], y: [fy(q[2]), fy(q[3])], top: q[5] === 'deck' ? top + TL.t : z0 + (q[5] !== undefined ? q[5] : fl.tile_top) }));
       const org = [Math.max(...cells.map(c => c.x[1])), Y + TL.joint_y];
       cells.forEach((c, n) => {
@@ -1445,7 +1549,7 @@
       floorInfo.push({ back: fl.back, deck_top: top, tile_top: tt, tiles: cells.map(c => ({ col: c.col, x: c.x, y: c.y, top: c.top })) });
     }
     window.__kartFloor = floorInfo;   // model frame; for tools/check_kart.js
-    window.__frontBay = { cross_pipe: [x1, zs], centre_upright: [x1, Y, z0, z1], posts: { x: xb, inside: pw.clear, top: z1, bottom: z0 }, board: { x: xb, z: zs, len: pw.clear }, front_deck_top: deckTop, rear_floor_top: z0 + K.tub_floors[0].tile_top, support_bar: zs, bottom_bar: z0, top_bar: z1 };   // for tools/check_kart.js
+    window.__frontBay = { cross_pipe: [x1, zs], centre_upright: [x1, Y, z0, z1], posts: { x: xb, inside: pw.clear, top: z1, bottom: z0 }, board: { x: xb, z: zs + c24.dz, len: pw.clear }, front_deck_top: deckTop, rear_floor_top: z0 + K.tub_floors[0].tile_top, support_bar: zs, bottom_bar: z0, top_bar: z1 };   // for tools/check_kart.js
     // the dancer cage above the top bar (dimension set 1.9, 3D dense cloud, +-1; tokens C1 to C13): two side frames shaped like an L on its back, tall at the rear and one step
     // down toward the front, joined by four cross bars; open at the step, at the front below its top cross bar, and on top. Four posts of their own (not the frame uprights made
     // longer): each stands 2.5 in front of a frame upright (the second and the third from the front) and 1.3 in inboard of it, from the bottom bar up; grey below the top bar,
@@ -1467,7 +1571,7 @@
     for (let i = nCage; i < kart.children.length; i++) kart.children[i].userData.kpart = 'cage';
     // Not drawn, on purpose: the head platform and the generators. The steering column (once read as a stand post), its wheel, the brake lever and the wood
     // near the top bar are drawn in buildInterior.
-    return { x0, x1, z0, yc, z1, zs, ux, Y, kx, d, deck: deckTop };   // z1 .. deck: for buildInterior
+    return { x0, x1, z0, yc, z1, zs, ux, Y, kx, d, deck: deckTop, raised: z0 + K.tub_floors[2].tile_top - K.tile.t };   // z1 .. deck: for buildInterior
   }
   function buildInterior(P, F) {   // the cart's interior and attached construction: lumber, a plywood face and steel pipes (numbers: KART_INTERIOR)
     const I = KART_INTERIOR, L = I.lumber, { x0, x1, z0, z1, zs, yc, ux, Y } = F, u1 = ux[1], parts = [];
@@ -1496,16 +1600,20 @@
     const DD = I.drivers_deck, dw = (DD.to - DD.from - (DD.n - 1) * DD.gap) / DD.n;   // the boards the driver sits on
     for (let i = 0; i < DD.n; i++) B([u1 + DD.from + dw / 2 + i * (dw + DD.gap), Y, zs + DD.under + L.t / 2], [dw, 2 * (yc - DD.clear), L.t], 0, "driver's deck board");
     { const FR = I.front_rail, [fx_, fl_] = span(F.x1 - FR.back[1], F.x1 - FR.back[0]);
-      for (const s of FR.sides) { B([fx_, Y + s * (yc - FR.in), zs + FR.bottom + L.w / 2], [fl_, L.t, L.w], 0, 'front bay wood rail'); B([fx_, Y + s * (yc - FR.in), zs + FR.bottom + L.w + FR.strip / 2], [fl_, L.t, FR.strip], 0, 'front bay wood rail, strip'); } }
+      for (const s of FR.sides) { B([fx_, Y + s * (yc - FR.in), zs + FR.bottom + L.w / 2], [fl_, L.t, L.w], 0, 'front bay wood rail'); if (FR.strip > 0) B([fx_, Y + s * (yc - FR.in), zs + FR.bottom + L.w + FR.strip / 2], [fl_, L.t, FR.strip], 0, 'front bay wood rail, strip'); } }
     const RR = I.rear_rails, [rrx, rrl] = span(xp + L.w / 2, u1 - F.d / 2);   // a 4x4 inside each support bar in the rear bay
-    for (const s of [1, -1]) B([rrx, Y + s * (yc - RR.in), zs + RR.bottom + L.w / 2], [rrl, L.w, L.w], 0, 'rear bay 4x4 rail');
+    for (const s of [1, -1]) B([rrx, Y + s * (yc - RR.in), z1 - RR.top_below_top - L.w / 2], [rrl, L.w, L.w], 0, 'rear bay 4x4 rail');
+    { const FL = I.front_ledge; B([u1 + FL.rear + L.w / 2, Y, z1 - FL.top_below_top - L.t / 2], [L.w, 2 * (yc - RR.in - L.w / 2), L.t], 0, 'rear bay front ledge'); }
+    { const H = I.rear_hoop, pt = k => { const y = -yc + 2 * yc * k / H.n; return [x0 - H.out * Math.sqrt(Math.max(0, 1 - (y / yc) * (y / yc))), Y + y, z1]; };   // the curved tube round the rear
+      for (let k = 0; k < H.n; k++) { pipe(pt(k), pt(k + 1), H.d); kmesh(new THREE.SphereGeometry(H.d / 2, 10, 8), pipeMat, pt(k)); } parts.push({ part: 'rear hoop', a: pt(0), b: pt(H.n / 2), d: H.d }); }
     const BR = I.bracket, [kx_, kl] = span(u1 + BR.from, u1 + BR.to), [ky, kw] = span(BR.y0, BR.y1), [kz, kh] = span(z1 - BR.below_top, z1 + F.d / 2);
     B([kx_, Y + ky, kz], [kl, kw, kh], 0, 'hanging bracket');
     // the driver's controls (KART_CONTROLS, kart frame K): the wood blocks, the steering column and wheel, the brake lever and the planned motor deck
     const DC = KART_CONTROLS, kX = k => x1 + k, kZ = k => z0 + (k - KART.frame_ground);
     const zbox = (xr, yr, zb, zt, part) => { const [cx, cl] = span(kX(xr[0]), kX(xr[1])), [cy, cw] = span(yr[0], yr[1]); B([cx, Y + cy, (zb + zt) / 2], [cl, cw, zt - zb], 0, part); };
-    const BK = DC.blocks, zlow = kZ(BK.lower.top), ztop = kZ(BK.top);
-    zbox(BK.lower.X, BK.lower.Y, F.deck, zlow, 'column blocks, lower'); zbox(BK.front.X, BK.front.Y, zlow, ztop, 'column blocks, front 2x4 pair'); zbox(BK.rear.X, BK.rear.Y, zlow, ztop, 'column blocks, rear boards');
+    const kZd = kZ;   // since set 1.11 the levels are heights above the garage floor again (the drawn bottom bar and the scan agree)
+    const BK = DC.blocks, zlow = kZd(BK.lower.top), ztop = kZd(BK.top);
+    zbox(BK.lower.X, BK.lower.Y, F.deck, zlow, 'column blocks, lower'); zbox(BK.ledge.X, BK.ledge.Y, F.deck, kZd(BK.ledge.top), 'column blocks, lower ledge'); zbox(BK.front.X, BK.front.Y, zlow, ztop, 'column blocks, front 2x4 pair'); zbox(BK.rear.X, BK.rear.Y, zlow, ztop, 'column blocks, rear boards');
     const line = (a, b) => { const p = V(kX(a[0]), Y + a[1], kZ(a[2])), u = V(kX(b[0]), Y + b[1], kZ(b[2])).sub(p).normalize(); return { u, at: z => { const t = (z - p.z) / u.z; return [p.x + u.x * t, p.y + u.y * t, z]; } }; };
     const CO = DC.column, col = line(CO.a, CO.b);
     const TC = (za, zb, d, mat, part) => { const a = col.at(za), b = col.at(zb); pipe(a, b, d, mat); parts.push({ part, a, b, d }); };
@@ -1519,7 +1627,7 @@
     TC(kZ(CO.sleeve.Z[0]), kZ(CO.sleeve.Z[1]), CO.sleeve.d, hubMat, 'column sleeve');
     for (const zc of CO.hose_clamps.Z) TC(kZ(zc) - CO.hose_clamps.h / 2, kZ(zc) + CO.hose_clamps.h / 2, CO.hose_clamps.d, railMat, 'sleeve hose clamp');
     {   // the steering wheel: a group square to the column, its own z along the column
-      const SW = DC.wheel, c = col.at(kZ(SW.Z)), g = new THREE.Group(), rr = SW.od / 2 - SW.rim / 2; g.position.set(c[0], c[1], c[2]); g.quaternion.setFromUnitVectors(V(0, 0, 1), col.u); kart.add(g);
+      const SW = DC.wheel, c = SW.c ? [kX(SW.c[0]), Y + SW.c[1], kZ(SW.Z)] : col.at(kZ(SW.Z)), g = new THREE.Group(), rr = SW.od / 2 - SW.rim / 2; g.position.set(c[0], c[1], c[2]); g.quaternion.setFromUnitVectors(V(0, 0, 1), col.u); kart.add(g);
       const add = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.name = "kart"; g.add(m); return m; };
       for (let i = 0; i < 4; i++) add(new THREE.TorusGeometry(rr, SW.rim / 2, 12, 14, Math.PI / 2), i % 2 ? spokeMat : foamMat).rotation.z = (i - 0.5) * Math.PI / 2;   // rim: black at the front and rear, blue at the two sides
       add(new THREE.CylinderGeometry(SW.hub / 2, SW.hub / 2, 1.2, 20).rotateX(Math.PI / 2), hubMat);
@@ -1536,7 +1644,7 @@
       { const l0 = len(BL.grip_from), l1 = len(BL.top); add([BL.s + 0.15, BL.s + 0.15, l1 - l0], [0, 0, (l0 + l1) / 2], tapeMat); }
       parts.push({ part: 'brake lever', a: lev.at(kZ(BL.a[2])), b: lev.at(kZ(BL.b[2])), top: lev.at(kZ(BL.top)) });
     }
-    { const f = lev.at(F.deck + L.t / 2), gd = BL.guide; for (const s of [1, -1]) B([f[0], f[1] + s * (BL.s / 2 + gd.gap + L.w / 2), F.deck + L.t / 2], [gd.len, L.w, L.t], 0, 'brake lever guide'); }   // the wood guide at the floor
+    if (BL.guide.len > 0) { const f = lev.at(F.deck + L.t / 2), gd = BL.guide; for (const s of [1, -1]) B([f[0], f[1] + s * (BL.s / 2 + gd.gap + L.w / 2), F.deck + L.t / 2], [gd.len, L.w, L.t], 0, 'brake lever guide'); }   // the wood guide at the floor
     { const RV = DC.reservoir, c = [kX(RV.c[0]), Y + RV.c[1], kZ(RV.c[2])]; B(c, RV.size, tapeMat, 'brake fluid reservoir');
       pipe([c[0], c[1], c[2] + RV.size[2] / 2], [c[0], c[1], c[2] + RV.size[2] / 2 + RV.cap_h], RV.cap_d, foamMat); }
     const plate = (D, zb, holes, kp, part) => {   // a flat plywood board with openings: [x, y, half size, round]
@@ -1545,12 +1653,14 @@
       const m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: D.t, bevelEnabled: false, curveSegments: 24 }), plyMat); m.position.z = zb; m.name = "kart"; m.userData.kpart = kp; kart.add(m);
       parts.push({ part, c: [(xr[0] + xr[1]) / 2, (yr[0] + yr[1]) / 2, zb + D.t / 2], sz: [xr[1] - xr[0], yr[1] - yr[0], D.t] });
     };
-    const MD = DC.motor_deck, zm = kZ(MD.under); plate(MD, zm, [], 'mdeck', 'motor deck (planned)');
-    for (const [ex, ey] of MD.props) {   // a cut of 4x4 under a corner of the motor deck, from the front deck up to its underside
-      const c = [kX(MD.X[ex]) + (ex ? -1 : 1) * L.w / 2, Y + MD.Y[ey] + (ey ? -1 : 1) * L.w / 2, (F.deck + zm) / 2], sz = [L.w, L.w, zm - F.deck];
+    const MD = DC.motor_deck, zm = kZd(MD.under); plate(MD, zm, [], 'mdeck', 'motor deck (planned)');
+    for (const [ex, ey, dy, foot] of MD.props) {   // a cut of 4x4 under a corner of the motor deck, from the front deck up to its underside
+      const zf = foot ? kZd(foot) : F.deck, c = [kX(MD.X[ex]) + (ex ? -1 : 1) * L.w / 2, Y + MD.Y[ey] + (ey ? -1 : 1) * L.w / 2 + (dy || 0), (zf + zm) / 2], sz = [L.w, L.w, zm - zf];
       box(c, sz, lumberMat).userData.kpart = 'mdeck'; parts.push({ part: 'motor deck prop (4x4, planned)', c, sz }); }
+    if (MD.corner_block) { const CB = MD.corner_block, zf = kZd(CB.foot), [cx, lx] = span(kX(CB.X[0]), kX(CB.X[1])), [cy, ly] = span(CB.Y[0], CB.Y[1]), c = [cx, Y + cy, (zf + zm) / 2], sz = [lx, ly, zm - zf];
+      box(c, sz, lumberMat).userData.kpart = 'mdeck'; parts.push({ part: 'motor deck corner block (estimate)', c, sz }); }
     {   // the two 2x4s under the flat 2x4 between the front posts, and the planned cable bar below it. bx, bz: that flat 2x4's centre (kart frame)
-      const c24 = KART.cross_2x4, bx = -(KART.front_cross_d / 2 + KART.post_wood.w / 2), bz = KART.frame_ground + KART.support_h, U = DC.upper_2x4s, CB = DC.cable_bar;
+      const c24 = KART.cross_2x4, bx = -(KART.front_cross_d / 2 + KART.post_wood.w / 2), bz = KART.frame_ground + KART.support_h + KART.cross_2x4.dz, U = DC.upper_2x4s, CB = DC.cable_bar;
       const sw = parts.find(q => q.part === 'steering wheel'), xe = sw.c[0] - sw.od / 2 - U.behind_wheel, xf = kX(bx + c24.w / 2), zt = kZ(bz - c24.t / 2);
       const sl = parts.find(q => q.part === 'column sleeve'); for (const s of [1, -1]) { const c = [(xe + xf) / 2, sl.a[1] + s * (sl.d / 2 + L.w / 2), zt - L.t / 2], sz = [xf - xe, L.w, L.t];   // one each side of the column
         box(c, sz, lumberMat).userData.kpart = 'upper'; parts.push({ part: 'upper 2x4 (along the steering column)', c, sz }); }
@@ -1564,7 +1674,7 @@
     if (window.__motorLib) {   // the six motor apparatus in a row on the motor deck, each bare cable up to the bar, and the barrel adjusters (all planned)
       const ML = window.__motorLib, MR = DC.motor_row, CB = DC.cable_bar, AJ = DC.adjuster, mm = 1 / 25.4, top = zm + MD.t;
       const th = CB.tilt * Math.PI / 180, wv = [Math.sin(th), Math.cos(th)], uv = [Math.cos(th), -Math.sin(th)], hu = CB.w / 2 - CB.hole_u;   // wv: the bar's normal (up and forward); uv: across the bar, toward its front face (forward and down); hu: the hole line from the bar's centre line, along uv
-      const end = [kX(-(KART.front_cross_d / 2 + KART.post_wood.w / 2)) + hu * uv[0], kZ(KART.frame_ground + KART.support_h - CB.below_2x4) + hu * uv[1]];   // the line of the cable holes, at the bar's mid thickness (x, z)
+      const end = [kX(-(KART.front_cross_d / 2 + KART.post_wood.w / 2)) + hu * uv[0], kZ(KART.frame_ground + KART.support_h + KART.cross_2x4.dz - CB.below_2x4) + hu * uv[1]];   // the line of the cable holes, at the bar's mid thickness (x, z)
       const wid = MR.map(r => ML.meta[r.type].y[1] - ML.meta[r.type].y[0]), gap = (MD.X[1] - MD.X[0] - wid.reduce((a, b) => a + b, 0)) / (MR.length + 1);
       const tag = o => { o.userData.kpart = 'motors'; return o; };
       let x = kX(MD.X[1]);
@@ -1608,8 +1718,11 @@
     for (const s of [1, -1]) T([u1, Y + s * G.y, z0], [u1, Y + s * G.y, zg], G.d, 'gate post');
     T([u1, Y - yc, zg], [u1, Y + yc, zg], G.d, 'gate top cross pipe');
     T([u1, Y - yc, z0], [u1, Y + yc, z0], G.d, 'gate bottom cross pipe');
-    T([x0, Y + I.centre_pipe.y, zg], [u1, Y + I.centre_pipe.y, zg], I.centre_pipe.d, 'centre pipe');
-    for (const p of I.rear_tall_pipes) { const y = Y + p.side * (RP.clear / 2 - p.in); T([x0 + p.fwd, y, z1], [x0 + p.fwd, y, z1 + p.top], p.d, 'rear tall pipe'); }
+    { const CP = I.centre_pipe, zc_ = z1 - CP.below_top, a = [x0, Y + CP.y, zc_], b = [u1, Y + CP.y, zc_]; pipe(a, b, CP.d, cageMat); parts.push({ part: 'centre pipe', a, b, d: CP.d });
+      const RC = I.rear_crosshead, xr_ = F.x1 + RC.x, ra = [xr_, Y - RC.half, zc_], rb = [xr_, Y + RC.half, zc_]; pipe(ra, rb, RC.d, cageMat); parts.push({ part: 'rear bay crosshead', a: ra, b: rb, d: RC.d });
+      const FU = I.front_upright, fa = [F.x1 + FU.x, Y + FU.y, F.raised], fb = [F.x1 + FU.x, Y + FU.y, z0 + (FU.top_K - KART.frame_ground)]; B([fa[0], fa[1], (fa[2] + fb[2]) / 2], [FU.s, FU.s, fb[2] - fa[2]], rustMat, 'front upright behind the posts'); }
+    { const CPo = I.rear_centre_post, a = [x0, Y + CPo.y, z1 - CPo.from_below_top], b = [x0, Y + CPo.y, z1 + CPo.top]; pipe(a, b, CPo.d, hubMat); parts.push({ part: 'rear centre post', a, b, d: CPo.d }); }
+    for (const p of I.rear_tall_pipes) { const y = Y + p.side * (RP.clear / 2 - p.in); T([x0 + p.fwd, y, z0], [x0 + p.fwd, y, z1 + p.top], p.d, 'rear tall pipe'); }
     window.__kartInterior = parts;   // model frame; read by the overlay check
   }
   // ---- the chassis below the cart frame: numbers in KART_CHASSIS (kart frame K), mapped to the model frame by buildChassis ----
@@ -1688,18 +1801,21 @@
     }
     // cross members: rear end, shock towers over the axles (G), the box at the top of the front diagonals, the nose; the bottom chords' rear ends (G)
     const span = 2 * (yo - tc.w / 2);
-    for (const xk of [C.rear_cross_X, C.rear_tower_X, C.front_axle_X - 1, tc.X[1] - 0.75]) box([X(xk), 0, tz], [1.5, span, th], aluMat);
+    for (const xk of [C.rear_cross_X, tc.X[1] - 0.75]) box([X(xk), 0, tz], [1.5, span, th], aluMat);   // at the upper rail: its rear end and its front end. The guessed member near the rear shocks is gone: list 14j, no cross member crosses the middle between X -92 and -79
+    const ff = C.front_frame, zff = Z((ff.Z[0] + ff.Z[1]) / 2), hff = ff.Z[1] - ff.Z[0];   // the front frame: two rails along the kart and two cross members
+    for (const s of [1, -1]) box([(X(ff.X[0]) + X(ff.X[1])) / 2, s * ff.y, zff], [X(ff.X[1]) - X(ff.X[0]), ff.w, hff], aluMat);
+    for (const xk of ff.cross_X) box([X(xk), 0, zff], [1.5, 2 * ff.y + ff.w, hff], aluMat);
     const fc = C.front_cross; box([X(fc.X), 0, Z((fc.Z[0] + fc.Z[1]) / 2)], [2, span, fc.Z[1] - fc.Z[0]], aluMat);
     box([X(bc.X[0]) + 0.75, 0, Z((bc.Z[0] + bc.Z[1]) / 2)], [1.5, 2 * (yo - bc.inset), bc.Z[1] - bc.Z[0]], aluMat);
     // front suspension: double A-arms from pivot plates (G), knuckles, spindles, coil-overs, steering rack and tie rods
     const A = C.arm, sh = C.shock, rk = C.rack;
     for (const s of [1, -1]) {
       const yk = s * (yt - 2.6), yi = s * Yk(A.inner_y);
-      for (const dzA of [A.lower_dz, A.upper_dz]) box([xf, yi, za + dzA], [2 * A.spread + 1.5, 1.2, 1.2], aluMat);   // pivot brackets (G)
+      for (const [dzA] of A.levels) box([xf, yi, za + dzA], [2 * A.spread + 1.5, 1.2, 1.2], aluMat);   // pivot brackets (G)
       beam([xf, yi, za + A.upper_dz + 1.5], [X(fc.X), yi, Z(fc.Z[0])], 1.5, aluMat);                           // up to the front cross member
       pipe([xf, yk, za - 4], [xf, yk, za + 4], 1.4, wheelMat);                                                   // knuckle
       pipe([xf, yk, za], [xf, s * (yt + C.rim.w / 2 - C.rim.dish), za], 1.1, hubMat);                           // spindle
-      for (const dzA of [A.lower_dz, A.upper_dz]) for (const dx of [-A.spread, A.spread]) pipe([xf + dx, yi, za + dzA], [xf, yk, za + dzA * 0.85], 0.9, railMat);
+      for (const [dzA, drop] of A.levels) for (const dx of [-A.spread, A.spread]) pipe([xf + dx, yi, za + dzA], [xf, yk, za + dzA - drop], 0.9, railMat);
       coilover([xf + sh.front.lo[0], s * Yk(sh.front.lo[1]), zA(sh.front.lo[2])], [X(C.front_axle_X + sh.front.hi[0]), s * Yk(sh.front.hi[1]), Z(sh.front.hi[2])], sh.coil_od, sh.turns, hubMat);   // the front springs are light (192351)
       pipe([X(C.front_axle_X + rk.dx), s * Yk(rk.half), Z(rk.z)], [xf - 3, yk, za - 1], 0.6, hubMat);          // tie rod
     }
@@ -1743,7 +1859,7 @@
     box([X(sf.X[1]) - 0.75, 0, Z(sf.Z)], [1.5, 2 * sf.y, 1.5], aluMat); box([X(sf.post_X), 0, Z(sf.top_Z)], [1.5, 2 * sf.y, 1.5], aluMat);
     // the pullers' rope tie-down points: two aluminium plates at the nose, hanging from the nose cross member, each with an eye
     const tie = { x: X(C.tie_X), y: C.tie_apart / 2, z: Z(C.tie_Z) }, zp = Z(C.tie_Z - 4);
-    for (const s of [1, -1]) { box([tie.x, s * tie.y, (zp + tz) / 2], [0.5, 2.5, tz - zp], aluMat); box([tie.x + 0.5, s * tie.y, tie.z], [0.6, 1.4, 1.8], hubMat); }
+    for (const s of [1, -1]) { box([tie.x, s * tie.y, (zp + zff) / 2], [0.5, 2.5, zff - zp], aluMat); box([tie.x + 0.5, s * tie.y, tie.z], [0.6, 1.4, 1.8], hubMat); }
     window.__kartTie = tie; frame.KX = X; frame.KZ = Z;   // the kart-frame mapping, for the zone files
     window.__kartChassis = { axles_x: [xb, xf], axle_z: za, tyre_y: yt, truss_y: yo, top_chord_top: zt, gap_wood: gap, platform: [px0, X(pf.X[1]), Z(pf.top)] };   // for checks
   }
