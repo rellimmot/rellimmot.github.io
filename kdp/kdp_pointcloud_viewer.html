@@ -164,11 +164,12 @@ const LAYERS = [
   { group: 'Scan 2 · inside and underside', sub: 'placed in the kart frame with scan 1' },
   { id: 'scan2sparse', label: 'Sparse points', file: 'kdp_scan2_sparse.ply', mb: 10.6 },
   { id: 'scan2path', label: 'Camera path', file: 'kdp_scan2_campath.ply', path: true, mb: 0.03 },
+  { id: 'scan2mesh', label: 'Photo mesh, scans 1 + 2', file: 'kdp_scan2_mesh.ply', texture: 'kdp_scan2_mesh.jpg', kart: true, mb: 68 },
 ];
 // Dense clouds of scan 2 are listed in a small file, so new ones show up without a page change.
 const MORE = 'kdp_scan2_layers.json';
 const TINTS = [0xe8c84a, 0x4ac2e8, 0xe86a4a, 0x7be84a, 0xc04ae8, 0x4a78e8, 0xe84aa0, 0x4ae8b4, 0xe8a04a, 0x9a9a9a];
-// The photo mesh is in the first scan's model units; this moves it into the kart frame.
+// Scan 1's photo mesh is in that scan's model units; this moves it into the kart frame.
 const TO_KART = new THREE.Matrix4().set(26.448866, 0.51306803, -0.250351353, -43.8972887, 0.300778971, -2.66296169, 26.3189398, 6.85119062, 0.485228414, -26.3156573, -2.66817487, 60.5748317, 0, 0, 0, 1);
 const CENTER = new THREE.Vector3(-35, 0, 45);
 
@@ -549,7 +550,8 @@ function toggle(id, on) {
       new THREE.TextureLoader().load(s.def.texture, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
         const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
-        m.applyMatrix4(TO_KART); ready(m);
+        if (!s.def.kart) m.applyMatrix4(TO_KART);   // kart: already in the kart frame
+        ready(m);
       }, undefined, () => fail(new Error('The photo texture did not load.')));
     } else if (s.def.path) { ready(buildPath(geo)); }
     else {
