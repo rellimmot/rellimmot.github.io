@@ -164,7 +164,13 @@ const LAYERS = [
   { group: 'Scan 2 · inside and underside', sub: 'placed in the kart frame with scan 1' },
   { id: 'scan2sparse', label: 'Sparse points', file: 'kdp_scan2_sparse.ply', mb: 10.6 },
   { id: 'scan2path', label: 'Camera path', file: 'kdp_scan2_campath.ply', path: true, mb: 0.03 },
-  { id: 'scan2mesh', label: 'Photo mesh, scans 1 + 2', file: 'kdp_scan2_mesh.ply', texture: 'kdp_scan2_mesh.jpg', kart: true, mb: 68 },
+  // Full detail comes in two halves (front and rear), each with its own photo atlas; a device whose
+  // graphics card takes no 16384-pixel picture gets the 8192 copies of the atlases.
+  { id: 'scan2mesh', label: 'Photo mesh, scans 1 + 2', texture: 'kdp_scan2_mesh.jpg', kart: true, variants: [
+    { key: 'medium', file: 'kdp_scan2_mesh.ply', texture: 'kdp_scan2_mesh.jpg', mb: 68 },
+    { key: 'full', file: 'kdp_scan2_mesh_full1.ply', mb: 160, parts: [
+      { file: 'kdp_scan2_mesh_full1.ply', texture: 'kdp_scan2_mesh_full1.jpg', small: 'kdp_scan2_mesh_full1_8k.jpg', mb: 79.6 },
+      { file: 'kdp_scan2_mesh_full2.ply', texture: 'kdp_scan2_mesh_full2.jpg', small: 'kdp_scan2_mesh_full2_8k.jpg', mb: 80.6 } ] } ] },
   // Scan quality: green = well resolved, yellow = fair, red = needs another video sweep (holes, few points, few or narrow views, noise).
   { id: 'scan2heat', label: 'Scan quality (red: film again)', variants: [
     { key: 'light', file: 'kdp_scan2_heat_light.ply', mb: 1.9 },
@@ -459,7 +465,7 @@ function addRow(def, list = $('layerList')) {
 // Takes a layer out of memory (it loads again when it is next switched on).
 function unload(s) {
   s.token++; s.loading = false;                      // anything still loading is dropped
-  if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); }); s.object = null; }
+  if (s.object) { scene.remove(s.object); s.object.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material.map) o.material.map.dispose(); }); s.object = null; }
   dropFill(s);
   s.points = 0; s.faces = 0; s.pared = 0; s.stEl.textContent = ''; s.stEl.classList.remove('err');
 }
@@ -549,15 +555,37 @@ function toggle(id, on) {
     refresh(); showLoading();
     if (s.auto) { quietUntil = performance.now() + 1500; planAuto(); }   // loading makes the picture stutter: not counted; then the next ones
   };
+  const photoMesh = (geo, tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+    if (!s.def.kart) m.applyMatrix4(TO_KART);   // kart: already in the kart frame
+    return m;
+  };
+  if (src.parts) {   // a mesh in several files: they load one after the other into one group
+    const group = new THREE.Group(), big = renderer.capabilities.maxTextureSize >= 16384;
+    s.size = src.mb * 1048576;
+    let before = 0;
+    const next = (i) => {
+      if (tok !== s.token) return;
+      if (i === src.parts.length) { ready(group); return; }
+      const p = src.parts[i];
+      loadPly(p.file, (geo) => {
+        if (tok !== s.token) { geo.dispose(); return; }
+        s.stEl.textContent = 'photo ' + (i + 1) + '/' + src.parts.length + '…';
+        new THREE.TextureLoader().load(big ? p.texture : (p.small || p.texture), (tex) => {
+          if (tok !== s.token) { geo.dispose(); tex.dispose(); return; }
+          group.add(photoMesh(geo, tex)); before += p.mb * 1048576; next(i + 1);
+        }, undefined, () => fail(new Error('The photo texture did not load.')));
+      }, (e) => { if (tok !== s.token) return; s.got = before + (e.loaded || 0); showLoading(); s.stEl.textContent = Math.min(99, Math.round(100 * s.got / s.size)) + ' %'; }, fail, true);
+    };
+    next(0);
+    return;
+  }
   loadPly(src.file, (geo) => {
     if (s.def.texture) {   // photo mesh: per-face UVs and one atlas image
       s.stEl.textContent = 'photo…';
-      new THREE.TextureLoader().load(s.def.texture, (tex) => {
-        tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
-        const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
-        if (!s.def.kart) m.applyMatrix4(TO_KART);   // kart: already in the kart frame
-        ready(m);
-      }, undefined, () => fail(new Error('The photo texture did not load.')));
+      new THREE.TextureLoader().load(src.texture || s.def.texture, (tex) => ready(photoMesh(geo, tex)),
+        undefined, () => fail(new Error('The photo texture did not load.')));
     } else if (s.def.path) { ready(buildPath(geo)); }
     else {
       s.material = cloudLook(geo);
