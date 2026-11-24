@@ -2817,8 +2817,15 @@
   const SCAN = {
     ov_cloud: { file: "kdp_scan2_opt.ply", name: "point cloud", mb: 10.4, pare: 2 },                          // scan 2, optimized dense cloud
     ov_cloud2: { file: "kdp_pointcloud_light.ply", name: "light point cloud", mb: 3.1 },                       // scan 2, the light cloud of the kart scan page
-    ov_mesh: { file: "kdp_scan2_mesh.ply", texture: "kdp_scan2_mesh.jpg", name: "photo mesh", mb: 64.7 },     // scans 1 and 2 together, half detail
+    // scans 1 and 2 together, full detail (2.5 M faces) in two files, front and rear; the half-detail kdp_scan2_mesh.ply + .jpg is still on the website
+    ov_mesh: { name: "photo mesh", mb: 160, parts: [
+      { file: "kdp_scan2_mesh_full1.ply", texture: "kdp_scan2_mesh_full1.jpg", small: "kdp_scan2_mesh_full1_8k.jpg" },
+      { file: "kdp_scan2_mesh_full2.ply", texture: "kdp_scan2_mesh_full2.jpg", small: "kdp_scan2_mesh_full2_8k.jpg" } ] },
   };
+  // A mesh's files: one file and its texture, or several parts. A graphics card that takes no 16384-pixel picture gets the 8192 copies of the textures.
+  const bigTex = renderer.capabilities.maxTextureSize >= 16384;
+  const partsOf = c => c.parts || [{ file: c.file, texture: c.texture }];
+  const texOf = p => (bigTex || !p.small) ? p.texture : p.small;
   const pareCount = (file, r, done) => fetch("kdp_scan2_layers.json", { cache: "no-store" }).then(x => x.ok ? x.json() : null).then(j => {
     const v = j && j.combined && (j.combined.variants || []).find(x => x.file === file), st = v && (v.steps || []).find(x => x[0] === r);
     done(st ? st[1] : Infinity);
@@ -2826,14 +2833,15 @@
   const scanLabel = (c, mb) => "Load " + c.name.replace(/^scan 2 /, "") + (mb ? " (" + (mb < 10 ? mb.toFixed(1) : Math.round(mb)) + " MB)" : "");
   const scanSize = async f => { try { const r = await fetch(f, { method: "HEAD" }); if (!r.ok) return null; const n = +r.headers.get("content-length"); return n > 0 ? n / 1048576 : 0; } catch (e) { return null; } };
   const SCAN_START = 50;   // opacity a scan shows at once it has loaded (%)
-  const scanSetOpacity = (obj, o) => { const m = obj.material; m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; obj.visible = o > 0.001; };
+  const scanSetOpacity = (obj, o) => { obj.traverse(x => { const m = x.material; if (!m) return; m.transparent = o < 0.999; m.opacity = o; m.depthWrite = o > 0.6; }); obj.visible = o > 0.001; };
   window.__scan = {};
   for (const id in SCAN) {
     const c = SCAN[id], row = $(id), btn = row.querySelector("button");
     btn.textContent = scanLabel(c, c.mb);
     if (/github.io$/.test(location.hostname)) (async () => {   // on the website: the real sizes from the server; a pending file shows its row once it is there
-      const a = await scanSize(c.file); if (a === null) return; const b = c.texture ? await scanSize(c.texture) : 0; if (b === null) return;
-      if (!btn.disabled && a + b > 0) btn.textContent = scanLabel(c, a + b); if (c.pending) { row.hidden = false; for (const j in SCAN) if (SCAN[j].gives_way === id && !$(j).querySelector("input")) $(j).hidden = true; } })();
+      let a = 0;
+      for (const p of partsOf(c)) { const f = await scanSize(p.file); if (f === null) return; const t = p.texture ? await scanSize(texOf(p)) : 0; if (t === null) return; a += f + t; }
+      if (!btn.disabled && a > 0) btn.textContent = scanLabel(c, a); if (c.pending) { row.hidden = false; for (const j in SCAN) if (SCAN[j].gives_way === id && !$(j).querySelector("input")) $(j).hidden = true; } })();
     btn.addEventListener("click", () => {
       btn.disabled = true; btn.textContent = "Loading the " + c.name + "...";
       const bar = document.createElement("div"); bar.className = "bar"; bar.innerHTML = "<i></i>"; const msg = document.createElement("div"); msg.className = "msg"; msg.textContent = "Starting...";
@@ -2848,21 +2856,28 @@
         row.appendChild(inp); row.appendChild(num);
         inp.addEventListener("input", () => { num.textContent = inp.value + "%"; scanSetOpacity(obj, inp.value / 100); });
       };
+      const parts = partsOf(c), group = parts.length > 1 ? new THREE.Group() : null;   // several parts load one after the other into one group
+      const loadPart = i => {
+      const p = parts[i], tag = group ? "Part " + (i + 1) + " of " + parts.length + ": " : "";
       const loadPly = (name, retry) => new THREE.PLYLoader().load(name, geo => {
         if (geo.attributes.normal) geo.deleteAttribute("normal");
-        if (!c.texture) {
+        if (!p.texture) {
           const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true }));
           if (!c.pare) { ready(pts); return; }
           pareCount(c.file, c.pare, n => { geo.setDrawRange(0, Math.min(n, geo.attributes.position.count)); ready(pts); });
           return;
         }
-        msg.textContent = "Loading the photo texture..."; bar.firstChild.style.width = "100%";
-        new THREE.TextureLoader().load(c.texture, tex => {   // the mesh shows only once its texture is in
+        msg.textContent = tag + "loading the photo texture..."; bar.firstChild.style.width = "100%";
+        new THREE.TextureLoader().load(texOf(p), tex => {   // the mesh shows only once its texture is in
           tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 8;
-          const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })); if (c.to_kart) m.applyMatrix4(TO_KART); ready(m);
+          const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })); if (c.to_kart) m.applyMatrix4(TO_KART);
+          if (!group) { ready(m); return; }
+          group.add(m); if (i + 1 < parts.length) loadPart(i + 1); else ready(group);
         }, undefined, fail);
-      }, e => progress(e, c.texture ? "Mesh: " : ""), retry ? () => loadPly(c.file + ".wasm", false) : fail);   // the private copy of this page serves the scan under a binary type its host accepts
-      loadPly(c.file, true);
+      }, e => progress(e, p.texture ? tag + "Mesh: " : ""), retry ? () => loadPly(p.file + ".wasm", false) : fail);   // the private copy of this page serves the scan under a binary type its host accepts
+      loadPly(p.file, true);
+      };
+      loadPart(0);
     });
   }
 
